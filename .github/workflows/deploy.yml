@@ -45,6 +45,8 @@ jobs:
           script: |
             cd "${{ secrets.REMOTE_DIR }}"
             git pull origin production
+            cp package.json ${{ secrets.PACKAGE_DIR }}/package.json
+            cp package-lock.json ${{ secrets.PACKAGE_DIR }}/package-lock.json
             # Activate Node
             source ${{ secrets.NODE_DIR }}/activate
             # Install production deps and build if needed; or use the built files as you prefer:
