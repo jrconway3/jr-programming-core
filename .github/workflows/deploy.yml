@@ -37,8 +37,8 @@ jobs:
 
       - name: Archive build+app for transfer
         run: |
-          # create a zip of what we will deploy (exclude node_modules)
-          zip -r deploy.zip package.json package-lock.json .next public pages components styles next.config.js tsconfig.json .  -x "node_modules/*"
+          # create a zip of what we will deploy
+          zip -r deploy.zip package.json package-lock.json .next node_modules public pages components styles next.config.js tsconfig.json .
 
       - name: Copy to server (SCP)
         uses: appleboy/scp-action@v0.1.6
@@ -61,16 +61,6 @@ jobs:
             set -e
             mkdir -p "${{ secrets.REMOTE_DIR }}/releases/${{ github.sha }}"
             cd "${{ secrets.REMOTE_DIR }}/releases/${{ github.sha }}"
-            unzip -o deploy.zip
-            # Activate Node
-            source ${{ secrets.NODE_DIR }}/activate && cd ${{ secrets.REMOTE_DIR }}
-            # Install production deps and build if needed; or use the built files as you prefer:
-            npm ci --production
-            # Start or restart with pm2 (assumes pm2 is installed globally)
-            if pm2 describe jrprogramming > /dev/null; then
-              pm2 reload jrprogramming || pm2 restart jrprogramming
-            else
-              pm2 start npm --name "jrprogramming" -- start
-            fi
+            unzip -d "${{ secrets.REMOTE_DIR }}" -o deploy.zip
             # Remove Release Immediately After
             rm -R "releases/${{ github.sha }}"
