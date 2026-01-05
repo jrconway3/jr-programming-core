@@ -1,5 +1,9 @@
 # JRProgramming — Next.js Starter
 
+[![CI](https://github.com/jrconway3/jr-programming-core/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jrconway3/jr-programming-core/actions/workflows/ci.yml)
+
+[![License: MIT](https://img.shields.io/github/license/jrconway3/jr-programming-core)](./LICENSE)
+
 A minimal Next.js starter scaffold.
 
 Getting started (PowerShell):
@@ -26,3 +30,7 @@ Tailwind plugins included in this scaffold:
 - `@tailwindcss/line-clamp` — utilities like `line-clamp-3` to truncate text.
 
 Examples are included on the homepage (`pages/index.js`) showing `prose`, `line-clamp`, and a simple form.
+
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
