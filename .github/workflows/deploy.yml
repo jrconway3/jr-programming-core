@@ -59,11 +59,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
-            mkdir -p "${{ secrets.REMOTE_DIR }}/releases/${GITHUB_SHA}"
-            cd "${{ secrets.REMOTE_DIR }}/releases/${GITHUB_SHA}"
+            mkdir -p "${{ secrets.REMOTE_DIR }}/releases/${{ github.sha }}"
+            cd "${{ secrets.REMOTE_DIR }}/releases/${{ github.sha }}"
             unzip -o deploy.zip
             # Activate Node
-            source /home/jrcovcoe/nodevenv/node/14/bin/activate && cd /home/jrcovcoe/node
+            source ${{ secrets.NODE_DIR }}/activate && cd ${{ secrets.REMOTE_DIR }}
             # Install production deps and build if needed; or use the built files as you prefer:
             npm ci --production
             # Start or restart with pm2 (assumes pm2 is installed globally)
@@ -72,5 +72,5 @@ jobs:
             else
               pm2 start npm --name "jrprogramming" -- start
             fi
-            # Optionally update a symlink for current release
-            ln -sfn "${{ secrets.REMOTE_DIR }}/releases/${GITHUB_SHA}" "${{ secrets.REMOTE_DIR }}/current"
+            # Remove Release Immediately After
+            rm -R "releases/${{ github.sha }}"
