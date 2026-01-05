@@ -1,15 +1,15 @@
-/** @type {import('tailwindcss').Config} */
-const forms = require('@tailwindcss/forms')
-const typography = require('@tailwindcss/typography')
-const aspectRatio = require('@tailwindcss/aspect-ratio')
+// tailwind.config.js
+import forms from "@tailwindcss/forms";
+import typography from "@tailwindcss/typography"
+import aspectRatio from "@tailwindcss/aspect-ratio"
 
-module.exports = {
+export default {
+  plugins: [forms, typography, aspectRatio],
   content: [
     './pages/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {},
-  },
-  plugins: [forms, typography, aspectRatio],
+  }
 }
