@@ -1,7 +1,5 @@
 # JRProgramming — Next.js Starter
 
-[![CI](https://github.com/jrconway3/jr-programming-core/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jrconway3/jr-programming-core/actions/workflows/ci.yml)
-
 [![License: MIT](https://img.shields.io/github/license/jrconway3/jr-programming-core)](./LICENSE)
 
 A minimal Next.js starter scaffold.
