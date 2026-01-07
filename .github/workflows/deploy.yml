@@ -89,6 +89,9 @@ jobs:
             mkdir -p "${{ secrets.REMOTE_DIR }}/releases/${{ github.sha }}"
             cd "${{ secrets.REMOTE_DIR }}/releases/${{ github.sha }}"
             unzip -d "${{ secrets.REMOTE_DIR }}" -o deploy.zip
+
+            # Move Package Lock to Correct Directory
+            cd "${{ secrets.REMOTE_DIR }}"
             cp package-lock.json ${{ secrets.PACKAGE_DIR }}/package-lock.json
 
             # Activate Node
