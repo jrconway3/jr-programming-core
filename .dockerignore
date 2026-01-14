@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.gitignore
+README.md
+LICENSE
+.eslintignore
+*.log
+.vscode
+.DS_Store
+coverage
+dist
+build
+.turbo
+.vercel

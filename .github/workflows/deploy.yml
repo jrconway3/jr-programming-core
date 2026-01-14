@@ -35,49 +35,7 @@ jobs:
           name: next-build
           path: .next
 
-      #- name: Pull Production
-      #  uses: appleboy/ssh-action@v0.1.8
-      #  with:
-      #    host: ${{ secrets.SSH_HOST }}
-      #    username: ${{ secrets.SSH_USER }}
-      #    port: ${{ secrets.SSH_PORT || 22 }}
-      #    key: ${{ secrets.SSH_PRIVATE_KEY }}
-      #    script: |
-      #      cd "${{ secrets.REMOTE_DIR }}"
-      #      git pull origin production
-      #      cp package-lock.json ${{ secrets.PACKAGE_DIR }}/package-lock.json
-      #      # Activate Node
-      #      source ${{ secrets.NODE_DIR }}/activate
-      #      # Install production deps and build if needed; or use the built files as you prefer:
-      #      cd ${{ secrets.PACKAGE_DIR }}
-      #      npm ci --omit=dev
-      #      # Start or restart with pm2 (assumes pm2 is installed globally)
-      #      if pm2 describe jrprogramming > /dev/null; then
-      #       pm2 reload jrprogramming || pm2 restart jrprogramming
-      #      else
-      #        pm2 start npm --name "jrprogramming" -- start
-      #      fi
-      #      # Build, and Start
-      #      cd ${{ secrets.REMOTE_DIR }}
-      #      npm run build
-      #      npm run start
-
-      - name: Archive build+app for transfer
-        run: |
-          # create a zip of what we will deploy (exclude node_modules)
-          zip -r deploy.zip package.json package-lock.json .next public pages components styles next.config.js tsconfig.json .  -x "node_modules/*"
-
-      - name: Copy to server (SCP)
-        uses: appleboy/scp-action@v0.1.6
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          port: ${{ secrets.SSH_PORT || 22 }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "deploy.zip"
-          target: "${{ secrets.REMOTE_DIR }}/releases/${{ github.sha }}"
-
-      - name: Extract & npm install & restart (remote)
+      - name: Pull Production
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -85,23 +43,10 @@ jobs:
           port: ${{ secrets.SSH_PORT || 22 }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            set -e
-            mkdir -p "${{ secrets.REMOTE_DIR }}/releases/${{ github.sha }}"
-            cd "${{ secrets.REMOTE_DIR }}/releases/${{ github.sha }}"
-            unzip -d "${{ secrets.REMOTE_DIR }}" -o deploy.zip
-
-            # Move Package Lock to Correct Directory
+            # Pull Updates and Install Dependencies
             cd "${{ secrets.REMOTE_DIR }}"
-            cp package-lock.json ${{ secrets.PACKAGE_DIR }}/package-lock.json
-            rm "releases/${{ github.sha }}/deploy.zip"
-            rmdir "releases/${{ github.sha }}"
-
-            # Activate Node
-            source ${{ secrets.NODE_DIR }}/activate
-            # Install production deps and build if needed; or use the built files as you prefer:
-            cd ${{ secrets.PACKAGE_DIR }}
+            git pull origin production
             npm ci --omit=dev
-
             # Start or restart with pm2 (assumes pm2 is installed globally)
             if pm2 describe jrprogramming > /dev/null; then
              pm2 reload jrprogramming || pm2 restart jrprogramming
