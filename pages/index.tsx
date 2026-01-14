@@ -5,7 +5,7 @@ const Home: NextPage = () => {
   return (
     <main className="max-w-3xl mx-auto my-24 px-4 font-sans">
       <h1 className="text-4xl font-extrabold mb-4">Welcome to JRProgramming</h1>
-      <p className="text-gray-700 mb-6">This is a minimal Next.js scaffold with Tailwind CSS. Edit <code>pages/index.tsx</code> to get started.</p>
+      <p className="text-gray-700 mb-6">This is a minimal Next.js scaffold with Tailwind CSS.</p>
 
       <div className="space-x-3 mb-12">
         <a className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" href="#">Get started</a>
