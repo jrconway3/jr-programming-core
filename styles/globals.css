@@ -6,11 +6,19 @@ html, body, #__next {
   height: 100%;
 }
 body {
-  margin: 0;
-  padding: 0;
-  background: #f7f7fb;
-  color: #0f172a;
+  @apply bg-primary-background text-primary-text font-sans;
+  min-height: 100vh;
+  transition: background 0.3s;
 }
 
 /* small helpers kept from original scaffold */
 .container { max-width: 800px; }
+
+@keyframes gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 4s ease-in-out infinite;
+}
