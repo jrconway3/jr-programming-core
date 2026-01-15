@@ -24,7 +24,8 @@ export default {
       },
       fontFamily: {
         text: ['"Commodore 64"', 'Inter', 'ui-sans-serif', 'system-ui'],
-        headers: ['"Commodore 64 Angled"', 'Inter', 'ui-sans-serif', 'system-ui']
+        headers: ['"Commodore 64 Angled"', 'Inter', 'ui-sans-serif', 'system-ui'],
+        copyright: ['Inter', 'ui-sans-serif', 'system-ui'],
       }
     }
   }

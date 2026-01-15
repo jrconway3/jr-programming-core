@@ -55,6 +55,10 @@ a span.flip-vertically {
   transform: scaleY(-1);
 }
 
+footer .copyright {
+  @apply font-copyright;
+}
+
 /* Custom animated gradient text utility */
 .gradient-text {
   background-image: linear-gradient(90deg, #a855f7, #c084fc, #6d28d9, #a855f7);
