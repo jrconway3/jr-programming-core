@@ -2,11 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Commodore 64';
+  src: url('/fonts/commodore-64-6.3.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Commodore 64 Angled';
+  src: url('/fonts/commodore-64-angled-1.2.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Commodore 64 Rounded';
+  src: url('/fonts/commodore-64-rounded-1.2.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 html, body, #__next {
   height: 100%;
 }
+h1 {
+  @apply text-primary-text font-headers;
+}
 body {
-  @apply bg-primary-background text-primary-text font-sans;
+  @apply bg-primary-background text-primary-text font-text;
   min-height: 100vh;
   transition: background 0.3s;
 }
@@ -21,4 +48,28 @@ body {
 .animate-gradient {
   background-size: 200% 200%;
   animation: gradient 4s ease-in-out infinite;
+}
+
+a span.flip-vertically {
+  display: inline-block;
+  transform: scaleY(-1);
+}
+
+/* Custom animated gradient text utility */
+.gradient-text {
+  background-image: linear-gradient(90deg, #a855f7, #c084fc, #6d28d9, #a855f7);
+  background-size: 200% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(24, 30, 52, 0.7);
+  box-shadow: 0 4px 32px 0 rgba(0,0,0,0.12);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(168, 85, 247, 0.18);
 }

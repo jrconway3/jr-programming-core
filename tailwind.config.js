@@ -2,10 +2,9 @@
 import forms from "@tailwindcss/forms";
 import typography from "@tailwindcss/typography"
 import aspectRatio from "@tailwindcss/aspect-ratio"
-import lineClamp from "@tailwindcss/line-clamp"
 
 export default {
-  plugins: [forms, typography, aspectRatio, lineClamp],
+  plugins: [forms, typography, aspectRatio],
   darkMode: 'class',
   content: [
     './pages/**/*.{js,ts,jsx,tsx}',
@@ -24,7 +23,8 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui']
+        text: ['"Commodore 64"', 'Inter', 'ui-sans-serif', 'system-ui'],
+        headers: ['"Commodore 64 Angled"', 'Inter', 'ui-sans-serif', 'system-ui']
       }
     }
   }
