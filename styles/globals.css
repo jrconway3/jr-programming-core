@@ -36,6 +36,19 @@ body {
   @apply bg-primary-background text-primary-text font-text;
   min-height: 100vh;
   transition: background 0.3s;
+
+  /* CRT scanline effect */
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(168, 85, 247, 0.04) 0px,
+      rgba(168, 85, 247, 0.04) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    linear-gradient(135deg, #181e34 0%, #0f172a 100%);
+  background-size: 100% 4px, cover;
+  background-blend-mode: lighten;
 }
 
 /* small helpers kept from original scaffold */
@@ -51,6 +64,8 @@ body {
 }
 
 a span.flip-vertically {
+  position: relative;
+  top: 2px;
   display: inline-block;
   transform: scaleY(-1);
 }
@@ -76,4 +91,46 @@ footer .copyright {
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
   border: 1px solid rgba(168, 85, 247, 0.18);
+}
+
+/* Neon glow utility for retro effect */
+.neon-glow {
+  box-shadow:
+    0 0 6px 2px rgba(168, 85, 247, 0.25),
+    0 0 16px 4px rgba(192, 132, 252, 0.12);
+}
+
+/* Neon glow for retro text */
+.neon-text {
+  text-shadow:
+    0 0 4px #a855f7,
+    0 0 8px #c084fc,
+    0 0 12px #a855f7;
+}
+
+/* Terminal/retro window card style */
+.terminal-card {
+  @apply neon-glow;
+  border: 3px solid #a855f7;
+  border-radius: 0.75rem;
+  padding-top: 2.5rem;
+  position: relative;
+  background: rgba(24, 30, 52, 0.85);
+  overflow: hidden;
+}
+.terminal-card::before, .terminal-card::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  top: 10px;
+  background: #a855f7;
+  box-shadow: 24px 0 #c084fc, 48px 0 #6d28d9;
+  left: 16px;
+  z-index: 2;
+  opacity: 0.7;
+}
+.terminal-card::after {
+  display: none;
 }

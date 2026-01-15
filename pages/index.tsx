@@ -8,25 +8,25 @@ export default function Home() {
       </Head>
       <main className="min-h-screen flex flex-col items-center justify-center px-4">
         <section className="w-full max-w-3xl text-center py-8">
-            <h1 className="text-4xl md:text-5xl font-extrabold mb-4 gradient-text animate-gradient">
-              David Conway Jr.
-            </h1>
-            <p className="text-xl md:text-2xl text-muted mb-8">
-              Web Software Engineer &amp; Programmer
-            </p>
-            <a
-              href="#projects"
-              className="hidden inline-block px-8 py-3 rounded-lg bg-primary-accent hover:bg-primary-accentDark text-white font-semibold shadow-lg transition glass border border-accent/30"
-            >
-              View Projects
-            </a>
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 gradient-text animate-gradient">
+            David Conway Jr.
+          </h1>
+          <p className="text-xl md:text-2xl text-muted mb-8 neon-text">
+            Web Software Engineer &amp; Programmer
+          </p>
+          <a
+            href="#projects"
+            className="hidden inline-block px-8 py-3 rounded-lg bg-primary-accent hover:bg-primary-accentDark text-white font-semibold shadow-lg transition glass border border-accent/30"
+          >
+            View Projects
+          </a>
         </section>
 
         <section id="projects" className="w-full max-w-5xl py-12">
-          <h2 className="hidden text-2xl font-bold mb-6 text-accentLight">Featured Projects</h2>
+          <h2 className="hidden text-2xl font-bold mb-6 text-primary-accentLight">Featured Projects</h2>
           <div className="grid md:grid-cols-2 gap-8">
             {/* Example Project Card */}
-            <div className="rounded-xl shadow-lg p-6 border border-accent/30 hover:scale-105 hover:shadow-accent transition glass">
+            <div className="terminal-card p-6 hover:scale-105 hover:shadow-accent transition">
               <h3 className="text-xl font-semibold text-accent mb-2">JRProgramming Website</h3>
               <p className="text-muted mb-4">
                   I created this website as a proof of concept to showcase I could create a ReactJS using modern frameworks. I have worked with Nuxt.js before but never had the opportunity to work with React until now.
