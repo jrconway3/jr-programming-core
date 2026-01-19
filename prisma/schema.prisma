@@ -1,0 +1,17 @@
+// Prisma schema for MySQL/MariaDB
+// Run `npx prisma migrate dev --name init` after editing
+
+datasource db {
+  provider = "mysql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?
+  createdAt DateTime @default(now())
+}
