@@ -9,9 +9,40 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String?
-  createdAt DateTime @default(now())
+model jr_projects {
+  id         Int                  @id @default(autoincrement())
+  name       String
+  short      String
+  role       String?
+  position   String?
+  extended   String?              @db.Text
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  links      jr_projects_links[]
+  gallery    jr_projects_gallery[]
+}
+
+model jr_projects_links {
+  id         Int         @id @default(autoincrement())
+  project_id Int
+  project    jr_projects @relation(fields: [project_id], references: [id])
+  website    String
+  url        String
+  priority   Int         @default(0)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  gallery    jr_projects_gallery[]
+}
+
+model jr_projects_gallery {
+  id         Int         @id @default(autoincrement())
+  project_id Int
+  project    jr_projects @relation(fields: [project_id], references: [id])
+  link_id    Int?
+  link       jr_projects_links? @relation(fields: [link_id], references: [id])
+  title      String
+  image      String
+  priority   Int         @default(0)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
 }

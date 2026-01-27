@@ -1,33 +1,20 @@
-# JRProgramming — Next.js Starter
+# JRProgramming — Next.js Portfolio Website
 
 [![License: MIT](https://img.shields.io/github/license/jrconway3/jr-programming-core)](./LICENSE)
 
-A minimal Next.js starter scaffold.
+A portfolio website designed in Next.js/React. Theme is designed to give off a dark theme programming/coding aesthetic.
+
+Github Copilot was used to help support development of this website. 
 
 Getting started (PowerShell):
 
 ```powershell
-cd e:\code\websites\jrprogramming
+cd path\to\jrprogramming
 npm install
 npm run dev
 ```
 
 Open http://localhost:3000 in your browser.
-
-Next steps:
-- Add TypeScript (`npx create-next-app@latest --ts`) or convert files.
-- Add Tailwind if you want utility-first CSS.
-
-Tailwind is included in this scaffold. After `npm install` the Tailwind CLI runs via PostCSS automatically when you run the Next.js dev server.
-
-Tailwind plugins included in this scaffold:
-
-- `@tailwindcss/forms` — better default form control styles.
-- `@tailwindcss/typography` — the `prose` class for readable article content.
-- `@tailwindcss/aspect-ratio` — utilities for maintaining media aspect ratios.
-- `@tailwindcss/line-clamp` — utilities like `line-clamp-3` to truncate text.
-
-Examples are included on the homepage (`pages/index.js`) showing `prose`, `line-clamp`, and a simple form.
 
 ## License
 
