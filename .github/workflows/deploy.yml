@@ -48,9 +48,18 @@ jobs:
             git pull origin production
             npm run build
             npm ci --omit=dev
+
             # Start or restart with pm2 (assumes pm2 is installed globally)
             if pm2 describe jrprogramming > /dev/null; then
              pm2 reload jrprogramming || pm2 restart jrprogramming
             else
               pm2 start npm --name "jrprogramming" -- start
             fi
+
+            # Create .env file
+            > .env
+            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
