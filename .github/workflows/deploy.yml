@@ -43,8 +43,8 @@ jobs:
 
             # Generate Prisma
             cd "${{ secrets.REMOTE_DIR }}"
-            npm run prisma:generate
-            npm run prisma:migrate:deploy
+            npx prisma migrate deploy
+            npx prisma generate
 
             # Pull Updates and Install Dependencies
             cd "${{ secrets.REMOTE_DIR }}"
