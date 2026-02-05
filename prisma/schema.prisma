@@ -7,42 +7,46 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  output   = ".generated/prisma"
 }
 
-model jr_projects {
-  id         Int                  @id @default(autoincrement())
+model Project {
+  id         Int         @id @default(autoincrement())
   name       String
   short      String
   role       String?
   position   String?
-  extended   String?              @db.Text
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
-  links      jr_projects_links[]
-  gallery    jr_projects_gallery[]
+  extended   String?     @db.Text
+  created_at DateTime    @default(now())
+  updated_at DateTime    @default(now())
+  links      ProjectLinks[]
+  gallery    ProjectGallery[]
+  @@map("jr_projects")
 }
 
-model jr_projects_links {
+model ProjectLinks {
   id         Int         @id @default(autoincrement())
   project_id Int
-  project    jr_projects @relation(fields: [project_id], references: [id])
+  project    Project     @relation(fields: [project_id], references: [id])
   website    String
   url        String
   priority   Int         @default(0)
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
-  gallery    jr_projects_gallery[]
+  created_at DateTime    @default(now())
+  updated_at DateTime    @default(now())
+  gallery    ProjectGallery[]
+  @@map("jr_projects_links")
 }
 
-model jr_projects_gallery {
-  id         Int         @id @default(autoincrement())
+model ProjectGallery {
+  id         Int           @id @default(autoincrement())
   project_id Int
-  project    jr_projects @relation(fields: [project_id], references: [id])
+  project    Project       @relation(fields: [project_id], references: [id])
   link_id    Int?
-  link       jr_projects_links? @relation(fields: [link_id], references: [id])
+  link       ProjectLinks? @relation(fields: [link_id], references: [id])
   title      String
   image      String
-  priority   Int         @default(0)
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
+  priority   Int           @default(0)
+  created_at DateTime      @default(now())
+  updated_at DateTime      @default(now())
+  @@map("jr_projects_gallery")
 }

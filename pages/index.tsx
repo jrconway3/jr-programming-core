@@ -1,6 +1,8 @@
 import Head from "next/head";
+import { useProjects } from "../models/projects";
 
 export default function Home() {
+  const { projects, loading, error } = useProjects();
   return (
     <>
       <Head>
@@ -25,22 +27,18 @@ export default function Home() {
         <section id="projects" className="w-full max-w-5xl py-12">
           <h2 className="hidden text-2xl font-bold mb-6 text-primary-accentLight">Featured Projects</h2>
           <div className="grid md:grid-cols-2 gap-8">
-            {/* Example Project Card */}
-            <div className="terminal-card p-6 hover:scale-105 hover:shadow-accent transition">
-              <h3 className="text-xl font-semibold text-accent mb-2">JRProgramming Website</h3>
-              <p className="text-muted mb-4">
-                  I created this website as a proof of concept to showcase I could create a ReactJS using modern frameworks. I have worked with Nuxt.js before but never had the opportunity to work with React until now.
-              </p>
-              <a
-                href="https://github.com/jrconway3/jr-programming-core"
-                className="text-accentLight hover:underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View on GitHub &rarr;
-              </a>
-            </div>
-            {/* Add more project cards as needed */}
+            {loading && <div>Loading projects...</div>}
+            {error && <div className="text-red-500">{error}</div>}
+            {!loading && !error && projects.length === 0 && (
+              <div>No projects found.</div>
+            )}
+            {!loading && !error && projects.map((project) => (
+              <div key={project.id} className="terminal-card p-6 hover:scale-105 hover:shadow-accent transition">
+                <h3 className="text-xl font-semibold text-accent mb-2">{project.name}</h3>
+                <p className="text-muted mb-4">{project.short}</p>
+                {/* Add more fields as needed */}
+              </div>
+            ))}
           </div>
         </section>
       </main>
