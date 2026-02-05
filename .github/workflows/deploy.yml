@@ -43,6 +43,19 @@ jobs:
           port: ${{ secrets.SSH_PORT || 22 }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            # Create .env file
+            > .env
+            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+
+            # Generate Prisma
+            cd "${{ secrets.REMOTE_DIR }}"
+            npx prisma migrate dev
+            npx prisma generate
+
             # Pull Updates and Install Dependencies
             cd "${{ secrets.REMOTE_DIR }}"
             git pull origin production
@@ -55,11 +68,3 @@ jobs:
             else
               pm2 start npm --name "jrprogramming" -- start
             fi
-
-            # Create .env file
-            > .env
-            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-            echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
-            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
