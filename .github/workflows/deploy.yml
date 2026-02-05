@@ -26,7 +26,9 @@ jobs:
         run: npm run lint
 
       - name: Build
-        run: npm run build
+        run: |
+          npm run prisma:generate
+          npm run build
 
       - name: Upload build on failure
         if: failure()
@@ -53,8 +55,8 @@ jobs:
 
             # Generate Prisma
             cd "${{ secrets.REMOTE_DIR }}"
-            npx prisma migrate dev
-            npx prisma generate
+            npm run prisma:generate
+            npm run prisma:migrate:deploy
 
             # Pull Updates and Install Dependencies
             cd "${{ secrets.REMOTE_DIR }}"
