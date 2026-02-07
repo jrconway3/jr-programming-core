@@ -2,9 +2,6 @@
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": "./",
-    "paths": {
-      "@prisma/*": [".generated/prisma/*"]
-    },
     "target": "esnext",
     "lib": [
       "dom",
