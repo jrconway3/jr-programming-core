@@ -35,6 +35,7 @@ jobs:
           script: |
             # Open Dir            
             cd "${{ secrets.REMOTE_DIR }}"
+            npm ci --omit=dev
 
             # Create .env file
             > .env
@@ -57,7 +58,6 @@ jobs:
             cd "${{ secrets.REMOTE_DIR }}"
             git pull origin production
             npm run build
-            npm ci --omit=dev
 
             # Start or restart with pm2 (assumes pm2 is installed globally)
             if pm2 describe jrprogramming > /dev/null; then
