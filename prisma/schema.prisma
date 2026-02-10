@@ -9,6 +9,16 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model Settings {
+  id         Int           @id @default(autoincrement())
+  page_id    Int?
+  key        String
+  value      String
+  created_at DateTime      @default(now())
+  updated_at DateTime      @default(now())
+  @@map("jr_settings")
+}
+
 model Project {
   id         Int         @id @default(autoincrement())
   name       String
@@ -18,12 +28,12 @@ model Project {
   extended   String?     @db.Text
   created_at DateTime    @default(now())
   updated_at DateTime    @default(now())
-  links      ProjectLinks[]
+  links      ProjectLink[]
   gallery    ProjectGallery[]
   @@map("jr_projects")
 }
 
-model ProjectLinks {
+model ProjectLink {
   id         Int         @id @default(autoincrement())
   project_id Int
   project    Project     @relation(fields: [project_id], references: [id])
@@ -41,7 +51,7 @@ model ProjectGallery {
   project_id Int
   project    Project       @relation(fields: [project_id], references: [id])
   link_id    Int?
-  link       ProjectLinks? @relation(fields: [link_id], references: [id])
+  link       ProjectLink?  @relation(fields: [link_id], references: [id])
   title      String
   image      String
   priority   Int           @default(0)

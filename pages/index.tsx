@@ -1,8 +1,10 @@
 import Head from "next/head";
 import { useProjects } from "../models/projects";
+import { useSettings } from "../components/SettingsContext";
 
+const { projects, loading, error } = useProjects();
+const { settings, isLoaded } = useSettings();
 export default function Home() {
-  const { projects, loading, error } = useProjects();
   return (
     <>
       <Head>
@@ -11,10 +13,10 @@ export default function Home() {
       <main className="min-h-screen flex flex-col items-center justify-center px-4">
         <section className="w-full max-w-3xl text-center py-8">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4 gradient-text animate-gradient">
-            David Conway Jr.
+            {isLoaded ? (settings["/home/banner/title"] || "David Conway Jr.") : "..."}
           </h1>
           <p className="text-xl md:text-2xl text-muted mb-8 neon-text">
-            Web Software Engineer &amp; Programmer
+            {isLoaded ? (settings["/home/banner/subtitle"] || "Web Software Engineer & Programmer") : "..."}
           </p>
           <a
             href="#projects"
