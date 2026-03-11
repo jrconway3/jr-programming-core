@@ -60,4 +60,19 @@ INSERT INTO `jr_cats` (`title`, `created_at`, `updated_at`) VALUES
 
 -- Insert Projects
 INSERT INTO `jr_projects` (`name`, `short`, `role`, `position`, `extended`, `created_at`, `updated_at`) VALUES
+('JR Programming', 'I used Github Copilot to assist me in creating this portfolio website in React. I have a long history of picking up new things and detailed experience in Javascript programming and development.', '', 'Web Developer', '', CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3)),
+('JR Programming', 'I used Github Copilot to assist me in creating this portfolio website in React. I have a long history of picking up new things and detailed experience in Javascript programming and development.', '', 'Web Developer', '', CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3)),
+('JR Programming', 'I used Github Copilot to assist me in creating this portfolio website in React. I have a long history of picking up new things and detailed experience in Javascript programming and development.', '', 'Web Developer', '', CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3)),
+('JR Programming', 'I used Github Copilot to assist me in creating this portfolio website in React. I have a long history of picking up new things and detailed experience in Javascript programming and development.', '', 'Web Developer', '', CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3)),
+('JR Programming', 'I used Github Copilot to assist me in creating this portfolio website in React. I have a long history of picking up new things and detailed experience in Javascript programming and development.', '', 'Web Developer', '', CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3)),
 ('JR Programming', 'I used Github Copilot to assist me in creating this portfolio website in React. I have a long history of picking up new things and detailed experience in Javascript programming and development.', '', 'Web Developer', '', CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3));
+
+
+-- Insert Featured Projects
+INSERT INTO `jr_projects_cats` (`project_id`, `category_id`, `created_at`, `updated_at`) VALUES
+(1, 1, CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3)),
+(1, 2, CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3)),
+(1, 3, CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3)),
+(1, 4, CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3)),
+(1, 5, CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3)),
+(1, 6, CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3));
