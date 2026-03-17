@@ -25,6 +25,6 @@ export default defineConfig({
   },
   datasource: {
     url: DB_URL,
-    shadowDatabaseUrl: SHADOW_URL
+    shadowDatabaseUrl: !SHADOW_USER || SHADOW_USER === 'null' ? undefined : SHADOW_URL
   }
 });
