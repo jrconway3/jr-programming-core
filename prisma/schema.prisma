@@ -9,6 +9,16 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model Settings {
+  id         Int           @id @default(autoincrement())
+  page_id    Int?
+  key        String
+  value      String
+  created_at DateTime      @default(now())
+  updated_at DateTime      @default(now())
+  @@map("jr_settings")
+}
+
 model Project {
   id         Int         @id @default(autoincrement())
   name       String
@@ -16,14 +26,18 @@ model Project {
   role       String?
   position   String?
   extended   String?     @db.Text
+  start_date DateTime?
+  end_date   DateTime?
   created_at DateTime    @default(now())
   updated_at DateTime    @default(now())
-  links      ProjectLinks[]
+  links      ProjectLink[]
   gallery    ProjectGallery[]
+  skills     ProjectSkill[]
+  categories ProjectCategory[]
   @@map("jr_projects")
 }
 
-model ProjectLinks {
+model ProjectLink {
   id         Int         @id @default(autoincrement())
   project_id Int
   project    Project     @relation(fields: [project_id], references: [id])
@@ -41,11 +55,55 @@ model ProjectGallery {
   project_id Int
   project    Project       @relation(fields: [project_id], references: [id])
   link_id    Int?
-  link       ProjectLinks? @relation(fields: [link_id], references: [id])
+  link       ProjectLink?  @relation(fields: [link_id], references: [id])
   title      String
   image      String
   priority   Int           @default(0)
   created_at DateTime      @default(now())
   updated_at DateTime      @default(now())
   @@map("jr_projects_gallery")
+}
+
+model ProjectSkill {
+  project_id Int
+  project    Project       @relation(fields: [project_id], references: [id])
+  skill_id   Int
+  skill      Skill         @relation(fields: [skill_id], references: [id])
+  priority   Int           @default(0)
+  created_at DateTime      @default(now())
+  updated_at DateTime      @default(now())
+  @@id([project_id, skill_id])
+  @@map("jr_projects_skills")
+}
+
+model ProjectCategory {
+  project_id    Int
+  project       Project    @relation(fields: [project_id], references: [id])
+  category_id   Int
+  category      Category   @relation(fields: [category_id], references: [id])
+  priority      Int        @default(0)
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @default(now())
+  @@id([project_id, category_id])
+  @@map("jr_projects_cats")
+}
+
+model Skill {
+  id         Int           @id @default(autoincrement())
+  name       String
+  desc       String
+  rating     Int           @db.TinyInt @default(5)
+  created_at DateTime      @default(now())
+  updated_at DateTime      @default(now())
+  projects   ProjectSkill[]
+  @@map("jr_skills")
+}
+
+model Category {
+  id         Int           @id @default(autoincrement())
+  title      String
+  created_at DateTime      @default(now())
+  updated_at DateTime      @default(now())
+  projects   ProjectCategory[]
+  @@map("jr_cats")
 }
