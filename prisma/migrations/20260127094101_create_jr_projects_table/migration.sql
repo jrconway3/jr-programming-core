@@ -5,8 +5,6 @@ CREATE TABLE `jr_projects` (
     `short` VARCHAR(191) NOT NULL,
     `role` VARCHAR(191) NULL,
     `position` VARCHAR(191) NULL,
-    `start_date` VARCHAR(191) NULL,
-    `end_date` VARCHAR(191) NULL,
     `extended` text NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),

@@ -26,6 +26,8 @@ model Project {
   role       String?
   position   String?
   extended   String?     @db.Text
+  start_date DateTime?
+  end_date   DateTime?
   created_at DateTime    @default(now())
   updated_at DateTime    @default(now())
   links      ProjectLink[]
