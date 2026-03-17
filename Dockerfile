@@ -13,6 +13,9 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Clean any existing .next directory and cache to prevent permission issues
+RUN rm -rf .next .turbo node_modules/.cache
+
 # Build the Next.js app
 RUN npm run build
 
@@ -31,8 +34,13 @@ COPY package.json package-lock.json ./
 # Install only production dependencies
 RUN npm ci --production && npm cache clean --force
 
-# Copy built app from builder
+# Copy built app and public assets from builder with proper ownership
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+
+# Ensure proper permissions on app directory
+RUN chown -R nextjs:nodejs /app
 
 # Switch to non-root user
 USER nextjs
