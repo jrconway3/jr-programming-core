@@ -7,6 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const settings = await prisma.settings.findMany();
       res.status(200).json(settings);
     } catch (error) {
+      console.error('GET /api/settings failed', error);
       res.status(500).json({ error: 'Failed to fetch settings' });
     }
   } else {
