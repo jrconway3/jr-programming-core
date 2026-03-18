@@ -31,6 +31,9 @@ RUN adduser -S nextjs -u 1001
 # Copy package files from builder
 COPY package.json package-lock.json ./
 
+# Copy Prisma schema before install so @prisma/client can generate correctly
+COPY --from=builder /app/prisma ./prisma
+
 # Install only production dependencies
 RUN npm ci --production && npm cache clean --force
 

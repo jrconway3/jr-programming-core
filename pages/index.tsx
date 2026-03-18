@@ -2,9 +2,10 @@ import Head from "next/head";
 import { useProjects } from "../models/projects";
 import { useSettings } from "../components/SettingsContext";
 
-const { projects, loading, error } = useProjects();
-const { settings, isLoaded } = useSettings();
 export default function Home() {
+  const { projects, loading, error } = useProjects();
+  const { settings, isLoaded } = useSettings();
+
   return (
     <>
       <Head>
