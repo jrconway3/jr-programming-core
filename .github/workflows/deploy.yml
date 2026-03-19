@@ -46,7 +46,7 @@ jobs:
             # Clean stale build output that may have mismatched ownership
             if [ -d .next ]; then
               if command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
-                sudo chown -R "${USER}:$(id -gn)" .next || true
+                sudo chown -R "$(id -un):$(id -gn)" .next || true
               fi
               chmod -R u+rwX .next || true
               rm -rf .next || mv .next ".next.stale.$(date +%s)" || true
@@ -101,3 +101,37 @@ jobs:
 
             pm2 start node --name "jrprogramming" -- .next/standalone/server.js
             pm2 save
+
+            # Verify process and critical routes before reporting success
+            sleep 5
+            if ! pm2 pid jrprogramming | grep -qE '^[1-9][0-9]*$'; then
+              echo "pm2 process jrprogramming is not online"
+              pm2 logs jrprogramming --lines 100 --nostream || true
+              exit 1
+            fi
+
+            if ! curl -fsS http://127.0.0.1:3000/ >/tmp/home.html; then
+              echo "Homepage check failed"
+              exit 1
+            fi
+
+            if ! grep -q '/_next/static/chunks/.*\.css' /tmp/home.html; then
+              echo "Homepage did not reference a CSS chunk"
+              exit 1
+            fi
+
+            css_path="$(grep -oE '/_next/static/chunks/[^\"]+\.css' /tmp/home.html | head -n 1)"
+            if [ -z "$css_path" ]; then
+              echo "Failed to extract CSS chunk path"
+              exit 1
+            fi
+
+            if ! curl -fsS "http://127.0.0.1:3000${css_path}" >/dev/null; then
+              echo "CSS chunk is not being served: ${css_path}"
+              exit 1
+            fi
+
+            if ! curl -fsS http://127.0.0.1:3000/api/health >/dev/null; then
+              echo "Health endpoint check failed"
+              exit 1
+            fi
