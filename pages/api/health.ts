@@ -1,12 +1,31 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../prisma/adapter';
+
+const requiredDbEnv = ['DB_HOST', 'DB_USER', 'DB_NAME'] as const;
+
+function getMissingDbEnv(): string[] {
+  return requiredDbEnv.filter((key) => !process.env[key] || process.env[key]?.trim() === '');
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const missingEnv = getMissingDbEnv();
+  if (missingEnv.length > 0) {
+    return res.status(503).json({
+      status: 'error',
+      database: 'misconfigured',
+      missingEnv,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  let prisma: import('@prisma/client').PrismaClient | null = null;
   try {
+    const adapter = await import('../../prisma/adapter');
+    prisma = adapter.prisma;
+
     await prisma.$connect();
     await prisma.$queryRaw`SELECT 1`;
 
@@ -21,9 +40,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(503).json({
       status: 'error',
       database: 'unavailable',
+      message: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString(),
     });
   } finally {
-    await prisma.$disconnect().catch(() => undefined);
+    if (prisma) {
+      await prisma.$disconnect().catch(() => undefined);
+    }
   }
 }
