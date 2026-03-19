@@ -95,8 +95,24 @@ jobs:
             cp -R public .next/standalone/public
 
             # Recreate pm2 process with explicit standalone command
-            if pm2 describe jrprogramming > /dev/null; then
+            if pm2 describe jrprogramming > /dev/null 2>&1; then
               pm2 delete jrprogramming
+            fi
+
+            # Wait for port 3000 to fully drain before starting new process
+            for i in $(seq 1 15); do
+              if ! lsof -iTCP:3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
+                break
+              fi
+              echo "Waiting for port 3000 to free... ($i/15)"
+              sleep 2
+            done
+
+            # Force-kill any process still holding port 3000
+            if lsof -iTCP:3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
+              echo "Port 3000 still occupied, force-killing"
+              lsof -iTCP:3000 -sTCP:LISTEN -t | xargs kill -9 || true
+              sleep 2
             fi
 
             pm2 start node --name "jrprogramming" -- .next/standalone/server.js
