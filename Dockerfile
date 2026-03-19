@@ -28,17 +28,9 @@ WORKDIR /app
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
 
-# Copy package files from builder
-COPY package.json package-lock.json ./
-
-# Copy Prisma schema before install so @prisma/client can generate correctly
-COPY --from=builder /app/prisma ./prisma
-
-# Install only production dependencies
-RUN npm ci --production && npm cache clean --force
-
-# Copy built app and public assets from builder with proper ownership
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+# Copy standalone server output and required runtime assets
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
@@ -59,4 +51,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
 # Start the Next.js app
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
