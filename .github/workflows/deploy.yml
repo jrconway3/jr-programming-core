@@ -87,9 +87,17 @@ jobs:
               exit 1
             fi
 
-            # Start or restart with pm2 (assumes pm2 is installed globally)
+            # Prepare standalone runtime assets for direct node execution
+            mkdir -p .next/standalone/.next
+            rm -rf .next/standalone/.next/static
+            cp -R .next/static .next/standalone/.next/static
+            rm -rf .next/standalone/public
+            cp -R public .next/standalone/public
+
+            # Recreate pm2 process with explicit standalone command
             if pm2 describe jrprogramming > /dev/null; then
-             pm2 reload jrprogramming || pm2 restart jrprogramming
-            else
-              pm2 start npm --name "jrprogramming" -- start
+              pm2 delete jrprogramming
             fi
+
+            pm2 start node --name "jrprogramming" -- .next/standalone/server.js
+            pm2 save
