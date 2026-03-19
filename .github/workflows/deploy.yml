@@ -33,9 +33,24 @@ jobs:
           port: ${{ secrets.SSH_PORT || 22 }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Open Dir            
+            set -euo pipefail
+
+            # Open app dir
             cd "${{ secrets.REMOTE_DIR }}"
-            npm ci --omit=dev
+
+            # Sync working tree to production branch head
+            git fetch origin production
+            git checkout production
+            git reset --hard origin/production
+
+            # Clean stale build output that may have mismatched ownership
+            if [ -d .next ]; then
+              if command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
+                sudo chown -R "${USER}:$(id -gn)" .next || true
+              fi
+              chmod -R u+rwX .next || true
+              rm -rf .next || mv .next ".next.stale.$(date +%s)" || true
+            fi
 
             # Create .env file
             > .env
@@ -50,14 +65,27 @@ jobs:
             echo "SHADOW_PORT=null" >> .env
             echo "SHADOW_NAME=null" >> .env
 
-            # Generate Prisma
+            # Install deps for build and generate Prisma client
+            npm ci
             npx prisma migrate deploy
             npx prisma generate
 
-            # Pull Updates and Install Dependencies
-            cd "${{ secrets.REMOTE_DIR }}"
-            git pull origin production
-            npm run build
+            # Build app
+            if ! npm run build; then
+              echo "Build failed on remote server"
+              exit 1
+            fi
+
+            # Validate required build artifacts
+            if [ ! -f .next/standalone/server.js ]; then
+              echo "Missing .next/standalone/server.js after build"
+              exit 1
+            fi
+
+            if [ ! -d .next/static ]; then
+              echo "Missing .next/static after build"
+              exit 1
+            fi
 
             # Start or restart with pm2 (assumes pm2 is installed globally)
             if pm2 describe jrprogramming > /dev/null; then
