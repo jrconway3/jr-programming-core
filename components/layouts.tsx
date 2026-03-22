@@ -19,8 +19,8 @@ export default function Layout({ children }: Props) {
             </Link>
             <div className="space-x-6">
               <Link href="/" className="hover:text-primary-accentLight transition neon-text">Home</Link>
-              <Link href="/projects" className="hover:text-primary-accentLight transition neon-text">Projects</Link>
               <Link href="/experience" className="hover:text-primary-accentLight transition neon-text">Experience</Link>
+              <Link href="/projects" className="hover:text-primary-accentLight transition neon-text">Projects</Link>
               <Link href="/about" className="hover:text-primary-accentLight transition neon-text">About</Link>
               <Link href="/blog" className="hidden hover:text-primary-accentLight transition neon-text">Blog</Link>
               <Link href="/contact" className="hidden hover:text-primary-accentLight transition neon-text">Contact</Link>
