@@ -1,9 +1,10 @@
 import Head from "next/head";
+import Link from "next/link";
 import { useProjects } from "../models/projects";
 import { useSettings } from "../components/SettingsContext";
 
 export default function Home() {
-  const { projects, loading, error } = useProjects({ featured: true, sort: 'date' });
+  const { projects, loading, error } = useProjects({ shortcode: 'featured-projects', sort: 'date' });
   const { settings, isLoaded } = useSettings();
 
   return (
@@ -42,6 +43,14 @@ export default function Home() {
                 {/* Add more fields as needed */}
               </div>
             ))}
+          </div>
+          <div className="mt-10 text-center">
+            <Link
+              href="/projects"
+              className="inline-block px-8 py-3 rounded-lg bg-primary-accent hover:bg-primary-accentDark text-white font-semibold shadow-lg transition glass border border-accent/30"
+            >
+              View More
+            </Link>
           </div>
         </section>
       </main>

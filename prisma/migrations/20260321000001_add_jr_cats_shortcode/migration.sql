@@ -4,7 +4,7 @@ ALTER TABLE `jr_cats` ADD COLUMN `shortcode` VARCHAR(191) NOT NULL DEFAULT '' AF
 -- Backfill shortcodes for seeded categories
 UPDATE `jr_cats` SET `shortcode` = 'featured-projects' WHERE `title` = 'Featured Projects';
 UPDATE `jr_cats` SET `shortcode` = 'projects' WHERE `title` = 'Projects';
-UPDATE `jr_cats` SET `shortcode` = 'work-history' WHERE `title` = 'Work History';
+UPDATE `jr_cats` SET `shortcode` = 'experience', `title` = 'Experience' WHERE `title` = 'Work History';
 
 -- AlterTable: make shortcode unique and remove the temporary default
 ALTER TABLE `jr_cats` ADD UNIQUE INDEX `jr_cats_shortcode_key` (`shortcode`);
@@ -21,5 +21,15 @@ WHERE p.name IN (
   'Universal Spritesheet Character Generator',
   'Sands Investment Group',
   'TrailerCentral Craigslist Autoposter'
+)
+ON DUPLICATE KEY UPDATE `updated_at` = VALUES(`updated_at`);
+
+-- Assign 'projects' category to all projects not already in any category
+INSERT INTO `jr_projects_cats` (`project_id`, `category_id`, `priority`, `created_at`, `updated_at`)
+SELECT p.id, c.id, 0, CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3)
+FROM `jr_projects` p
+JOIN `jr_cats` c ON c.shortcode = 'projects'
+WHERE NOT EXISTS (
+  SELECT 1 FROM `jr_projects_cats` pc WHERE pc.project_id = p.id
 )
 ON DUPLICATE KEY UPDATE `updated_at` = VALUES(`updated_at`);

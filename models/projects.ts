@@ -13,7 +13,7 @@ export interface Project {
   updated_at: string;
 }
 
-export function useProjects(options: { featured?: boolean; sort?: 'date' } = {}) {
+export function useProjects(options: { shortcode?: string; sort?: 'date' } = {}) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +22,7 @@ export function useProjects(options: { featured?: boolean; sort?: 'date' } = {})
     async function fetchProjects() {
       try {
         const params = new URLSearchParams();
-        if (options.featured !== undefined) params.set('featured', String(options.featured));
+        if (options.shortcode) params.set('shortcode', options.shortcode);
         if (options.sort !== undefined) params.set('sort', options.sort);
         const query = params.size ? `?${params.toString()}` : '';
         const res = await fetch(`/api/projects${query}`);
@@ -36,8 +36,7 @@ export function useProjects(options: { featured?: boolean; sort?: 'date' } = {})
       }
     }
     fetchProjects();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [options.featured, options.sort]);
+  }, [options.shortcode, options.sort]);
 
   return { projects, loading, error };
 }

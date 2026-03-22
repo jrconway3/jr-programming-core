@@ -4,11 +4,11 @@ import { prisma } from '../../prisma/adapter';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     try {
-      const featured = req.query.featured === 'true';
+      const shortcode = typeof req.query.shortcode === 'string' ? req.query.shortcode : undefined;
       const sortByDate = req.query.sort === 'date';
       const projects = await prisma.project.findMany({
-        where: featured
-          ? { categories: { some: { category: { shortcode: 'featured-projects' } } } }
+        where: shortcode
+          ? { categories: { some: { category: { shortcode } } } }
           : undefined,
         orderBy: sortByDate
           ? [
