@@ -102,6 +102,7 @@ model Skill {
 model Category {
   id         Int           @id @default(autoincrement())
   title      String
+  shortcode  String        @unique
   created_at DateTime      @default(now())
   updated_at DateTime      @default(now())
   projects   ProjectCategory[]

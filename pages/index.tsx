@@ -3,7 +3,7 @@ import { useProjects } from "../models/projects";
 import { useSettings } from "../components/SettingsContext";
 
 export default function Home() {
-  const { projects, loading, error } = useProjects();
+  const { projects, loading, error } = useProjects({ featured: true, sort: 'date' });
   const { settings, isLoaded } = useSettings();
 
   return (
@@ -28,7 +28,7 @@ export default function Home() {
         </section>
 
         <section id="projects" className="w-full max-w-5xl py-12">
-          <h2 className="hidden text-2xl font-bold mb-6 text-primary-accentLight">Featured Projects</h2>
+          <h2 className="text-2xl font-bold mb-6 text-primary-accentLight">Featured Projects</h2>
           <div className="grid md:grid-cols-2 gap-8">
             {loading && <div>Loading projects...</div>}
             {error && <div className="text-red-500">{error}</div>}
