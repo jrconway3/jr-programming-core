@@ -41,8 +41,7 @@ jobs:
             cd "${{ secrets.REMOTE_DIR }}"
 
             # Sync working tree to production branch head
-            git fetch origin production
-            git checkout production
+            git pull origin production
 
             # Clean stale build output that may have mismatched ownership
             if [ -d .next ]; then
