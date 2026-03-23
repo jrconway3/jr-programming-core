@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          node-version: 24
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -41,7 +43,6 @@ jobs:
             # Sync working tree to production branch head
             git fetch origin production
             git checkout production
-            git reset --hard origin/production
 
             # Clean stale build output that may have mismatched ownership
             if [ -d .next ]; then
@@ -66,7 +67,7 @@ jobs:
             echo "SHADOW_NAME=null" >> .env
 
             # Install deps for build and generate Prisma client
-            npm ci
+            npm ci --omit=dev
             npx prisma migrate deploy
             npx prisma generate
 
@@ -77,22 +78,17 @@ jobs:
             fi
 
             # Validate required build artifacts
-            if [ ! -f .next/server.js ]; then
-              echo "Missing .next/server.js after build"
-              exit 1
-            fi
-
             if [ ! -d .next/static ]; then
               echo "Missing .next/static after build"
               exit 1
             fi
 
-            # Recreate pm2 process with explicit command
+            # Start or restart pm2 process
             if pm2 describe jrprogramming > /dev/null 2>&1; then
-              pm2 stop jrprogramming
+              pm2 restart jrprogramming
+            else
+              pm2 start npm --name "jrprogramming" -- start
             fi
-
-            pm2 start node --name "jrprogramming" -- .next/server.js
             pm2 save
 
             # Verify process and critical routes before reporting success
