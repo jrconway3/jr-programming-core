@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useProjects } from "../models/projects";
 import { useSettings } from "../components/SettingsContext";
+import ProjectCard from "components/ProjectCard";
 
 export default function Home() {
   const { projects, loading, error } = useProjects({ shortcode: 'featured-projects', sort: 'date' });
@@ -36,13 +37,7 @@ export default function Home() {
             {!loading && !error && projects.length === 0 && (
               <div>No projects found.</div>
             )}
-            {!loading && !error && projects.map((project) => (
-              <div key={project.id} className="terminal-card p-6 hover:scale-105 hover:shadow-accent transition">
-                <h3 className="text-xl font-semibold text-accent mb-2">{project.name}</h3>
-                <p className="text-muted mb-4">{project.short}</p>
-                {/* Add more fields as needed */}
-              </div>
-            ))}
+            {!loading && !error && projects.map((project) => <ProjectCard key={project.id} project={project} />)}
           </div>
           <div className="mt-10 text-center">
             <Link
