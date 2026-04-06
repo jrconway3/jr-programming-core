@@ -13,8 +13,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          node-version: 24
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -52,18 +50,26 @@ jobs:
               rm -rf .next || mv .next ".next.stale.$(date +%s)" || true
             fi
 
-            # Create .env file
-            > .env
-            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-            echo "DB_PASSWORD=${{ secrets.DB_PASS }}" >> .env
-            echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
-            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-            echo "SHADOW_USER=null" >> .env
-            echo "SHADOW_PASSWORD=null" >> .env
-            echo "SHADOW_HOST=null" >> .env
-            echo "SHADOW_PORT=null" >> .env
-            echo "SHADOW_NAME=null" >> .env
+            # Create .env file from GitHub secrets without shell re-expanding secret values
+            cat > .env <<'EOF'
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASS }}
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            SHADOW_USER=null
+            SHADOW_PASSWORD=null
+            SHADOW_HOST=null
+            SHADOW_PORT=null
+            SHADOW_NAME=null
+            CONTACT_EMAIL_TO=${{ secrets.CONTACT_EMAIL_TO }}
+            CONTACT_EMAIL_FROM=${{ secrets.CONTACT_EMAIL_FROM }}
+            SMTP_HOST=${{ secrets.SMTP_HOST }}
+            SMTP_PORT=${{ secrets.SMTP_PORT }}
+            SMTP_SECURE=${{ secrets.SMTP_SECURE }}
+            SMTP_USER=${{ secrets.SMTP_USER }}
+            SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+            EOF
 
             # Install deps for build and generate Prisma client
             npm ci --omit=dev

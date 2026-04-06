@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 
 type FormData = {
   name: string;
@@ -29,6 +29,7 @@ export default function Contact() {
   const [submittedAt, setSubmittedAt] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionState, setSubmissionState] = useState<SubmissionState>(null);
+  const submitLockRef = useRef(false);
 
   useEffect(() => {
     setSubmittedAt(Date.now());
@@ -41,6 +42,12 @@ export default function Contact() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (submitLockRef.current) {
+      return;
+    }
+
+    submitLockRef.current = true;
     setSubmissionState(null);
     setIsSubmitting(true);
 
@@ -71,6 +78,7 @@ export default function Contact() {
         message: error instanceof Error ? error.message : 'Unable to submit your inquiry right now.',
       });
     } finally {
+      submitLockRef.current = false;
       setIsSubmitting(false);
     }
   }
@@ -185,7 +193,7 @@ export default function Contact() {
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  minLength={25}
+                  minLength={12}
                   maxLength={4000}
                   rows={8}
                   className="mt-2 block w-full rounded-lg border border-primary-accent/40 bg-slate-950/60 px-4 py-3 text-sm text-primary-text shadow-inner transition focus:border-primary-accent focus:ring-primary-accent"

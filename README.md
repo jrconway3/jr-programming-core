@@ -14,18 +14,40 @@ Getting started (PowerShell):
 ```powershell
 cd path\to\jrprogramming
 npm install
+Copy-Item .env.example .env
 ```
 
 
 ## Generate Prisma Database
 
-Ensure your .env vars have the DB config filled out correctly.
+Ensure your `.env` file is created from `.env.example` and the database values are filled out correctly.
 
 ```powershell
 cd path\to\jrprogramming
 npx prisma migrate dev
 npx prisma generate
 ```
+
+
+## Contact Form Email Configuration
+
+The contact form sends inquiries using SMTP and the recipient address is configured through environment variables.
+
+Local setup uses the same `.env` file created from `.env.example`.
+
+Required values:
+
+```powershell
+CONTACT_EMAIL_TO=you@example.com
+CONTACT_EMAIL_FROM=website@example.com
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-smtp-user
+SMTP_PASSWORD=your-smtp-password
+```
+
+Use [.env.example](.env.example) as the local template and copy it to `.env` before running the app.
 
 
 ## Initialize Locally

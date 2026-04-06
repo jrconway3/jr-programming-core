@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import nodemailer from 'nodemailer';
 import { prisma } from '../../prisma/adapter';
 
 type ContactResponse = {
@@ -23,12 +24,24 @@ const SPAM_TERMS = ['seo', 'backlink', 'guest post', 'casino', 'loan', 'crypto',
 const TEN_MINUTES_MS = 10 * 60 * 1000;
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const MINIMUM_SUBMISSION_AGE_MS = 4000;
+const DUPLICATE_SUBMISSION_WINDOW_MS = 2 * 60 * 1000;
 const MAX_NAME_LENGTH = 100;
 const MAX_EMAIL_LENGTH = 190;
 const MAX_COMPANY_LENGTH = 120;
 const MAX_SUBJECT_LENGTH = 140;
 const MAX_MESSAGE_LENGTH = 4000;
+const MIN_MESSAGE_LENGTH = 12;
 const rateLimitStore = new Map<string, number[]>();
+
+type MailConfig = {
+  host: string;
+  port: number;
+  secure: boolean;
+  user?: string;
+  password?: string;
+  to: string;
+  from: string;
+};
 
 function normalizeText(value: unknown, maxLength: number): string {
   if (typeof value !== 'string') {
@@ -124,6 +137,90 @@ function scoreSubmission(payload: {
   return { score, reasons };
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getMailConfig(): MailConfig | null {
+  const host = process.env.SMTP_HOST?.trim();
+  const port = Number(process.env.SMTP_PORT ?? '587');
+  const secureEnv = process.env.SMTP_SECURE?.trim().toLowerCase();
+  const user = process.env.SMTP_USER?.trim();
+  const password = process.env.SMTP_PASSWORD;
+  const to = process.env.CONTACT_EMAIL_TO?.trim();
+  const from = process.env.CONTACT_EMAIL_FROM?.trim();
+
+  if (!host || !Number.isFinite(port) || !to || !from) {
+    return null;
+  }
+
+  return {
+    host,
+    port,
+    secure: secureEnv ? secureEnv === 'true' : port === 465,
+    user,
+    password,
+    to,
+    from,
+  };
+}
+
+async function sendContactNotification(config: MailConfig, payload: {
+  name: string;
+  email: string;
+  company: string;
+  subject: string;
+  message: string;
+}) {
+  const transporter = nodemailer.createTransport({
+    host: config.host,
+    port: config.port,
+    secure: config.secure,
+    auth: config.user && config.password
+      ? {
+          user: config.user,
+          pass: config.password,
+        }
+      : undefined,
+  });
+
+  const companyLine = payload.company ? `Company: ${payload.company}\n` : '';
+  const htmlCompanyLine = payload.company
+    ? `<p><strong>Company:</strong> ${escapeHtml(payload.company)}</p>`
+    : '';
+
+  await transporter.sendMail({
+    to: config.to,
+    from: config.from,
+    replyTo: payload.email,
+    subject: `JRProgramming inquiry: ${payload.subject}`,
+    text: [
+      `Name: ${payload.name}`,
+      `Email: ${payload.email}`,
+      companyLine.trimEnd(),
+      `Subject: ${payload.subject}`,
+      '',
+      payload.message,
+    ].filter(Boolean).join('\n'),
+    html: [
+      '<div style="font-family: Arial, sans-serif; line-height: 1.6; color: #0f172a;">',
+      '<h2>New JRProgramming inquiry</h2>',
+      `<p><strong>Name:</strong> ${escapeHtml(payload.name)}</p>`,
+      `<p><strong>Email:</strong> ${escapeHtml(payload.email)}</p>`,
+      htmlCompanyLine,
+      `<p><strong>Subject:</strong> ${escapeHtml(payload.subject)}</p>`,
+      `<p><strong>Message:</strong></p>`,
+      `<p>${escapeHtml(payload.message).replace(/\n/g, '<br />')}</p>`,
+      '</div>',
+    ].filter(Boolean).join(''),
+  });
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ContactResponse>) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -152,7 +249,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       return res.status(400).json({ error: 'Please enter a valid email address.' });
     }
 
-    if (message.length < 25) {
+    if (message.length < MIN_MESSAGE_LENGTH) {
       return res.status(400).json({ error: 'Please provide a few more details in your message.' });
     }
 
@@ -174,7 +271,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const shouldSendToOwner = score < 4;
     const status = shouldSendToOwner ? 'pending' : 'spam';
 
-    await prisma.inquiry.create({
+    const recentDuplicate = await prisma.inquiry.findFirst({
+      where: {
+        name,
+        email,
+        company: company || null,
+        subject,
+        message,
+        created_at: {
+          gte: new Date(now - DUPLICATE_SUBMISSION_WINDOW_MS),
+        },
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    if (recentDuplicate) {
+      return res.status(200).json({
+        message: 'Your inquiry has already been received.',
+      });
+    }
+
+    const inquiry = await prisma.inquiry.create({
       data: {
         name,
         email,
@@ -189,6 +308,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         sent_at: null,
       },
     });
+
+    if (shouldSendToOwner) {
+      const mailConfig = getMailConfig();
+
+      if (!mailConfig) {
+        console.error('Contact email delivery is not configured.');
+        await prisma.inquiry.update({
+          where: { id: inquiry.id },
+          data: { status: 'delivery_failed' },
+        });
+      } else {
+        try {
+          await sendContactNotification(mailConfig, {
+            name,
+            email,
+            company,
+            subject,
+            message,
+          });
+
+          await prisma.inquiry.update({
+            where: { id: inquiry.id },
+            data: {
+              status: 'sent',
+              sent_at: new Date(),
+            },
+          });
+        } catch (mailError) {
+          console.error('Contact inquiry email delivery failed', mailError);
+          await prisma.inquiry.update({
+            where: { id: inquiry.id },
+            data: { status: 'delivery_failed' },
+          });
+        }
+      }
+    }
 
     return res.status(200).json({
       message: 'Your inquiry has been received. I will review it and follow up if a response is needed.',
