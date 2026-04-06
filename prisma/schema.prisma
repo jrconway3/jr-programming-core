@@ -108,3 +108,23 @@ model Category {
   projects   ProjectCategory[]
   @@map("jr_cats")
 }
+
+model Inquiry {
+  id          Int       @id @default(autoincrement())
+  name        String
+  email       String
+  company     String?
+  subject     String
+  message     String    @db.Text
+  status      String    @default("pending")
+  spam_score  Int       @default(0)
+  spam_reason String?   @db.Text
+  ip_hash     String?   @db.VarChar(64)
+  user_agent  String?   @db.Text
+  sent_at     DateTime?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now())
+
+  @@index([status, created_at])
+  @@map("jr_inquiries")
+}

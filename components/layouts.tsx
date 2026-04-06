@@ -23,7 +23,7 @@ export default function Layout({ children }: Props) {
               <Link href="/projects" className="hover:text-primary-accentLight transition neon-text">Projects</Link>
               <Link href="/about" className="hover:text-primary-accentLight transition neon-text">About</Link>
               <Link href="/blog" className="hidden hover:text-primary-accentLight transition neon-text">Blog</Link>
-              <Link href="/contact" className="hidden hover:text-primary-accentLight transition neon-text">Contact</Link>
+              <Link href="/contact" className="hover:text-primary-accentLight transition neon-text">Contact</Link>
             </div>
           </nav>
         </header>
