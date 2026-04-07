@@ -37,7 +37,7 @@ Local setup uses the same `.env` file created from `.env.example`.
 
 Required values:
 
-```powershell
+```dotenv
 CONTACT_EMAIL_TO=you@example.com
 CONTACT_EMAIL_FROM=website@example.com
 CONTACT_IP_HASH_SECRET=replace-with-a-long-random-secret

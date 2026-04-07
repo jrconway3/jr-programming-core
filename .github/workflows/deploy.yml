@@ -6,18 +6,21 @@ on:
       - CI
     types:
       - completed
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
-    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'production'
+    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/production') || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'production')
     runs-on: ubuntu-latest
     environment:
       name: production
+    env:
+      DEPLOY_SHA: ${{ github.event_name == 'workflow_dispatch' && github.sha || github.event.workflow_run.head_sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ env.DEPLOY_SHA }}
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -33,15 +36,15 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -euo pipefail
-            tested_sha="${{ github.event.workflow_run.head_sha }}"
+            deploy_sha="${{ env.DEPLOY_SHA }}"
 
             # Open app dir
             cd "${{ secrets.REMOTE_DIR }}"
 
-            # Sync working tree to the exact commit that passed CI
+            # Sync working tree to the exact commit selected for this deploy
             git fetch --prune origin
-            git checkout --force "$tested_sha"
-            git reset --hard "$tested_sha"
+            git checkout --force "$deploy_sha"
+            git reset --hard "$deploy_sha"
 
             # Clean stale build output that may have mismatched ownership
             if [ -d .next ]; then

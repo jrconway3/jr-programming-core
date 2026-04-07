@@ -1,5 +1,5 @@
 import { createHash, createHmac } from 'node:crypto';
-import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ONE_HOUR_MS } from '../lib/contact';
 
 type JsonValue = Record<string, unknown>;
@@ -16,6 +16,7 @@ type MockResponse = {
 const sendMailMock = vi.fn();
 const createTransportMock = vi.fn(() => ({ sendMail: sendMailMock }));
 const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+const originalEnv = { ...process.env };
 
 const prismaMock = {
   inquiry: {
@@ -91,6 +92,10 @@ async function loadContactApiModule() {
 describe('contact API handler', () => {
   afterAll(() => {
     consoleErrorSpy.mockRestore();
+  });
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
   });
 
   beforeEach(() => {
@@ -249,6 +254,37 @@ describe('contact API handler', () => {
     });
   });
 
+  it('normalizes ipv4-mapped remote addresses before hashing', async () => {
+    const handler = await loadHandler();
+    const req = createRequest({
+      body: {
+        name: 'Jane Client',
+        email: 'jane@example.com',
+        company: 'Acme Co',
+        subject: 'Project inquiry',
+        message: 'I need help building a new marketing site and would like to discuss a timeline.',
+        website: '',
+        submittedAt: Date.now() - 10_000,
+      },
+      headers: {
+        'user-agent': 'vitest',
+      },
+      socket: {
+        remoteAddress: '::ffff:198.51.100.42',
+      },
+    });
+    const res = createResponse();
+
+    await handler(req as never, res as never);
+
+    expect(res.statusCode).toBe(200);
+    expect(prismaMock.inquiry.create.mock.calls[0]?.[0]).toMatchObject({
+      data: {
+        ip_hash: createHmac('sha256', 'contact-ip-secret').update('198.51.100.42').digest('hex'),
+      },
+    });
+  });
+
   it('marks inquiries as delivery_failed when SMTP is not configured', async () => {
     delete process.env.SMTP_HOST;
 
@@ -303,6 +339,32 @@ describe('contact API handler', () => {
 
   it('treats partial SMTP auth configuration as misconfiguration', async () => {
     delete process.env.SMTP_PASSWORD;
+
+    const handler = await loadHandler();
+    const req = createRequest({
+      body: {
+        name: 'Jane Client',
+        email: 'jane@example.com',
+        company: 'Acme Co',
+        subject: 'Project inquiry',
+        message: 'I need help building a new marketing site and would like to discuss a timeline.',
+        website: '',
+        submittedAt: Date.now() - 10_000,
+      },
+    });
+    const res = createResponse();
+
+    await handler(req as never, res as never);
+
+    expect(createTransportMock).not.toHaveBeenCalled();
+    expect(prismaMock.inquiry.update).toHaveBeenCalledWith({
+      where: { id: 123 },
+      data: { status: 'delivery_failed' },
+    });
+  });
+
+  it('treats whitespace SMTP_PASSWORD as missing auth configuration', async () => {
+    process.env.SMTP_PASSWORD = '   ';
 
     const handler = await loadHandler();
     const req = createRequest({

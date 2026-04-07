@@ -39,13 +39,28 @@ type MailConfig = {
 
 let hasWarnedAboutMissingIpHashSecret = false;
 
+function normalizeIpAddress(value: string | undefined): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) {
+    return undefined;
+  }
+
+  return trimmedValue.toLowerCase().startsWith('::ffff:') ? trimmedValue.slice(7) : trimmedValue;
+}
+
 function isTrustedProxyRemoteAddress(remoteAddress: string | undefined): boolean {
-  if (!remoteAddress) {
+  const normalizedAddress = normalizeIpAddress(remoteAddress)?.toLowerCase();
+
+  if (!normalizedAddress) {
     return false;
   }
 
-  const normalizedAddress = remoteAddress.toLowerCase();
-  const ipv4Address = normalizedAddress.startsWith('::ffff:') ? normalizedAddress.slice(7) : normalizedAddress;
+  const ipv4Address = normalizedAddress;
 
   if (ipv4Address === '127.0.0.1' || ipv4Address.startsWith('127.')) {
     return true;
@@ -66,7 +81,7 @@ function isTrustedProxyRemoteAddress(remoteAddress: string | undefined): boolean
 }
 
 function getClientIp(req: NextApiRequest): string {
-  const remoteAddress = req.socket.remoteAddress;
+  const remoteAddress = normalizeIpAddress(req.socket.remoteAddress);
 
   if (!isTrustedProxyRemoteAddress(remoteAddress)) {
     return remoteAddress ?? 'unknown';
@@ -75,7 +90,7 @@ function getClientIp(req: NextApiRequest): string {
   const forwardedFor = req.headers['x-forwarded-for'];
 
   if (typeof forwardedFor === 'string' && forwardedFor.length > 0) {
-    const forwardedIp = forwardedFor.split(',')[0].trim();
+    const forwardedIp = normalizeIpAddress(forwardedFor.split(',')[0]);
 
     if (forwardedIp) {
       return forwardedIp;
@@ -83,7 +98,7 @@ function getClientIp(req: NextApiRequest): string {
   }
 
   if (Array.isArray(forwardedFor) && forwardedFor.length > 0) {
-    const forwardedIp = forwardedFor[0].trim();
+    const forwardedIp = normalizeIpAddress(forwardedFor[0]);
 
     if (forwardedIp) {
       return forwardedIp;
@@ -192,7 +207,7 @@ function getMailConfig(): MailConfig | null {
   const port = portValue === undefined ? 587 : Number(portValue);
   const secureEnv = process.env.SMTP_SECURE?.trim().toLowerCase();
   const user = process.env.SMTP_USER?.trim();
-  const password = process.env.SMTP_PASSWORD;
+  const password = process.env.SMTP_PASSWORD?.trim();
   const to = process.env.CONTACT_EMAIL_TO?.trim();
   const from = process.env.CONTACT_EMAIL_FROM?.trim();
   const hasPartialSmtpAuth = (Boolean(user) && !password) || (!user && Boolean(password));

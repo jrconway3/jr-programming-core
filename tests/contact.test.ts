@@ -165,6 +165,17 @@ describe('contact spam scoring', () => {
     expect(result.score).toBe(1);
   });
 
+  it('flags future submit timestamps', () => {
+    const now = 20_000;
+    const result = scoreSubmission({
+      ...createBasePayload(),
+      submittedAt: now + 5_000,
+    }, now);
+
+    expect(result.reasons).toContain('future-submit-timestamp');
+    expect(result.score).toBe(2);
+  });
+
   it('flags messages with multiple links', () => {
     const now = 20_000;
     const result = scoreSubmission({
