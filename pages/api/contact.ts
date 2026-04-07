@@ -195,8 +195,9 @@ function getMailConfig(): MailConfig | null {
   const password = process.env.SMTP_PASSWORD;
   const to = process.env.CONTACT_EMAIL_TO?.trim();
   const from = process.env.CONTACT_EMAIL_FROM?.trim();
+  const hasPartialSmtpAuth = (Boolean(user) && !password) || (!user && Boolean(password));
 
-  if (!host || portValue === '' || !Number.isInteger(port) || port < 1 || port > 65535 || !to || !from) {
+  if (!host || portValue === '' || !Number.isInteger(port) || port < 1 || port > 65535 || !to || !from || hasPartialSmtpAuth) {
     return null;
   }
 
