@@ -1,29 +1,28 @@
 name: Deploy to SSH host
 
 on:
-  push:
-    branches:
-      - production
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
 
 jobs:
   build-and-deploy:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'production'
     runs-on: ubuntu-latest
     environment:
       name: production
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
-
-      - name: Install deps
-        run: npm ci
-
-      - name: Run ESLint
-        run: npm run lint
 
       - name: Pull Production
         uses: appleboy/ssh-action@v0.1.8
