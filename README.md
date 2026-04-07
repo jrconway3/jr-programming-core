@@ -51,6 +51,21 @@ SMTP_PASSWORD=your-smtp-password
 Use [.env.example](.env.example) as the local template and copy it to `.env` before running the app.
 
 
+## Admin Area
+
+The site includes a private admin area at `/admin` for inquiries, project management, and category management.
+
+Configure these environment variables before using it:
+
+```powershell
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=replace-with-a-strong-password
+ADMIN_SESSION_SECRET=replace-with-a-long-random-secret
+```
+
+After that, start the app with `npm run dev` or `npm run build` and sign in at `http://localhost:3000/admin`.
+
+
 ## Initialize Locally
 
 Build a local version of the React website and initialize a virtual instance.
