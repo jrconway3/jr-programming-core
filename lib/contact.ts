@@ -121,6 +121,11 @@ export function scoreSubmission(payload: {
   } else {
     const age = now - payload.submittedAt;
 
+    if (age < 0) {
+      score += 2;
+      reasons.push('future-submit-timestamp');
+    }
+
     if (age >= 0 && age < MINIMUM_SUBMISSION_AGE_MS) {
       score += 3;
       reasons.push('submitted-too-fast');

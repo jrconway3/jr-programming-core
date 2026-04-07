@@ -254,6 +254,37 @@ describe('contact API handler', () => {
     });
   });
 
+  it('normalizes ipv4-mapped remote addresses before hashing', async () => {
+    const handler = await loadHandler();
+    const req = createRequest({
+      body: {
+        name: 'Jane Client',
+        email: 'jane@example.com',
+        company: 'Acme Co',
+        subject: 'Project inquiry',
+        message: 'I need help building a new marketing site and would like to discuss a timeline.',
+        website: '',
+        submittedAt: Date.now() - 10_000,
+      },
+      headers: {
+        'user-agent': 'vitest',
+      },
+      socket: {
+        remoteAddress: '::ffff:198.51.100.42',
+      },
+    });
+    const res = createResponse();
+
+    await handler(req as never, res as never);
+
+    expect(res.statusCode).toBe(200);
+    expect(prismaMock.inquiry.create.mock.calls[0]?.[0]).toMatchObject({
+      data: {
+        ip_hash: createHmac('sha256', 'contact-ip-secret').update('198.51.100.42').digest('hex'),
+      },
+    });
+  });
+
   it('marks inquiries as delivery_failed when SMTP is not configured', async () => {
     delete process.env.SMTP_HOST;
 
