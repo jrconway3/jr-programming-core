@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 const requiredDbEnv = ['DB_HOST', 'DB_USER', 'DB_NAME'] as const;
 
+type PrismaInstance = typeof import('../../prisma/adapter').prisma;
+
 function getMissingDbEnv(): string[] {
   return requiredDbEnv.filter((key) => !process.env[key] || process.env[key]?.trim() === '');
 }
@@ -21,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 
-  let prisma: import('@prisma/client').PrismaClient | null = null;
+  let prisma: PrismaInstance | null = null;
   try {
     const adapter = await import('../../prisma/adapter');
     prisma = adapter.prisma;
