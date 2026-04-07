@@ -1,6 +1,8 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { ADMIN_SESSION_COOKIE, SESSION_DURATION_SECONDS, sanitizeAdminNextPath } from './admin-session';
+export { sanitizeAdminNextPath } from './admin-session';
 
 type AdminSession = {
   username: string;
@@ -10,9 +12,6 @@ type AdminSession = {
 type AdminPageProps = {
   adminUser: string;
 };
-
-const ADMIN_SESSION_COOKIE = 'jr_admin_session';
-const SESSION_DURATION_SECONDS = 60 * 60 * 12;
 
 function encodeCookieValue(value: string): string {
   return encodeURIComponent(value);
@@ -172,26 +171,6 @@ export function getAdminSession(
 ): AdminSession | null {
   const sessionValue = getCookie(req, ADMIN_SESSION_COOKIE);
   return readSessionValue(sessionValue);
-}
-
-export function sanitizeAdminNextPath(nextValue: unknown): string {
-  if (typeof nextValue !== 'string') {
-    return '/admin';
-  }
-
-  if (!nextValue.startsWith('/')) {
-    return '/admin';
-  }
-
-  if (nextValue.startsWith('//') || nextValue.startsWith('/api/')) {
-    return '/admin';
-  }
-
-  if (!nextValue.startsWith('/admin')) {
-    return '/admin';
-  }
-
-  return nextValue;
 }
 
 export function requireAdminApi(req: NextApiRequest, res: NextApiResponse): AdminSession | null {
