@@ -75,11 +75,19 @@ function getClientIp(req: NextApiRequest): string {
   const forwardedFor = req.headers['x-forwarded-for'];
 
   if (typeof forwardedFor === 'string' && forwardedFor.length > 0) {
-    return forwardedFor.split(',')[0].trim();
+    const forwardedIp = forwardedFor.split(',')[0].trim();
+
+    if (forwardedIp) {
+      return forwardedIp;
+    }
   }
 
   if (Array.isArray(forwardedFor) && forwardedFor.length > 0) {
-    return forwardedFor[0].trim();
+    const forwardedIp = forwardedFor[0].trim();
+
+    if (forwardedIp) {
+      return forwardedIp;
+    }
   }
 
   return remoteAddress ?? 'unknown';

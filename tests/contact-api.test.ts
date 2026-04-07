@@ -1,5 +1,5 @@
 import { createHash, createHmac } from 'node:crypto';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ONE_HOUR_MS } from '../lib/contact';
 
 type JsonValue = Record<string, unknown>;
@@ -89,6 +89,10 @@ async function loadContactApiModule() {
 }
 
 describe('contact API handler', () => {
+  afterAll(() => {
+    consoleErrorSpy.mockRestore();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     prismaMock.inquiry.findFirst.mockReset();
