@@ -52,9 +52,13 @@ jobs:
               rm -rf .next || mv .next ".next.stale.$(date +%s)" || true
             fi
 
-            # Create .env with exact key=value lines and JSON-escaped secret values
+            # Create .env with JSON-quoted values so special characters cannot break the file format
             node <<'NODE'
             const { writeFileSync } = require('node:fs');
+
+            function serializeEnvValue(value) {
+              return JSON.stringify(value ?? '');
+            }
 
             const envValues = {
               DB_USER: ${{ toJson(secrets.DB_USER) }},
@@ -78,7 +82,7 @@ jobs:
             };
 
             const envFile = Object.entries(envValues)
-              .map(([key, value]) => `${key}=${value ?? ''}`)
+              .map(([key, value]) => `${key}=${serializeEnvValue(value)}`)
               .join('\n');
 
             writeFileSync('.env', `${envFile}\n`, 'utf8');

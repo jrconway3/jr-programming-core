@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import { ChangeEvent, FormEvent, useRef, useState } from 'react';
 
-type FormData = {
+type ContactFormData = {
   name: string;
   email: string;
   company: string;
@@ -15,7 +15,7 @@ type SubmissionState = {
   message: string;
 } | null;
 
-const initialFormData: FormData = {
+const initialFormData: ContactFormData = {
   name: '',
   email: '',
   company: '',
@@ -25,7 +25,7 @@ const initialFormData: FormData = {
 };
 
 export default function Contact() {
-  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [formData, setFormData] = useState<ContactFormData>(initialFormData);
   const [submittedAt, setSubmittedAt] = useState<number>(() => Date.now());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionState, setSubmissionState] = useState<SubmissionState>(null);

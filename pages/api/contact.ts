@@ -39,7 +39,39 @@ type MailConfig = {
 
 let hasWarnedAboutMissingIpHashSecret = false;
 
+function isTrustedProxyRemoteAddress(remoteAddress: string | undefined): boolean {
+  if (!remoteAddress) {
+    return false;
+  }
+
+  const normalizedAddress = remoteAddress.toLowerCase();
+  const ipv4Address = normalizedAddress.startsWith('::ffff:') ? normalizedAddress.slice(7) : normalizedAddress;
+
+  if (ipv4Address === '127.0.0.1' || ipv4Address.startsWith('127.')) {
+    return true;
+  }
+
+  if (ipv4Address.startsWith('10.') || ipv4Address.startsWith('192.168.')) {
+    return true;
+  }
+
+  if (/^172\.(1[6-9]|2\d|3[0-1])\./.test(ipv4Address)) {
+    return true;
+  }
+
+  return normalizedAddress === '::1'
+    || normalizedAddress.startsWith('fc')
+    || normalizedAddress.startsWith('fd')
+    || normalizedAddress.startsWith('fe80:');
+}
+
 function getClientIp(req: NextApiRequest): string {
+  const remoteAddress = req.socket.remoteAddress;
+
+  if (!isTrustedProxyRemoteAddress(remoteAddress)) {
+    return remoteAddress ?? 'unknown';
+  }
+
   const forwardedFor = req.headers['x-forwarded-for'];
 
   if (typeof forwardedFor === 'string' && forwardedFor.length > 0) {
@@ -50,7 +82,7 @@ function getClientIp(req: NextApiRequest): string {
     return forwardedFor[0].trim();
   }
 
-  return req.socket.remoteAddress ?? 'unknown';
+  return remoteAddress ?? 'unknown';
 }
 
 function hashValue(value: string): string {
