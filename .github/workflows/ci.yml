@@ -15,11 +15,6 @@ jobs:
       DB_USER: ci
       DB_PASSWORD: ci
       DB_NAME: jrprogramming_ci
-      SHADOW_HOST: null
-      SHADOW_PORT: null
-      SHADOW_USER: null
-      SHADOW_PASSWORD: null
-      SHADOW_NAME: null
 
     steps:
       - name: Checkout
