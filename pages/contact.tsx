@@ -58,7 +58,16 @@ export default function Contact() {
         body: JSON.stringify({ ...formData, submittedAt: formOpenedAt }),
       });
 
-      const payload = (await response.json()) as { message?: string; error?: string };
+      let payload: { message?: string; error?: string } = {};
+      const contentType = response.headers.get('content-type')?.toLowerCase() ?? '';
+
+      if (contentType.includes('application/json')) {
+        try {
+          payload = (await response.json()) as { message?: string; error?: string };
+        } catch {
+          payload = {};
+        }
+      }
 
       if (!response.ok) {
         throw new Error(payload.error || 'Unable to submit your inquiry right now.');

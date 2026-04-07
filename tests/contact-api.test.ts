@@ -1,5 +1,5 @@
 import { createHash, createHmac } from 'node:crypto';
-import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ONE_HOUR_MS } from '../lib/contact';
 
 type JsonValue = Record<string, unknown>;
@@ -16,6 +16,7 @@ type MockResponse = {
 const sendMailMock = vi.fn();
 const createTransportMock = vi.fn(() => ({ sendMail: sendMailMock }));
 const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+const originalEnv = { ...process.env };
 
 const prismaMock = {
   inquiry: {
@@ -91,6 +92,10 @@ async function loadContactApiModule() {
 describe('contact API handler', () => {
   afterAll(() => {
     consoleErrorSpy.mockRestore();
+  });
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
   });
 
   beforeEach(() => {
