@@ -9,3 +9,4 @@ npm-debug.log*
 .vscode/
 .generated/
 .idea/
+tsconfig.tsbuildinfo
