@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   MIN_MESSAGE_LENGTH,
   MINIMUM_SUBMISSION_AGE_MS,
+  MAX_WEBSITE_LENGTH,
   ONE_HOUR_MS,
   SPAM_THRESHOLD,
   isSpamScore,
@@ -43,6 +44,15 @@ describe('contact payload validation', () => {
       website: '',
       submittedAt: 12345,
     });
+  });
+
+  it('truncates the honeypot field using its dedicated limit', () => {
+    const payload = normalizeContactPayload({
+      ...createBasePayload(),
+      website: `  ${'x'.repeat(MAX_WEBSITE_LENGTH + 10)}  `,
+    });
+
+    expect(payload.website).toBe('x'.repeat(MAX_WEBSITE_LENGTH));
   });
 
   it('rejects missing required fields', () => {

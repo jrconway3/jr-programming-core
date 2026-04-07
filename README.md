@@ -40,6 +40,7 @@ Required values:
 ```powershell
 CONTACT_EMAIL_TO=you@example.com
 CONTACT_EMAIL_FROM=website@example.com
+CONTACT_IP_HASH_SECRET=replace-with-a-long-random-secret
 SMTP_HOST=smtp.example.com
 SMTP_PORT=587
 SMTP_SECURE=false

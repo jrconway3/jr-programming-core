@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import nodemailer from 'nodemailer';
 import {
@@ -19,6 +19,10 @@ type ContactResponse = {
 
 const rateLimitStore = new Map<string, number[]>();
 
+export const contactApiTestState = {
+  rateLimitStore,
+};
+
 type MailConfig = {
   host: string;
   port: number;
@@ -28,6 +32,8 @@ type MailConfig = {
   to: string;
   from: string;
 };
+
+let hasWarnedAboutMissingIpHashSecret = false;
 
 function getClientIp(req: NextApiRequest): string {
   const forwardedFor = req.headers['x-forwarded-for'];
@@ -47,9 +53,29 @@ function hashValue(value: string): string {
   return createHash('sha256').update(value).digest('hex');
 }
 
+function hashIpAddress(value: string): string | null {
+  const secret = process.env.CONTACT_IP_HASH_SECRET?.trim();
+
+  if (!secret) {
+    if (!hasWarnedAboutMissingIpHashSecret) {
+      console.error('CONTACT_IP_HASH_SECRET is not configured; inquiry IP hashes will not be persisted.');
+      hasWarnedAboutMissingIpHashSecret = true;
+    }
+
+    return null;
+  }
+
+  return createHmac('sha256', secret).update(value).digest('hex');
+}
+
 function isRateLimited(ipHash: string, now: number): boolean {
   const recentSubmissions = (rateLimitStore.get(ipHash) ?? []).filter((timestamp) => now - timestamp < ONE_HOUR_MS);
-  rateLimitStore.set(ipHash, recentSubmissions);
+
+  if (recentSubmissions.length === 0) {
+    rateLimitStore.delete(ipHash);
+  } else {
+    rateLimitStore.set(ipHash, recentSubmissions);
+  }
 
   const submissionsInLastTenMinutes = recentSubmissions.filter((timestamp) => now - timestamp < TEN_MINUTES_MS).length;
 
@@ -161,9 +187,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     }
 
     const now = Date.now();
-    const ipHash = hashValue(getClientIp(req));
+    const clientIp = getClientIp(req);
+    const ipHash = hashIpAddress(clientIp);
+    const rateLimitKey = ipHash ?? clientIp;
 
-    if (isRateLimited(ipHash, now)) {
+    if (isRateLimited(rateLimitKey, now)) {
       return res.status(429).json({ error: 'Too many submissions from this network. Please try again later.' });
     }
 

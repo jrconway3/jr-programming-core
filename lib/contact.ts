@@ -35,6 +35,7 @@ export const MAX_EMAIL_LENGTH = 190;
 export const MAX_COMPANY_LENGTH = 120;
 export const MAX_SUBJECT_LENGTH = 140;
 export const MAX_MESSAGE_LENGTH = 4000;
+export const MAX_WEBSITE_LENGTH = 120;
 export const MIN_MESSAGE_LENGTH = 12;
 export const SPAM_THRESHOLD = 4;
 
@@ -59,7 +60,7 @@ export function normalizeContactPayload(payload: ContactPayload): NormalizedCont
     company: normalizeText(payload.company, MAX_COMPANY_LENGTH),
     subject: normalizeText(payload.subject, MAX_SUBJECT_LENGTH),
     message: normalizeText(payload.message, MAX_MESSAGE_LENGTH),
-    website: normalizeText(payload.website, MAX_COMPANY_LENGTH),
+    website: normalizeText(payload.website, MAX_WEBSITE_LENGTH),
     submittedAt: Number.isFinite(submittedAt) ? Number(submittedAt) : null,
   };
 }

@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 type JsonValue = Record<string, unknown>;
@@ -81,9 +82,20 @@ async function loadHandler() {
   return module.default;
 }
 
+async function loadContactApiModule() {
+  vi.resetModules();
+  return import('../pages/api/contact');
+}
+
 describe('contact API handler', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    prismaMock.inquiry.findFirst.mockReset();
+    prismaMock.inquiry.create.mockReset();
+    prismaMock.inquiry.update.mockReset();
+    sendMailMock.mockReset();
+    createTransportMock.mockReset();
+    createTransportMock.mockImplementation(() => ({ sendMail: sendMailMock }));
     consoleErrorSpy.mockClear();
     prismaMock.inquiry.findFirst.mockResolvedValue(null);
     prismaMock.inquiry.create.mockResolvedValue({ id: 123 });
@@ -97,6 +109,9 @@ describe('contact API handler', () => {
     process.env.SMTP_SECURE = 'false';
     process.env.SMTP_USER = 'smtp-user';
     process.env.SMTP_PASSWORD = 'smtp-password';
+    process.env.CONTACT_IP_HASH_SECRET = 'contact-ip-secret';
+
+    vi.useRealTimers();
   });
 
   it('rejects non-POST methods', async () => {
@@ -152,6 +167,7 @@ describe('contact API handler', () => {
     expect(prismaMock.inquiry.create).toHaveBeenCalledOnce();
     expect(prismaMock.inquiry.create.mock.calls[0]?.[0]).toMatchObject({
       data: {
+        ip_hash: createHmac('sha256', 'contact-ip-secret').update('203.0.113.25').digest('hex'),
         status: 'spam',
         sent_at: null,
       },
@@ -183,6 +199,7 @@ describe('contact API handler', () => {
     expect(sendMailMock).toHaveBeenCalledOnce();
     expect(prismaMock.inquiry.create.mock.calls[0]?.[0]).toMatchObject({
       data: {
+        ip_hash: createHmac('sha256', 'contact-ip-secret').update('203.0.113.25').digest('hex'),
         status: 'pending',
       },
     });
@@ -301,5 +318,96 @@ describe('contact API handler', () => {
     expect(blockedRes.statusCode).toBe(429);
     expect(blockedRes.body).toEqual({ error: 'Too many submissions from this network. Please try again later.' });
     expect(prismaMock.inquiry.create).not.toHaveBeenCalled();
+  });
+
+  it('removes stale rate-limit buckets after submissions expire', async () => {
+    vi.useFakeTimers();
+    const now = new Date('2026-04-06T12:00:00.000Z');
+    vi.setSystemTime(now);
+
+    const module = await loadContactApiModule();
+    const handler = module.default;
+    const trackedIp = '203.0.113.99';
+    const body = {
+      name: 'Jane Client',
+      email: 'jane@example.com',
+      company: 'Acme Co',
+      subject: 'Project inquiry',
+      message: 'I need help building a new marketing site and would like to discuss a timeline.',
+      website: '',
+      submittedAt: now.getTime() - 10_000,
+    };
+
+    prismaMock.inquiry.findFirst.mockResolvedValueOnce({ id: 1 });
+    const firstReq = createRequest({
+      body,
+      headers: {
+        'user-agent': 'vitest',
+        'x-forwarded-for': trackedIp,
+      },
+    });
+    const firstRes = createResponse();
+
+    await handler(firstReq as never, firstRes as never);
+
+    expect(module.contactApiTestState.rateLimitStore.size).toBe(1);
+
+    vi.setSystemTime(new Date(now.getTime() + 2 * 60 * 60 * 1000));
+
+    prismaMock.inquiry.findFirst.mockResolvedValueOnce({ id: 2 });
+    const secondReq = createRequest({
+      body: {
+        ...body,
+        submittedAt: Date.now() - 10_000,
+      },
+      headers: {
+        'user-agent': 'vitest',
+        'x-forwarded-for': trackedIp,
+      },
+    });
+    const secondRes = createResponse();
+
+    await handler(secondReq as never, secondRes as never);
+
+    const ipHash = createHmac('sha256', 'contact-ip-secret').update(trackedIp).digest('hex');
+    const timestamps = module.contactApiTestState.rateLimitStore.get(ipHash);
+    expect(timestamps).toEqual([Date.now()]);
+    expect(module.contactApiTestState.rateLimitStore.size).toBe(1);
+  });
+
+  it('does not persist ip_hash when the HMAC secret is missing', async () => {
+    delete process.env.CONTACT_IP_HASH_SECRET;
+
+    const module = await loadContactApiModule();
+    const handler = module.default;
+    const req = createRequest({
+      body: {
+        name: 'Jane Client',
+        email: 'jane@example.com',
+        company: 'Acme Co',
+        subject: 'Project inquiry',
+        message: 'I need help building a new marketing site and would like to discuss a timeline.',
+        website: '',
+        submittedAt: Date.now() - 10_000,
+      },
+      headers: {
+        'user-agent': 'vitest',
+        'x-forwarded-for': '198.51.100.41',
+      },
+    });
+    const res = createResponse();
+
+    await handler(req as never, res as never);
+
+    expect(res.statusCode).toBe(200);
+    expect(prismaMock.inquiry.create).toHaveBeenCalledOnce();
+    expect(prismaMock.inquiry.create.mock.calls[0]?.[0]).toMatchObject({
+      data: {
+        ip_hash: null,
+      },
+    });
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'CONTACT_IP_HASH_SECRET is not configured; inquiry IP hashes will not be persisted.',
+    );
   });
 });

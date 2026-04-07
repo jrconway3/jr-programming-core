@@ -33,12 +33,15 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -euo pipefail
+            tested_sha="${{ github.event.workflow_run.head_sha }}"
 
             # Open app dir
             cd "${{ secrets.REMOTE_DIR }}"
 
-            # Sync working tree to production branch head
-            git pull origin production
+            # Sync working tree to the exact commit that passed CI
+            git fetch --prune origin
+            git checkout --force "$tested_sha"
+            git reset --hard "$tested_sha"
 
             # Clean stale build output that may have mismatched ownership
             if [ -d .next ]; then
@@ -63,6 +66,7 @@ jobs:
             SHADOW_NAME=null
             CONTACT_EMAIL_TO=${{ secrets.CONTACT_EMAIL_TO }}
             CONTACT_EMAIL_FROM=${{ secrets.CONTACT_EMAIL_FROM }}
+            CONTACT_IP_HASH_SECRET=${{ secrets.CONTACT_IP_HASH_SECRET }}
             SMTP_HOST=${{ secrets.SMTP_HOST }}
             SMTP_PORT=${{ secrets.SMTP_PORT }}
             SMTP_SECURE=${{ secrets.SMTP_SECURE }}
