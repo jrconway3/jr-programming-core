@@ -332,6 +332,32 @@ describe('contact API handler', () => {
     });
   });
 
+  it('treats whitespace SMTP_PASSWORD as missing auth configuration', async () => {
+    process.env.SMTP_PASSWORD = '   ';
+
+    const handler = await loadHandler();
+    const req = createRequest({
+      body: {
+        name: 'Jane Client',
+        email: 'jane@example.com',
+        company: 'Acme Co',
+        subject: 'Project inquiry',
+        message: 'I need help building a new marketing site and would like to discuss a timeline.',
+        website: '',
+        submittedAt: Date.now() - 10_000,
+      },
+    });
+    const res = createResponse();
+
+    await handler(req as never, res as never);
+
+    expect(createTransportMock).not.toHaveBeenCalled();
+    expect(prismaMock.inquiry.update).toHaveBeenCalledWith({
+      where: { id: 123 },
+      data: { status: 'delivery_failed' },
+    });
+  });
+
   it('marks inquiries as delivery_failed when sending throws', async () => {
     sendMailMock.mockRejectedValueOnce(new Error('smtp failed'));
 

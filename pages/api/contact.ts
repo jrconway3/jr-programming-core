@@ -192,7 +192,7 @@ function getMailConfig(): MailConfig | null {
   const port = portValue === undefined ? 587 : Number(portValue);
   const secureEnv = process.env.SMTP_SECURE?.trim().toLowerCase();
   const user = process.env.SMTP_USER?.trim();
-  const password = process.env.SMTP_PASSWORD;
+  const password = process.env.SMTP_PASSWORD?.trim();
   const to = process.env.CONTACT_EMAIL_TO?.trim();
   const from = process.env.CONTACT_EMAIL_FROM?.trim();
   const hasPartialSmtpAuth = (Boolean(user) && !password) || (!user && Boolean(password));
