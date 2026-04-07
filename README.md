@@ -61,6 +61,23 @@ npm run dev
 Open http://localhost:3000 in your browser.
 
 
+## Unit Tests
+
+Run the unit test suite with:
+
+```powershell
+npm test
+```
+
+Run tests in watch mode during development with:
+
+```powershell
+npm run test:watch
+```
+
+Current unit coverage includes contact form validation and spam scoring rules.
+
+
 ## Install Production
 
 SSH into your production server and go to the public direct.
