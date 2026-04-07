@@ -36,15 +36,15 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -euo pipefail
-            tested_sha="${{ env.DEPLOY_SHA }}"
+            deploy_sha="${{ env.DEPLOY_SHA }}"
 
             # Open app dir
             cd "${{ secrets.REMOTE_DIR }}"
 
-            # Sync working tree to the exact commit that passed CI
+            # Sync working tree to the exact commit selected for this deploy
             git fetch --prune origin
-            git checkout --force "$tested_sha"
-            git reset --hard "$tested_sha"
+            git checkout --force "$deploy_sha"
+            git reset --hard "$deploy_sha"
 
             # Clean stale build output that may have mismatched ownership
             if [ -d .next ]; then
