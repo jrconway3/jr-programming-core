@@ -52,27 +52,37 @@ jobs:
               rm -rf .next || mv .next ".next.stale.$(date +%s)" || true
             fi
 
-            # Create .env file from GitHub secrets without shell re-expanding secret values
-            cat > .env <<'EOF'
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASSWORD=${{ secrets.DB_PASS }}
-            DB_HOST=${{ secrets.DB_HOST }}
-            DB_PORT=${{ secrets.DB_PORT }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            SHADOW_USER=null
-            SHADOW_PASSWORD=null
-            SHADOW_HOST=null
-            SHADOW_PORT=null
-            SHADOW_NAME=null
-            CONTACT_EMAIL_TO=${{ secrets.CONTACT_EMAIL_TO }}
-            CONTACT_EMAIL_FROM=${{ secrets.CONTACT_EMAIL_FROM }}
-            CONTACT_IP_HASH_SECRET=${{ secrets.CONTACT_IP_HASH_SECRET }}
-            SMTP_HOST=${{ secrets.SMTP_HOST }}
-            SMTP_PORT=${{ secrets.SMTP_PORT }}
-            SMTP_SECURE=${{ secrets.SMTP_SECURE }}
-            SMTP_USER=${{ secrets.SMTP_USER }}
-            SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
-            EOF
+            # Create .env with exact key=value lines and JSON-escaped secret values
+            node <<'NODE'
+            const { writeFileSync } = require('node:fs');
+
+            const envValues = {
+              DB_USER: ${{ toJson(secrets.DB_USER) }},
+              DB_PASSWORD: ${{ toJson(secrets.DB_PASS) }},
+              DB_HOST: ${{ toJson(secrets.DB_HOST) }},
+              DB_PORT: ${{ toJson(secrets.DB_PORT) }},
+              DB_NAME: ${{ toJson(secrets.DB_NAME) }},
+              SHADOW_USER: 'null',
+              SHADOW_PASSWORD: 'null',
+              SHADOW_HOST: 'null',
+              SHADOW_PORT: 'null',
+              SHADOW_NAME: 'null',
+              CONTACT_EMAIL_TO: ${{ toJson(secrets.CONTACT_EMAIL_TO) }},
+              CONTACT_EMAIL_FROM: ${{ toJson(secrets.CONTACT_EMAIL_FROM) }},
+              CONTACT_IP_HASH_SECRET: ${{ toJson(secrets.CONTACT_IP_HASH_SECRET) }},
+              SMTP_HOST: ${{ toJson(secrets.SMTP_HOST) }},
+              SMTP_PORT: ${{ toJson(secrets.SMTP_PORT) }},
+              SMTP_SECURE: ${{ toJson(secrets.SMTP_SECURE) }},
+              SMTP_USER: ${{ toJson(secrets.SMTP_USER) }},
+              SMTP_PASSWORD: ${{ toJson(secrets.SMTP_PASSWORD) }},
+            };
+
+            const envFile = Object.entries(envValues)
+              .map(([key, value]) => `${key}=${value ?? ''}`)
+              .join('\n');
+
+            writeFileSync('.env', `${envFile}\n`, 'utf8');
+            NODE
 
             # Install deps for build and generate Prisma client
             npm ci --omit=dev

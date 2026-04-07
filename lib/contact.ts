@@ -47,6 +47,14 @@ export function normalizeText(value: unknown, maxLength: number): string {
   return value.trim().slice(0, maxLength);
 }
 
+export function normalizeSingleLineText(value: unknown, maxLength: number): string {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  return value.replace(/[\r\n]+/g, ' ').trim().slice(0, maxLength);
+}
+
 export function normalizeContactPayload(payload: ContactPayload): NormalizedContactPayload {
   const submittedAt = typeof payload.submittedAt === 'number'
     ? payload.submittedAt
@@ -55,12 +63,12 @@ export function normalizeContactPayload(payload: ContactPayload): NormalizedCont
       : null;
 
   return {
-    name: normalizeText(payload.name, MAX_NAME_LENGTH),
-    email: normalizeText(payload.email, MAX_EMAIL_LENGTH).toLowerCase(),
-    company: normalizeText(payload.company, MAX_COMPANY_LENGTH),
-    subject: normalizeText(payload.subject, MAX_SUBJECT_LENGTH),
+    name: normalizeSingleLineText(payload.name, MAX_NAME_LENGTH),
+    email: normalizeSingleLineText(payload.email, MAX_EMAIL_LENGTH).toLowerCase(),
+    company: normalizeSingleLineText(payload.company, MAX_COMPANY_LENGTH),
+    subject: normalizeSingleLineText(payload.subject, MAX_SUBJECT_LENGTH),
     message: normalizeText(payload.message, MAX_MESSAGE_LENGTH),
-    website: normalizeText(payload.website, MAX_WEBSITE_LENGTH),
+    website: normalizeSingleLineText(payload.website, MAX_WEBSITE_LENGTH),
     submittedAt: Number.isFinite(submittedAt) ? Number(submittedAt) : null,
   };
 }

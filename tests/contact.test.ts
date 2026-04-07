@@ -46,6 +46,27 @@ describe('contact payload validation', () => {
     });
   });
 
+  it('strips line breaks from single-line fields but preserves message newlines', () => {
+    const payload = normalizeContactPayload({
+      name: 'Jane\r\nClient',
+      email: 'Jane\r\n@Example.com',
+      company: 'Acme\nCo',
+      subject: 'Project\r\nInquiry',
+      message: 'Line one\nLine two',
+      website: 'bot\r\ntrap',
+      submittedAt: '12345',
+    });
+
+    expect(payload).toMatchObject({
+      name: 'Jane Client',
+      email: 'jane @example.com',
+      company: 'Acme Co',
+      subject: 'Project Inquiry',
+      message: 'Line one\nLine two',
+      website: 'bot trap',
+    });
+  });
+
   it('truncates the honeypot field using its dedicated limit', () => {
     const payload = normalizeContactPayload({
       ...createBasePayload(),

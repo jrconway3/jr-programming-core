@@ -148,14 +148,15 @@ function escapeHtml(value: string): string {
 
 function getMailConfig(): MailConfig | null {
   const host = process.env.SMTP_HOST?.trim();
-  const port = Number(process.env.SMTP_PORT ?? '587');
+  const portValue = process.env.SMTP_PORT?.trim();
+  const port = portValue === undefined ? 587 : Number(portValue);
   const secureEnv = process.env.SMTP_SECURE?.trim().toLowerCase();
   const user = process.env.SMTP_USER?.trim();
   const password = process.env.SMTP_PASSWORD;
   const to = process.env.CONTACT_EMAIL_TO?.trim();
   const from = process.env.CONTACT_EMAIL_FROM?.trim();
 
-  if (!host || !Number.isFinite(port) || !to || !from) {
+  if (!host || portValue === '' || !Number.isInteger(port) || port < 1 || port > 65535 || !to || !from) {
     return null;
   }
 
