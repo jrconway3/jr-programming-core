@@ -189,7 +189,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const now = Date.now();
     const clientIp = getClientIp(req);
     const ipHash = hashIpAddress(clientIp);
-    const rateLimitKey = ipHash ?? clientIp;
+    const rateLimitKey = ipHash ?? hashValue(clientIp);
 
     if (isRateLimited(rateLimitKey, now)) {
       return res.status(429).json({ error: 'Too many submissions from this network. Please try again later.' });

@@ -26,14 +26,10 @@ const initialFormData: FormData = {
 
 export default function Contact() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
-  const [submittedAt, setSubmittedAt] = useState<number>(0);
+  const [submittedAt, setSubmittedAt] = useState<number>(() => Date.now());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionState, setSubmissionState] = useState<SubmissionState>(null);
   const submitLockRef = useRef(false);
-
-  useEffect(() => {
-    setSubmittedAt(Date.now());
-  }, []);
 
   function handleChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = event.target;
@@ -52,12 +48,14 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
+      const formOpenedAt = submittedAt > 0 ? submittedAt : Date.now();
+
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...formData, submittedAt }),
+        body: JSON.stringify({ ...formData, submittedAt: formOpenedAt }),
       });
 
       const payload = (await response.json()) as { message?: string; error?: string };

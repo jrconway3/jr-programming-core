@@ -1,4 +1,4 @@
-import { createHmac } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 type JsonValue = Record<string, unknown>;
@@ -380,6 +380,7 @@ describe('contact API handler', () => {
 
     const module = await loadContactApiModule();
     const handler = module.default;
+    const rawIp = '198.51.100.41';
     const req = createRequest({
       body: {
         name: 'Jane Client',
@@ -392,7 +393,7 @@ describe('contact API handler', () => {
       },
       headers: {
         'user-agent': 'vitest',
-        'x-forwarded-for': '198.51.100.41',
+        'x-forwarded-for': rawIp,
       },
     });
     const res = createResponse();
@@ -406,6 +407,9 @@ describe('contact API handler', () => {
         ip_hash: null,
       },
     });
+    const fallbackKey = createHash('sha256').update(rawIp).digest('hex');
+    expect(module.contactApiTestState.rateLimitStore.get(rawIp)).toBeUndefined();
+    expect(module.contactApiTestState.rateLimitStore.get(fallbackKey)).toEqual([expect.any(Number)]);
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       'CONTACT_IP_HASH_SECRET is not configured; inquiry IP hashes will not be persisted.',
     );
