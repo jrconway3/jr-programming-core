@@ -89,7 +89,7 @@ jobs:
             NODE
 
             # Install deps for build and generate Prisma client
-            npm ci --omit=dev
+            npm ci
             npx prisma migrate deploy
             npx prisma generate
 

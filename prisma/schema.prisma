@@ -126,5 +126,6 @@ model Inquiry {
   updated_at  DateTime  @default(now())
 
   @@index([status, created_at])
+  @@index([created_at])
   @@map("jr_inquiries")
 }

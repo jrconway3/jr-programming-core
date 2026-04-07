@@ -256,7 +256,7 @@ async function sendContactNotification(config: MailConfig, payload: {
       htmlCompanyLine,
       `<p><strong>Subject:</strong> ${escapeHtml(payload.subject)}</p>`,
       `<p><strong>Message:</strong></p>`,
-      `<p>${escapeHtml(payload.message).replace(/\n/g, '<br />')}</p>`,
+      `<p>${escapeHtml(payload.message).replace(/\r\n|\r|\n/g, '<br />')}</p>`,
       '</div>',
     ].filter(Boolean).join(''),
   });

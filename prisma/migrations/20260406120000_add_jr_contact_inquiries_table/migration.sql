@@ -15,5 +15,6 @@ CREATE TABLE `jr_inquiries` (
   `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
 
   INDEX `jr_inquiries_status_created_at_idx`(`status`, `created_at`),
+  INDEX `jr_inquiries_created_at_idx`(`created_at`),
   PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
