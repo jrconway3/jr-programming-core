@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, FormEvent, useRef, useState } from 'react';
 
 type FormData = {
   name: string;

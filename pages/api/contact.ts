@@ -18,9 +18,13 @@ type ContactResponse = {
 };
 
 const rateLimitStore = new Map<string, number[]>();
+const RATE_LIMIT_PRUNE_INTERVAL_MS = 5 * 60 * 1000;
+const MAX_RATE_LIMIT_KEYS = 1024;
+let lastRateLimitPruneAt = 0;
 
 export const contactApiTestState = {
   rateLimitStore,
+  MAX_RATE_LIMIT_KEYS,
 };
 
 type MailConfig = {
@@ -68,7 +72,46 @@ function hashIpAddress(value: string): string | null {
   return createHmac('sha256', secret).update(value).digest('hex');
 }
 
+function pruneRateLimitStore(now: number) {
+  for (const [key, timestamps] of rateLimitStore.entries()) {
+    const recentSubmissions = timestamps.filter((timestamp) => now - timestamp < ONE_HOUR_MS);
+
+    if (recentSubmissions.length === 0) {
+      rateLimitStore.delete(key);
+      continue;
+    }
+
+    rateLimitStore.set(key, recentSubmissions);
+  }
+
+  if (rateLimitStore.size <= MAX_RATE_LIMIT_KEYS) {
+    return;
+  }
+
+  const entriesByRecency = Array.from(rateLimitStore.entries())
+    .map(([key, timestamps]) => ({
+      key,
+      latestTimestamp: timestamps[timestamps.length - 1] ?? 0,
+    }))
+    .sort((left, right) => left.latestTimestamp - right.latestTimestamp);
+
+  const excessEntryCount = rateLimitStore.size - MAX_RATE_LIMIT_KEYS;
+
+  for (let index = 0; index < excessEntryCount; index += 1) {
+    const entry = entriesByRecency[index];
+
+    if (entry) {
+      rateLimitStore.delete(entry.key);
+    }
+  }
+}
+
 function isRateLimited(ipHash: string, now: number): boolean {
+  if (lastRateLimitPruneAt === 0 || now - lastRateLimitPruneAt >= RATE_LIMIT_PRUNE_INTERVAL_MS || rateLimitStore.size >= MAX_RATE_LIMIT_KEYS) {
+    pruneRateLimitStore(now);
+    lastRateLimitPruneAt = now;
+  }
+
   const recentSubmissions = (rateLimitStore.get(ipHash) ?? []).filter((timestamp) => now - timestamp < ONE_HOUR_MS);
 
   if (recentSubmissions.length === 0) {
@@ -85,6 +128,12 @@ function isRateLimited(ipHash: string, now: number): boolean {
 
   recentSubmissions.push(now);
   rateLimitStore.set(ipHash, recentSubmissions);
+
+  if (rateLimitStore.size > MAX_RATE_LIMIT_KEYS) {
+    pruneRateLimitStore(now);
+    lastRateLimitPruneAt = now;
+  }
+
   return false;
 }
 

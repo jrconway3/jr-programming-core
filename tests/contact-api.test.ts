@@ -1,5 +1,6 @@
 import { createHash, createHmac } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ONE_HOUR_MS } from '../lib/contact';
 
 type JsonValue = Record<string, unknown>;
 
@@ -413,5 +414,47 @@ describe('contact API handler', () => {
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       'CONTACT_IP_HASH_SECRET is not configured; inquiry IP hashes will not be persisted.',
     );
+  });
+
+  it('prunes the oldest rate-limit buckets when unique IP volume exceeds the cap', async () => {
+    vi.useFakeTimers();
+    const now = new Date('2026-04-06T15:00:00.000Z');
+    vi.setSystemTime(now);
+
+    const module = await loadContactApiModule();
+    const handler = module.default;
+    const maxKeys = module.contactApiTestState.MAX_RATE_LIMIT_KEYS;
+
+    for (let index = 0; index <= maxKeys; index += 1) {
+      const key = createHmac('sha256', 'contact-ip-secret').update(`203.0.113.${index}`).digest('hex');
+      module.contactApiTestState.rateLimitStore.set(key, [now.getTime() - ONE_HOUR_MS + index]);
+    }
+
+    prismaMock.inquiry.findFirst.mockResolvedValueOnce({ id: 1 });
+    const req = createRequest({
+      body: {
+        name: 'Jane Client',
+        email: 'jane@example.com',
+        company: 'Acme Co',
+        subject: 'Project inquiry',
+        message: 'I need help building a new marketing site and would like to discuss a timeline.',
+        website: '',
+        submittedAt: now.getTime() - 10_000,
+      },
+      headers: {
+        'user-agent': 'vitest',
+        'x-forwarded-for': '198.51.100.200',
+      },
+    });
+    const res = createResponse();
+
+    await handler(req as never, res as never);
+
+    const oldestKey = createHmac('sha256', 'contact-ip-secret').update('203.0.113.0').digest('hex');
+    const newestRequestKey = createHmac('sha256', 'contact-ip-secret').update('198.51.100.200').digest('hex');
+
+    expect(module.contactApiTestState.rateLimitStore.size).toBeLessThanOrEqual(maxKeys);
+    expect(module.contactApiTestState.rateLimitStore.has(oldestKey)).toBe(false);
+    expect(module.contactApiTestState.rateLimitStore.get(newestRequestKey)).toEqual([Date.now()]);
   });
 });
