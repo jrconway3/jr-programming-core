@@ -59,7 +59,15 @@ export function normalizeContactPayload(payload: ContactPayload): NormalizedCont
   const submittedAt = typeof payload.submittedAt === 'number'
     ? payload.submittedAt
     : typeof payload.submittedAt === 'string'
-      ? Number(payload.submittedAt)
+      ? (() => {
+          const trimmedSubmittedAt = payload.submittedAt.trim();
+
+          if (!trimmedSubmittedAt) {
+            return null;
+          }
+
+          return Number(trimmedSubmittedAt);
+        })()
       : null;
 
   return {

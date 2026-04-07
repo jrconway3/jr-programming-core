@@ -76,6 +76,15 @@ describe('contact payload validation', () => {
     expect(payload.website).toBe('x'.repeat(MAX_WEBSITE_LENGTH));
   });
 
+  it('treats blank submittedAt strings as null', () => {
+    const payload = normalizeContactPayload({
+      ...createBasePayload(),
+      submittedAt: '   ',
+    });
+
+    expect(payload.submittedAt).toBeNull();
+  });
+
   it('rejects missing required fields', () => {
     const payload = normalizeContactPayload({
       name: '',

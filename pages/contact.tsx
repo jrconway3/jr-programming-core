@@ -213,6 +213,8 @@ export default function Contact() {
 
               {submissionState && (
                 <div
+                  role={submissionState.type === 'error' ? 'alert' : 'status'}
+                  aria-live={submissionState.type === 'error' ? 'assertive' : 'polite'}
                   className={`rounded-lg border px-4 py-3 text-sm ${submissionState.type === 'success' ? 'border-emerald-400/50 bg-emerald-500/10 text-emerald-100' : 'border-red-400/50 bg-red-500/10 text-red-100'}`}
                 >
                   {submissionState.message}
