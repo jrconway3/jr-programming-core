@@ -2,16 +2,15 @@ import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/router';
-import { getAdminSession, isAdminAuthConfigured, sanitizeAdminNextPath } from '../../lib/admin-auth';
+import { getAdminSession, sanitizeAdminNextPath } from '../../lib/admin-auth';
 
 type LoginPageProps = {
-  configured: boolean;
   nextPath: string;
 };
 
-export default function AdminLogin({ configured, nextPath }: LoginPageProps) {
+export default function AdminLogin({ nextPath }: LoginPageProps) {
   const router = useRouter();
-  const [username, setUsername] = useState('admin');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,83 +47,54 @@ export default function AdminLogin({ configured, nextPath }: LoginPageProps) {
   return (
     <>
       <Head>
-        <title>Admin Login | JRProgramming</title>
+        <title>Sign In | JRProgramming</title>
       </Head>
 
-      <main className="min-h-screen px-4 py-12 md:px-6">
-        <div className="mx-auto grid w-full max-w-5xl gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-          <section className="terminal-card p-6 md:p-8">
-            <p className="mb-4 text-xs uppercase tracking-[0.35em] text-primary-accentLight">Private Admin</p>
-            <h1 className="text-4xl font-extrabold gradient-text animate-gradient md:text-5xl">Control room for inquiries and portfolio data.</h1>
-            <p className="mt-6 text-sm leading-7 text-primary-text/85 md:text-base">
-              This area is intended for site administration only. Use it to review incoming inquiries and keep projects and categories current without touching the public pages directly.
-            </p>
+      <main className="flex min-h-screen items-center justify-center px-4 py-12 md:px-6">
+        <section className="w-full max-w-md rounded-2xl border border-primary-accent/20 bg-slate-950/50 p-6 shadow-2xl backdrop-blur md:p-8">
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            <h1 className="text-center text-2xl font-semibold text-primary-text">Sign In</h1>
 
-            <div className="mt-8 grid gap-4 md:grid-cols-2">
-              <article className="rounded-xl border border-primary-accent/20 bg-slate-950/35 p-4">
-                <h2 className="text-sm font-semibold uppercase tracking-[0.24em] text-primary-accentLight">Inquiries</h2>
-                <p className="mt-3 text-xs leading-6 text-primary-text/75">Review new leads, mark spam, and keep delivery outcomes visible.</p>
-              </article>
-              <article className="rounded-xl border border-primary-accent/20 bg-slate-950/35 p-4">
-                <h2 className="text-sm font-semibold uppercase tracking-[0.24em] text-primary-accentLight">Projects</h2>
-                <p className="mt-3 text-xs leading-6 text-primary-text/75">Create, edit, and reorganize the projects and categories that power the site.</p>
-              </article>
-            </div>
-          </section>
+            <label className="block text-xs uppercase tracking-[0.25em] text-primary-accentLight">
+              Username
+              <input
+                required
+                type="text"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                autoComplete="username"
+                autoFocus
+                className="mt-2 block w-full rounded-lg border border-primary-accent/40 bg-slate-950/60 px-4 py-3 text-sm text-primary-text shadow-inner transition focus:border-primary-accent focus:ring-primary-accent"
+              />
+            </label>
 
-          <section className="terminal-card p-6 md:p-8">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-primary-accentLight">Sign In</h2>
-              <p className="mt-3 text-sm leading-6 text-primary-text/75">Authenticate with the admin credentials configured on the server.</p>
-            </div>
+            <label className="block text-xs uppercase tracking-[0.25em] text-primary-accentLight">
+              Password
+              <input
+                required
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                autoComplete="current-password"
+                className="mt-2 block w-full rounded-lg border border-primary-accent/40 bg-slate-950/60 px-4 py-3 text-sm text-primary-text shadow-inner transition focus:border-primary-accent focus:ring-primary-accent"
+              />
+            </label>
 
-            {!configured && (
-              <div className="mb-5 rounded-lg border border-amber-400/45 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-                Set ADMIN_PASSWORD and ADMIN_SESSION_SECRET in the environment before using the admin area.
+            {error && (
+              <div className="rounded-lg border border-red-400/45 bg-red-500/10 px-4 py-3 text-sm text-red-100" role="alert">
+                {error}
               </div>
             )}
 
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              <label className="block text-xs uppercase tracking-[0.25em] text-primary-accentLight">
-                Username
-                <input
-                  required
-                  type="text"
-                  value={username}
-                  onChange={(event) => setUsername(event.target.value)}
-                  autoComplete="username"
-                  className="mt-2 block w-full rounded-lg border border-primary-accent/40 bg-slate-950/60 px-4 py-3 text-sm text-primary-text shadow-inner transition focus:border-primary-accent focus:ring-primary-accent"
-                />
-              </label>
-
-              <label className="block text-xs uppercase tracking-[0.25em] text-primary-accentLight">
-                Password
-                <input
-                  required
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  autoComplete="current-password"
-                  className="mt-2 block w-full rounded-lg border border-primary-accent/40 bg-slate-950/60 px-4 py-3 text-sm text-primary-text shadow-inner transition focus:border-primary-accent focus:ring-primary-accent"
-                />
-              </label>
-
-              {error && (
-                <div className="rounded-lg border border-red-400/45 bg-red-500/10 px-4 py-3 text-sm text-red-100" role="alert">
-                  {error}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={!configured || isSubmitting}
-                className="inline-flex w-full items-center justify-center rounded-lg border border-primary-accent/40 bg-primary-accent px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-primary-accentDark disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {isSubmitting ? 'Signing In...' : 'Enter Admin'}
-              </button>
-            </form>
-          </section>
-        </div>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="inline-flex w-full items-center justify-center rounded-lg border border-primary-accent/40 bg-primary-accent px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-primary-accentDark disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isSubmitting ? 'Signing In...' : 'Sign In'}
+            </button>
+          </form>
+        </section>
       </main>
     </>
   );
@@ -145,7 +115,6 @@ export const getServerSideProps: GetServerSideProps<LoginPageProps> = async (con
 
   return {
     props: {
-      configured: isAdminAuthConfigured(),
       nextPath,
     },
   };

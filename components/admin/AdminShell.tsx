@@ -34,15 +34,15 @@ export default function AdminShell({ title, description, adminUser, children }: 
   }
 
   return (
-    <main className="min-h-screen px-4 py-10 md:px-6">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <main className="min-h-screen px-4 py-10 md:px-6 xl:px-8">
+      <div className="mx-auto flex w-full max-w-none flex-col gap-6">
         <section className="terminal-card px-6 pb-6 pt-14 md:px-8">
           <div className="flex flex-col gap-5 border-b border-primary-accent/20 pb-6 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-3">
               <p className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">Private Admin</p>
               <div>
                 <h1 className="text-3xl font-extrabold gradient-text animate-gradient md:text-4xl">{title}</h1>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-primary-text/80 md:text-base">{description}</p>
+                <p className="mt-3 text-sm leading-7 text-primary-text/80 md:text-base">{description}</p>
               </div>
             </div>
 

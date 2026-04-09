@@ -199,17 +199,17 @@ export default function AdminInquiries({ adminUser, inquiries: initialInquiries 
 
                   <div className="grid gap-3 rounded-xl border border-primary-accent/12 bg-slate-950/45 p-4 text-sm text-primary-text/75 xl:min-w-[250px]">
                     <div>
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight">Received</p>
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight">Created</p>
                       <p className="mt-1">{formatDate(inquiry.created_at)}</p>
                     </div>
 
                     <div>
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight">Last updated</p>
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight">Updated</p>
                       <p className="mt-1">{formatDate(inquiry.updated_at)}</p>
                     </div>
 
                     <div>
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight">Delivery</p>
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight">Sent</p>
                       <p className="mt-1">{formatDate(inquiry.sent_at)}</p>
                     </div>
 

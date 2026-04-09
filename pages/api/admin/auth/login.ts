@@ -2,7 +2,6 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import {
   createAdminSessionCookie,
   getAdminSession,
-  isAdminAuthConfigured,
   sanitizeAdminNextPath,
   validateAdminCredentials,
 } from '../../../../lib/admin-auth';
@@ -16,10 +15,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<LoginR
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  if (!isAdminAuthConfigured()) {
-    return res.status(500).json({ error: 'Admin authentication is not configured on the server.' });
   }
 
   const existingSession = getAdminSession(req);

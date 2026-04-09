@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
-import { useMemo, useState } from 'react';
+import { DragEvent, useMemo, useState } from 'react';
 import AdminShell from '../../components/admin/AdminShell';
 import { getAdminPageProps } from '../../lib/admin-auth';
 import type { AdminCategoryOption, AdminProjectRecord } from '../../lib/admin-projects';
@@ -17,14 +17,12 @@ type ProjectFormLink = {
   key: string;
   website: string;
   url: string;
-  priority: string;
 };
 
 type ProjectFormGalleryItem = {
   key: string;
   title: string;
   image: string;
-  priority: string;
 };
 
 type ProjectFormCategory = {
@@ -48,6 +46,22 @@ type ProjectFormState = {
 
 const createKey = () => `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
+function reorderItems<T>(items: T[], fromIndex: number, toIndex: number): T[] {
+  if (fromIndex === toIndex) {
+    return items;
+  }
+
+  const nextItems = [...items];
+  const [movedItem] = nextItems.splice(fromIndex, 1);
+
+  if (!movedItem) {
+    return items;
+  }
+
+  nextItems.splice(toIndex, 0, movedItem);
+  return nextItems;
+}
+
 function toMonthInput(value: string | null): string {
   return value ? value.slice(0, 7) : '';
 }
@@ -57,7 +71,6 @@ function createLinkRow(link?: AdminProjectRecord['links'][number]): ProjectFormL
     key: link ? `link-${link.id}` : createKey(),
     website: link?.website ?? '',
     url: link?.url ?? '',
-    priority: String(link?.priority ?? 0),
   };
 }
 
@@ -66,7 +79,6 @@ function createGalleryRow(item?: AdminProjectRecord['gallery'][number]): Project
     key: item ? `gallery-${item.id}` : createKey(),
     title: item?.title ?? '',
     image: item?.image ?? '',
-    priority: String(item?.priority ?? 0),
   };
 }
 
@@ -119,15 +131,15 @@ function buildPayload(form: ProjectFormState) {
     extended: form.extended,
     start_date: form.start_date,
     end_date: form.end_date,
-    links: form.links.map((link) => ({
+    links: form.links.map((link, index) => ({
       website: link.website,
       url: link.url,
-      priority: link.priority,
+      priority: index,
     })),
-    gallery: form.gallery.map((item) => ({
+    gallery: form.gallery.map((item, index) => ({
       title: item.title,
       image: item.image,
-      priority: item.priority,
+      priority: index,
     })),
     categories: form.categories
       .filter((category) => category.selected)
@@ -156,6 +168,8 @@ export default function AdminProjects({ adminUser, categories, projects: initial
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [draggedLinkIndex, setDraggedLinkIndex] = useState<number | null>(null);
+  const [draggedGalleryIndex, setDraggedGalleryIndex] = useState<number | null>(null);
 
   const filteredProjects = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -184,6 +198,51 @@ export default function AdminProjects({ adminUser, categories, projects: initial
     setForm(createEmptyForm(categories));
     setError(null);
     setSuccessMessage(null);
+  }
+
+  function handleDragOver(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }
+
+  function handleLinkDragStart(event: DragEvent<HTMLDivElement>, index: number) {
+    setDraggedLinkIndex(index);
+    event.dataTransfer.effectAllowed = 'move';
+  }
+
+  function handleLinkDrop(event: DragEvent<HTMLDivElement>, targetIndex: number) {
+    event.preventDefault();
+
+    if (draggedLinkIndex === null || draggedLinkIndex === targetIndex) {
+      setDraggedLinkIndex(null);
+      return;
+    }
+
+    setForm((current) => ({
+      ...current,
+      links: reorderItems(current.links, draggedLinkIndex, targetIndex),
+    }));
+    setDraggedLinkIndex(null);
+  }
+
+  function handleGalleryDragStart(event: DragEvent<HTMLDivElement>, index: number) {
+    setDraggedGalleryIndex(index);
+    event.dataTransfer.effectAllowed = 'move';
+  }
+
+  function handleGalleryDrop(event: DragEvent<HTMLDivElement>, targetIndex: number) {
+    event.preventDefault();
+
+    if (draggedGalleryIndex === null || draggedGalleryIndex === targetIndex) {
+      setDraggedGalleryIndex(null);
+      return;
+    }
+
+    setForm((current) => ({
+      ...current,
+      gallery: reorderItems(current.gallery, draggedGalleryIndex, targetIndex),
+    }));
+    setDraggedGalleryIndex(null);
   }
 
   async function handleSave() {
@@ -451,7 +510,7 @@ export default function AdminProjects({ adminUser, categories, projects: initial
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
                     <h3 className="text-base font-semibold text-primary-accentLight">Project Links</h3>
-                    <p className="mt-1 text-sm text-primary-text/65">Public call-to-action buttons shown on the project page.</p>
+                    <p className="mt-1 text-sm text-primary-text/65">Public call-to-action buttons shown on the project page. Drag rows to set their order.</p>
                   </div>
                   <button
                     type="button"
@@ -464,7 +523,21 @@ export default function AdminProjects({ adminUser, categories, projects: initial
 
                 <div className="space-y-4">
                   {form.links.map((link, index) => (
-                    <div key={link.key} className="grid gap-3 md:grid-cols-[0.8fr_1.3fr_0.35fr_auto]">
+                    <div
+                      key={link.key}
+                      draggable
+                      onDragStart={(event) => handleLinkDragStart(event, index)}
+                      onDragOver={handleDragOver}
+                      onDrop={(event) => handleLinkDrop(event, index)}
+                      onDragEnd={() => setDraggedLinkIndex(null)}
+                      className={`grid gap-3 rounded-xl border border-primary-accent/12 bg-slate-950/35 p-3 md:grid-cols-[auto_0.8fr_1.3fr_auto] ${draggedLinkIndex === index ? 'opacity-60' : ''}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="cursor-grab rounded-lg border border-primary-accent/20 bg-slate-950/70 px-3 py-3 text-sm font-semibold text-primary-text/55 active:cursor-grabbing">
+                          ::
+                        </div>
+                        <span className="text-xs uppercase tracking-[0.22em] text-primary-text/55">{index + 1}</span>
+                      </div>
                       <input
                         type="text"
                         value={link.website}
@@ -483,16 +556,6 @@ export default function AdminProjects({ adminUser, categories, projects: initial
                           links: current.links.map((item, itemIndex) => itemIndex === index ? { ...item, url: event.target.value } : item),
                         }))}
                         placeholder="https://example.com"
-                        className="rounded-lg border border-primary-accent/30 bg-slate-950/65 px-4 py-3 text-sm text-primary-text focus:border-primary-accent focus:ring-primary-accent"
-                      />
-                      <input
-                        type="number"
-                        value={link.priority}
-                        onChange={(event) => setForm((current) => ({
-                          ...current,
-                          links: current.links.map((item, itemIndex) => itemIndex === index ? { ...item, priority: event.target.value } : item),
-                        }))}
-                        placeholder="0"
                         className="rounded-lg border border-primary-accent/30 bg-slate-950/65 px-4 py-3 text-sm text-primary-text focus:border-primary-accent focus:ring-primary-accent"
                       />
                       <button
@@ -514,7 +577,7 @@ export default function AdminProjects({ adminUser, categories, projects: initial
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
                     <h3 className="text-base font-semibold text-primary-accentLight">Gallery</h3>
-                    <p className="mt-1 text-sm text-primary-text/65">Images shown on the public project detail page.</p>
+                    <p className="mt-1 text-sm text-primary-text/65">Images shown on the public project detail page. Drag rows to set their order.</p>
                   </div>
                   <button
                     type="button"
@@ -527,7 +590,21 @@ export default function AdminProjects({ adminUser, categories, projects: initial
 
                 <div className="space-y-4">
                   {form.gallery.map((item, index) => (
-                    <div key={item.key} className="grid gap-3 md:grid-cols-[0.8fr_1.3fr_0.35fr_auto]">
+                    <div
+                      key={item.key}
+                      draggable
+                      onDragStart={(event) => handleGalleryDragStart(event, index)}
+                      onDragOver={handleDragOver}
+                      onDrop={(event) => handleGalleryDrop(event, index)}
+                      onDragEnd={() => setDraggedGalleryIndex(null)}
+                      className={`grid gap-3 rounded-xl border border-primary-accent/12 bg-slate-950/35 p-3 md:grid-cols-[auto_0.8fr_1.3fr_auto] ${draggedGalleryIndex === index ? 'opacity-60' : ''}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="cursor-grab rounded-lg border border-primary-accent/20 bg-slate-950/70 px-3 py-3 text-sm font-semibold text-primary-text/55 active:cursor-grabbing">
+                          ::
+                        </div>
+                        <span className="text-xs uppercase tracking-[0.22em] text-primary-text/55">{index + 1}</span>
+                      </div>
                       <input
                         type="text"
                         value={item.title}
@@ -546,16 +623,6 @@ export default function AdminProjects({ adminUser, categories, projects: initial
                           gallery: current.gallery.map((galleryItem, itemIndex) => itemIndex === index ? { ...galleryItem, image: event.target.value } : galleryItem),
                         }))}
                         placeholder="/images/project.png or https://..."
-                        className="rounded-lg border border-primary-accent/30 bg-slate-950/65 px-4 py-3 text-sm text-primary-text focus:border-primary-accent focus:ring-primary-accent"
-                      />
-                      <input
-                        type="number"
-                        value={item.priority}
-                        onChange={(event) => setForm((current) => ({
-                          ...current,
-                          gallery: current.gallery.map((galleryItem, itemIndex) => itemIndex === index ? { ...galleryItem, priority: event.target.value } : galleryItem),
-                        }))}
-                        placeholder="0"
                         className="rounded-lg border border-primary-accent/30 bg-slate-950/65 px-4 py-3 text-sm text-primary-text focus:border-primary-accent focus:ring-primary-accent"
                       />
                       <button
