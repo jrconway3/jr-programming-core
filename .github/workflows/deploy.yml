@@ -17,6 +17,31 @@ jobs:
     env:
       DEPLOY_SHA: ${{ github.event_name == 'workflow_dispatch' && github.sha || github.event.workflow_run.head_sha }}
     steps:
+      - name: Verify CI succeeded for manual deploy commit
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const headSha = process.env.DEPLOY_SHA;
+
+            const response = await github.rest.actions.listWorkflowRuns({
+              owner,
+              repo,
+              workflow_id: 'ci.yml',
+              branch: 'production',
+              head_sha: headSha,
+              status: 'completed',
+              per_page: 20,
+            });
+
+            const hasSuccessfulCi = response.data.workflow_runs.some((run) => run.conclusion === 'success');
+
+            if (!hasSuccessfulCi) {
+              core.setFailed(`Manual deploy blocked: CI has not succeeded for commit ${headSha}.`);
+            }
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
