@@ -225,6 +225,21 @@ export default function AdminProjects({ adminUser, categories, projects: initial
     setDraggedLinkIndex(null);
   }
 
+  function moveLink(index: number, direction: -1 | 1) {
+    const targetIndex = index + direction;
+
+    setForm((current) => {
+      if (targetIndex < 0 || targetIndex >= current.links.length) {
+        return current;
+      }
+
+      return {
+        ...current,
+        links: reorderItems(current.links, index, targetIndex),
+      };
+    });
+  }
+
   function handleGalleryDragStart(event: DragEvent<HTMLDivElement>, index: number) {
     setDraggedGalleryIndex(index);
     event.dataTransfer.effectAllowed = 'move';
@@ -243,6 +258,21 @@ export default function AdminProjects({ adminUser, categories, projects: initial
       gallery: reorderItems(current.gallery, draggedGalleryIndex, targetIndex),
     }));
     setDraggedGalleryIndex(null);
+  }
+
+  function moveGalleryItem(index: number, direction: -1 | 1) {
+    const targetIndex = index + direction;
+
+    setForm((current) => {
+      if (targetIndex < 0 || targetIndex >= current.gallery.length) {
+        return current;
+      }
+
+      return {
+        ...current,
+        gallery: reorderItems(current.gallery, index, targetIndex),
+      };
+    });
   }
 
   async function handleSave() {
@@ -510,7 +540,7 @@ export default function AdminProjects({ adminUser, categories, projects: initial
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
                     <h3 className="text-base font-semibold text-primary-accentLight">Project Links</h3>
-                    <p className="mt-1 text-sm text-primary-text/65">Public call-to-action buttons shown on the project page. Drag rows to set their order.</p>
+                    <p className="mt-1 text-sm text-primary-text/65">Public call-to-action buttons shown on the project page. Drag rows or use Move Up and Move Down to set their order.</p>
                   </div>
                   <button
                     type="button"
@@ -530,13 +560,33 @@ export default function AdminProjects({ adminUser, categories, projects: initial
                       onDragOver={handleDragOver}
                       onDrop={(event) => handleLinkDrop(event, index)}
                       onDragEnd={() => setDraggedLinkIndex(null)}
-                      className={`grid gap-3 rounded-xl border border-primary-accent/12 bg-slate-950/35 p-3 md:grid-cols-[auto_0.8fr_1.3fr_auto] ${draggedLinkIndex === index ? 'opacity-60' : ''}`}
+                      className={`grid gap-3 rounded-xl border border-primary-accent/12 bg-slate-950/35 p-3 md:grid-cols-[auto_0.8fr_1.3fr_auto_auto] ${draggedLinkIndex === index ? 'opacity-60' : ''}`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="cursor-grab rounded-lg border border-primary-accent/20 bg-slate-950/70 px-3 py-3 text-sm font-semibold text-primary-text/55 active:cursor-grabbing">
                           ::
                         </div>
                         <span className="text-xs uppercase tracking-[0.22em] text-primary-text/55">{index + 1}</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            disabled={index === 0}
+                            onClick={() => moveLink(index, -1)}
+                            className="rounded-lg border border-primary-accent/30 px-2 py-2 text-xs font-semibold text-primary-text/80 transition hover:border-primary-accent/55 hover:text-primary-accentLight disabled:cursor-not-allowed disabled:opacity-50"
+                            aria-label={`Move link ${index + 1} up`}
+                          >
+                            Up
+                          </button>
+                          <button
+                            type="button"
+                            disabled={index === form.links.length - 1}
+                            onClick={() => moveLink(index, 1)}
+                            className="rounded-lg border border-primary-accent/30 px-2 py-2 text-xs font-semibold text-primary-text/80 transition hover:border-primary-accent/55 hover:text-primary-accentLight disabled:cursor-not-allowed disabled:opacity-50"
+                            aria-label={`Move link ${index + 1} down`}
+                          >
+                            Down
+                          </button>
+                        </div>
                       </div>
                       <input
                         type="text"
@@ -577,7 +627,7 @@ export default function AdminProjects({ adminUser, categories, projects: initial
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
                     <h3 className="text-base font-semibold text-primary-accentLight">Gallery</h3>
-                    <p className="mt-1 text-sm text-primary-text/65">Images shown on the public project detail page. Drag rows to set their order.</p>
+                    <p className="mt-1 text-sm text-primary-text/65">Images shown on the public project detail page. Drag rows or use Move Up and Move Down to set their order.</p>
                   </div>
                   <button
                     type="button"
@@ -597,13 +647,33 @@ export default function AdminProjects({ adminUser, categories, projects: initial
                       onDragOver={handleDragOver}
                       onDrop={(event) => handleGalleryDrop(event, index)}
                       onDragEnd={() => setDraggedGalleryIndex(null)}
-                      className={`grid gap-3 rounded-xl border border-primary-accent/12 bg-slate-950/35 p-3 md:grid-cols-[auto_0.8fr_1.3fr_auto] ${draggedGalleryIndex === index ? 'opacity-60' : ''}`}
+                      className={`grid gap-3 rounded-xl border border-primary-accent/12 bg-slate-950/35 p-3 md:grid-cols-[auto_0.8fr_1.3fr_auto_auto] ${draggedGalleryIndex === index ? 'opacity-60' : ''}`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="cursor-grab rounded-lg border border-primary-accent/20 bg-slate-950/70 px-3 py-3 text-sm font-semibold text-primary-text/55 active:cursor-grabbing">
                           ::
                         </div>
                         <span className="text-xs uppercase tracking-[0.22em] text-primary-text/55">{index + 1}</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            disabled={index === 0}
+                            onClick={() => moveGalleryItem(index, -1)}
+                            className="rounded-lg border border-primary-accent/30 px-2 py-2 text-xs font-semibold text-primary-text/80 transition hover:border-primary-accent/55 hover:text-primary-accentLight disabled:cursor-not-allowed disabled:opacity-50"
+                            aria-label={`Move image ${index + 1} up`}
+                          >
+                            Up
+                          </button>
+                          <button
+                            type="button"
+                            disabled={index === form.gallery.length - 1}
+                            onClick={() => moveGalleryItem(index, 1)}
+                            className="rounded-lg border border-primary-accent/30 px-2 py-2 text-xs font-semibold text-primary-text/80 transition hover:border-primary-accent/55 hover:text-primary-accentLight disabled:cursor-not-allowed disabled:opacity-50"
+                            aria-label={`Move image ${index + 1} down`}
+                          >
+                            Down
+                          </button>
+                        </div>
                       </div>
                       <input
                         type="text"

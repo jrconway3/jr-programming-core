@@ -36,7 +36,11 @@ function parseCookies(cookieHeader: string | undefined): Record<string, string> 
       const key = part.slice(0, separatorIndex).trim();
       const value = part.slice(separatorIndex + 1).trim();
 
-      cookies[key] = decodeURIComponent(value);
+      try {
+        cookies[key] = decodeURIComponent(value);
+      } catch {
+        cookies[key] = value;
+      }
       return cookies;
     }, {});
 }
@@ -136,7 +140,7 @@ function readSessionValue(sessionValue: string | null): AdminSession | null {
 }
 
 function buildCookie(name: string, value: string, maxAgeSeconds: number): string {
-  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  const secure = process.env.NODE_ENV === 'production' ? 'Secure' : '';
   const expires = new Date(Date.now() + maxAgeSeconds * 1000).toUTCString();
 
   return [

@@ -63,7 +63,7 @@ ADMIN_PASSWORD=replace-with-a-strong-password
 ADMIN_SESSION_SECRET=replace-with-a-long-random-secret
 ```
 
-After that, start the app with `npm run dev` or `npm run build` and sign in at `http://localhost:3000/admin`.
+After that, start the app with `npm run dev`, or for a production-style run use `npm run build` followed by `npm run start`, and then sign in at `http://localhost:3000/admin`.
 
 
 ## Initialize Locally
