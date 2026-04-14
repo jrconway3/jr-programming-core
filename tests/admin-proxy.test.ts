@@ -74,6 +74,16 @@ describe('admin proxy protection', () => {
     expect(response.headers.get('x-middleware-next')).toBe('1');
   });
 
+  it('allows authenticated admin requests when the session username requires cookie decoding', async () => {
+    process.env.ADMIN_PASSWORD = 'secret-password';
+    process.env.ADMIN_SESSION_SECRET = 'top-secret-signing-key';
+
+    const setCookie = createAdminSessionCookie('owner@example.com');
+    const response = await proxy(createRequest('/admin/projects', extractCookiePair(setCookie!)));
+
+    expect(response.headers.get('x-middleware-next')).toBe('1');
+  });
+
   it('rejects invalid admin session cookies at the proxy layer', async () => {
     process.env.ADMIN_PASSWORD = 'secret-password';
     process.env.ADMIN_SESSION_SECRET = 'top-secret-signing-key';

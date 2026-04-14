@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 type JsonValue = Record<string, unknown>;
 
@@ -141,6 +141,10 @@ let projectsByIdHandler: typeof import('../pages/api/admin/projects/[id]').defau
 const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
 describe('admin API handlers', () => {
+  afterAll(() => {
+    consoleErrorSpy.mockRestore();
+  });
+
   beforeEach(async () => {
     vi.resetModules();
     vi.clearAllMocks();

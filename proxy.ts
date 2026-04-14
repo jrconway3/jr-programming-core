@@ -39,7 +39,17 @@ export async function proxy(request: NextRequest) {
   }
 
   const sessionSecret = process.env.ADMIN_SESSION_SECRET?.trim();
-  const sessionValue = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+  const rawSessionValue = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+  let sessionValue = rawSessionValue;
+
+  if (rawSessionValue) {
+    try {
+      sessionValue = decodeURIComponent(rawSessionValue);
+    } catch {
+      sessionValue = rawSessionValue;
+    }
+  }
+
   const session = await readAdminSessionValue(sessionValue, sessionSecret);
 
   if (session) {
