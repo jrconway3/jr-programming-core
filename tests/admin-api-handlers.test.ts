@@ -302,6 +302,16 @@ describe('admin API handlers', () => {
     expect(res.body).toEqual({ error: 'Invalid category id.' });
   });
 
+  it('categories by id handler rejects array id values', async () => {
+    const req = createRequest({ method: 'PUT', query: { id: ['12', '13'] as unknown as string } });
+    const res = createResponse();
+
+    await categoriesByIdHandler(req as never, res as never);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid category id.' });
+  });
+
   it('categories by id handler deletes category within transaction', async () => {
     const req = createRequest({ method: 'DELETE', query: { id: '12' } });
     const res = createResponse();
@@ -396,6 +406,20 @@ describe('admin API handlers', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({ error: 'Invalid inquiry status.' });
+  });
+
+  it('inquiries handler rejects array id values', async () => {
+    const req = createRequest({
+      method: 'PATCH',
+      query: { id: ['1', '2'] as unknown as string },
+      body: { status: 'reviewed' },
+    });
+    const res = createResponse();
+
+    await inquiriesByIdHandler(req as never, res as never);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid inquiry id.' });
   });
 
   it('inquiries handler returns updated inquiry payload', async () => {
@@ -565,6 +589,16 @@ describe('admin API handlers', () => {
 
   it('projects by id handler validates project id', async () => {
     const req = createRequest({ method: 'PUT', query: { id: 'nope' } });
+    const res = createResponse();
+
+    await projectsByIdHandler(req as never, res as never);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid project id.' });
+  });
+
+  it('projects by id handler rejects array id values', async () => {
+    const req = createRequest({ method: 'PUT', query: { id: ['41', '42'] as unknown as string } });
     const res = createResponse();
 
     await projectsByIdHandler(req as never, res as never);

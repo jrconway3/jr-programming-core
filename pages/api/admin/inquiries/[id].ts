@@ -32,8 +32,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const id = Number.parseInt(req.query.id as string, 10);
+  const rawId = req.query.id;
   const status = typeof req.body?.status === 'string' ? req.body.status.trim() : '';
+
+  if (typeof rawId !== 'string' || !/^\d+$/.test(rawId)) {
+    return res.status(400).json({ error: 'Invalid inquiry id.' });
+  }
+
+  const id = Number.parseInt(rawId, 10);
 
   if (!Number.isInteger(id)) {
     return res.status(400).json({ error: 'Invalid inquiry id.' });

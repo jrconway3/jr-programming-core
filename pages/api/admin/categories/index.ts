@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Prisma } from '@prisma/client';
 import { requireAdminApi } from '../../../../lib/admin-auth';
+import { normalizeShortcode } from '../../../../lib/admin-categories';
 import { prisma } from '../../../../prisma/adapter';
 
 type CategoryResponse = {
@@ -14,15 +15,6 @@ type CategoryResponse = {
   };
   error?: string;
 };
-
-function normalizeShortcode(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, '-')
-    .replace(/-{2,}/g, '-')
-    .replace(/^-|-$/g, '');
-}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<CategoryResponse>) {
   if (!requireAdminApi(req, res)) {

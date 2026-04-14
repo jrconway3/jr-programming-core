@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Prisma } from '@prisma/client';
 import { requireAdminApi } from '../../../../lib/admin-auth';
+import { normalizeShortcode } from '../../../../lib/admin-categories';
 import { prisma } from '../../../../prisma/adapter';
 
 type CategoryResponse = {
@@ -16,21 +17,18 @@ type CategoryResponse = {
   error?: string;
 };
 
-function normalizeShortcode(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, '-')
-    .replace(/-{2,}/g, '-')
-    .replace(/^-|-$/g, '');
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse<CategoryResponse>) {
   if (!requireAdminApi(req, res)) {
     return;
   }
 
-  const id = Number.parseInt(req.query.id as string, 10);
+  const rawId = req.query.id;
+
+  if (typeof rawId !== 'string' || !/^\d+$/.test(rawId)) {
+    return res.status(400).json({ error: 'Invalid category id.' });
+  }
+
+  const id = Number.parseInt(rawId, 10);
 
   if (!Number.isInteger(id)) {
     return res.status(400).json({ error: 'Invalid category id.' });

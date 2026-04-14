@@ -19,7 +19,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return;
   }
 
-  const id = Number.parseInt(req.query.id as string, 10);
+  const rawId = req.query.id;
+
+  if (typeof rawId !== 'string' || !/^\d+$/.test(rawId)) {
+    return res.status(400).json({ error: 'Invalid project id.' });
+  }
+
+  const id = Number.parseInt(rawId, 10);
 
   if (!Number.isInteger(id)) {
     return res.status(400).json({ error: 'Invalid project id.' });

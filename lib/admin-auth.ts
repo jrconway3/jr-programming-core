@@ -102,7 +102,16 @@ function readSessionValue(sessionValue: string | null): AdminSession | null {
     return null;
   }
 
-  const [username, expiresAtRaw, signature] = sessionValue.split('.');
+  const lastSeparator = sessionValue.lastIndexOf('.');
+  const secondLastSeparator = lastSeparator > 0 ? sessionValue.lastIndexOf('.', lastSeparator - 1) : -1;
+
+  if (lastSeparator === -1 || secondLastSeparator === -1) {
+    return null;
+  }
+
+  const username = sessionValue.slice(0, secondLastSeparator);
+  const expiresAtRaw = sessionValue.slice(secondLastSeparator + 1, lastSeparator);
+  const signature = sessionValue.slice(lastSeparator + 1);
 
   if (!username || !expiresAtRaw || !signature) {
     return null;

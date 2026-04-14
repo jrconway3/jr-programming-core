@@ -6,6 +6,7 @@ import {
   getAdminSession,
   isAdminAuthConfigured,
   requireAdminApi,
+  sanitizeAdminNextPath,
   validateAdminCredentials,
 } from '../lib/admin-auth';
 
@@ -159,5 +160,10 @@ describe('admin auth helpers', () => {
         adminUser: 'admin',
       },
     });
+  });
+
+  it('sanitizes /admin/login next path to avoid redirect loops', () => {
+    expect(sanitizeAdminNextPath('/admin/login')).toBe('/admin');
+    expect(sanitizeAdminNextPath('/admin/login?next=%2Fadmin%2Flogin')).toBe('/admin');
   });
 });
