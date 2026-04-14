@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
+import { unstable_doesMiddlewareMatch } from 'next/experimental/testing/server';
 import { createAdminSessionCookie } from '../lib/admin-auth';
-import { proxy } from '../proxy';
+import nextConfig from '../next.config.mjs';
+import { config, proxy } from '../proxy';
 
 const originalEnv = { ...process.env };
 
@@ -20,6 +22,24 @@ function createRequest(pathname: string, cookieHeader?: string) {
 describe('admin proxy protection', () => {
   afterEach(() => {
     process.env = { ...originalEnv };
+  });
+
+  it('matches admin page routes', () => {
+    expect(unstable_doesMiddlewareMatch({ config, nextConfig, url: '/admin' })).toBe(true);
+    expect(unstable_doesMiddlewareMatch({ config, nextConfig, url: '/admin/projects' })).toBe(true);
+    expect(unstable_doesMiddlewareMatch({ config, nextConfig, url: '/admin/login' })).toBe(true);
+  });
+
+  it('matches admin API routes', () => {
+    expect(unstable_doesMiddlewareMatch({ config, nextConfig, url: '/api/admin/projects' })).toBe(true);
+    expect(unstable_doesMiddlewareMatch({ config, nextConfig, url: '/api/admin/projects/42' })).toBe(true);
+    expect(unstable_doesMiddlewareMatch({ config, nextConfig, url: '/api/admin/auth/login' })).toBe(true);
+  });
+
+  it('does not match non-admin routes', () => {
+    expect(unstable_doesMiddlewareMatch({ config, nextConfig, url: '/' })).toBe(false);
+    expect(unstable_doesMiddlewareMatch({ config, nextConfig, url: '/contact' })).toBe(false);
+    expect(unstable_doesMiddlewareMatch({ config, nextConfig, url: '/api/contact' })).toBe(false);
   });
 
   it('allows the admin login page through without authentication', async () => {
