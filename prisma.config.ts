@@ -21,8 +21,8 @@ const DB_URL = `mysql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
 
 const SHADOW_USER = optionalConfigEnv('SHADOW_USER');
 const rawShadowPassword = process.env.SHADOW_PASSWORD?.trim();
-const hasShadowPasswordConfig = Boolean(rawShadowPassword) && rawShadowPassword !== 'null';
-const SHADOW_PASS = hasShadowPasswordConfig ? rawShadowPassword ?? '' : '';
+const hasShadowPasswordConfig = rawShadowPassword !== undefined;
+const SHADOW_PASS = rawShadowPassword === 'null' ? '' : rawShadowPassword ?? '';
 const SHADOW_HOST = optionalConfigEnv('SHADOW_HOST');
 const SHADOW_PORT = optionalConfigEnv('SHADOW_PORT');
 const SHADOW_NAME = optionalConfigEnv('SHADOW_NAME');

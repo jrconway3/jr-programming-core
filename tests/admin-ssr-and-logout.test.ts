@@ -36,6 +36,9 @@ const {
       count: vi.fn(),
       findMany: vi.fn(),
     },
+    settings: {
+      findMany: vi.fn(),
+    },
     inquiry: {
       count: vi.fn(),
       findMany: vi.fn(),
@@ -91,6 +94,7 @@ let dashboardGetServerSideProps: typeof import('../pages/admin/index').getServer
 let inquiriesGetServerSideProps: typeof import('../pages/admin/inquiries').getServerSideProps;
 let categoriesGetServerSideProps: typeof import('../pages/admin/categories').getServerSideProps;
 let projectsGetServerSideProps: typeof import('../pages/admin/projects').getServerSideProps;
+let settingsGetServerSideProps: typeof import('../pages/admin/settings').getServerSideProps;
 
 describe('admin logout and page server loaders', () => {
   beforeEach(async () => {
@@ -102,6 +106,7 @@ describe('admin logout and page server loaders', () => {
     inquiriesGetServerSideProps = (await import('../pages/admin/inquiries')).getServerSideProps;
     categoriesGetServerSideProps = (await import('../pages/admin/categories')).getServerSideProps;
     projectsGetServerSideProps = (await import('../pages/admin/projects')).getServerSideProps;
+    settingsGetServerSideProps = (await import('../pages/admin/settings')).getServerSideProps;
 
     clearAdminSessionCookieMock.mockReturnValue('jr_admin_session=; Path=/; HttpOnly');
 
@@ -308,6 +313,45 @@ describe('admin logout and page server loaders', () => {
         adminUser: 'admin',
         categories: [{ id: 1, title: 'Projects', shortcode: 'projects' }],
         projects: [{ id: 10, name: 'Serialized Project' }],
+      },
+    });
+  });
+
+  it('settings getServerSideProps merges stored hero settings with defaults', async () => {
+    prismaMock.settings.findMany.mockResolvedValue([
+      {
+        id: 2,
+        key: 'home/banner/title',
+        value: 'David Conway Jr.',
+        updated_at: new Date('2026-04-14T00:00:00.000Z'),
+      },
+      {
+        id: 3,
+        key: 'home/banner/cta/primary/label',
+        value: 'View My Work',
+        updated_at: new Date('2026-04-14T00:00:00.000Z'),
+      },
+    ]);
+
+    const result = await settingsGetServerSideProps({} as never);
+
+    expect(prismaMock.settings.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          key: {
+            in: expect.arrayContaining(['home/banner/title', 'home/banner/subtitle']),
+          },
+        },
+      }),
+    );
+    expect(result).toEqual({
+      props: {
+        adminUser: 'admin',
+        settings: expect.objectContaining({
+          'home/banner/title': 'David Conway Jr.',
+          'home/banner/cta/primary/label': 'View My Work',
+          'home/banner/subtitle': 'I help businesses automate workflows, integrate APIs, and scale backend systems',
+        }),
       },
     });
   });

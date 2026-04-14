@@ -10,6 +10,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         where: shortcode
           ? { categories: { some: { category: { shortcode } } } }
           : undefined,
+        include: {
+          skills: {
+            include: {
+              skill: true,
+            },
+            orderBy: { priority: 'asc' },
+          },
+          categories: {
+            include: {
+              category: true,
+            },
+            orderBy: { priority: 'asc' },
+          },
+        },
         orderBy: sortByDate
           ? [
               { end_date: { sort: 'desc', nulls: 'first' } },

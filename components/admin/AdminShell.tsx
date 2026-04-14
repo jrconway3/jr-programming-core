@@ -14,6 +14,7 @@ const navigationItems = [
   { href: '/admin/inquiries', label: 'Inquiries' },
   { href: '/admin/projects', label: 'Projects' },
   { href: '/admin/categories', label: 'Categories' },
+  { href: '/admin/settings', label: 'Settings' },
 ];
 
 export default function AdminShell({ title, description, adminUser, children }: AdminShellProps) {

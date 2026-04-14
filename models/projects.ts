@@ -11,6 +11,8 @@ export interface Project {
   end_date?: string;
   created_at: string;
   updated_at: string;
+  skills?: ProjectSkillEntry[];
+  categories?: ProjectCategoryEntry[];
 }
 
 export interface ProjectLink {

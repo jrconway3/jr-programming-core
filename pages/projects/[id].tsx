@@ -15,10 +15,13 @@ function formatDate(dateStr?: string | null): string {
 }
 
 export default function ProjectPage({ project }: Props) {
+  const isExperienceEntry = project.categories.some((categoryEntry) => categoryEntry.category.shortcode === 'experience');
   const dateRange =
     project.start_date || project.end_date !== undefined
       ? `${formatDate(project.start_date)} – ${formatDate(project.end_date)}`
       : null;
+  const primaryBackHref = isExperienceEntry ? '/experience' : '/projects';
+  const primaryBackLabel = isExperienceEntry ? 'Back to Experience' : 'Back to Portfolio';
 
   return (
     <>
@@ -28,33 +31,68 @@ export default function ProjectPage({ project }: Props) {
       </Head>
       <main className="min-h-screen px-4 py-12">
         <section className="w-full max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
+          <div className="terminal-card mb-8 px-6 pb-8 pt-14 md:px-8">
+            <p className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">
+              {isExperienceEntry ? 'Experience Entry' : 'Case Study'}
+            </p>
+            <div className="mt-4 flex flex-wrap justify-between items-start gap-2 mb-2">
               <h1 className="text-4xl md:text-5xl font-extrabold gradient-text animate-gradient">
                 {project.name}
               </h1>
               {dateRange && (
-                <span className="text-sm text-muted pt-3 whitespace-nowrap">{dateRange}</span>
+                <span className="rounded-full border border-primary-accent/25 px-3 py-1 text-sm text-primary-text/65 whitespace-nowrap">{dateRange}</span>
               )}
             </div>
             {project.role && (
               <p className="text-lg text-primary-accentLight font-medium">{project.role}</p>
             )}
             {project.position && (
-              <p className="text-sm text-muted">{project.position}</p>
+              <p className="mt-1 text-sm text-primary-text/70">{project.position}</p>
             )}
           </div>
 
-          {/* Short description */}
           <div className="terminal-card p-6 mb-6">
+            <h2 className="mb-3 text-lg font-semibold text-accent">What It Does</h2>
             <p className="text-text leading-relaxed">{project.short}</p>
           </div>
 
-          {/* Extended description */}
+          <div className="terminal-card p-6 mb-6">
+            <h2 className="mb-4 text-lg font-semibold text-accent">Project Snapshot</h2>
+            <div className="grid gap-5 md:grid-cols-2">
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-primary-accentLight">Built For</p>
+                <p className="mt-2 text-sm leading-7 text-primary-text/80">{project.position || 'Client project'}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-primary-accentLight">Focus</p>
+                <p className="mt-2 text-sm leading-7 text-primary-text/80">{project.role || 'Custom software development'}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-primary-accentLight">Timeline</p>
+                <p className="mt-2 text-sm leading-7 text-primary-text/80">{dateRange || 'Timeline not specified'}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-primary-accentLight">Categories</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {project.categories.length > 0 ? project.categories.map((categoryEntry) => (
+                    <Link
+                      key={categoryEntry.category_id}
+                      href={`/${categoryEntry.category.shortcode}`}
+                      className="rounded-full border border-accent/20 px-3 py-1 text-xs text-primary-text/70 transition hover:border-accent hover:text-accent"
+                    >
+                      {categoryEntry.category.title}
+                    </Link>
+                  )) : (
+                    <span className="text-sm text-primary-text/60">Uncategorized</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           {project.extended && (
             <div className="terminal-card p-6 mb-6">
-              <h2 className="text-lg font-semibold text-accent mb-3">About</h2>
+              <h2 className="text-lg font-semibold text-accent mb-3">What I Built</h2>
               <div
                 className="prose prose-invert max-w-none text-text leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: project.extended }}
@@ -62,10 +100,9 @@ export default function ProjectPage({ project }: Props) {
             </div>
           )}
 
-          {/* Links */}
           {project.links.length > 0 && (
             <div className="terminal-card p-6 mb-6">
-              <h2 className="text-lg font-semibold text-accent mb-3">Links</h2>
+              <h2 className="text-lg font-semibold text-accent mb-3">Proof & Links</h2>
               <div className="flex flex-wrap gap-3">
                 {project.links.map((link) => (
                   <a
@@ -82,7 +119,6 @@ export default function ProjectPage({ project }: Props) {
             </div>
           )}
 
-          {/* Skills */}
           {project.skills.length > 0 && (
             <div className="terminal-card p-6 mb-6">
               <h2 className="text-lg font-semibold text-accent mb-3">Skills & Technologies</h2>
@@ -100,7 +136,6 @@ export default function ProjectPage({ project }: Props) {
             </div>
           )}
 
-          {/* Gallery */}
           {project.gallery.length > 0 && (
             <div className="terminal-card p-6 mb-6">
               <h2 className="text-lg font-semibold text-accent mb-3">Gallery</h2>
@@ -124,29 +159,18 @@ export default function ProjectPage({ project }: Props) {
             </div>
           )}
 
-          {/* Categories */}
-          {project.categories.length > 0 && (
-            <div className="mb-8 flex flex-wrap gap-2 items-center">
-              <span className="text-sm text-muted">Categories:</span>
-              {project.categories.map((c) => (
-                <Link
-                  key={c.category_id}
-                  href={`/${c.category.shortcode}`}
-                  className="px-3 py-1 rounded-full text-xs glass border border-accent/20 text-muted hover:text-accent hover:border-accent transition"
-                >
-                  {c.category.title}
-                </Link>
-              ))}
-            </div>
-          )}
-
-          {/* Back */}
-          <div className="mt-4 text-center">
+          <div className="mt-4 flex flex-wrap justify-center gap-3 text-center">
+            <Link
+              href={primaryBackHref}
+              className="inline-block px-6 py-2 rounded-lg glass border border-accent/30 text-muted hover:text-accent hover:border-accent transition text-sm"
+            >
+              ← {primaryBackLabel}
+            </Link>
             <Link
               href="/"
               className="inline-block px-6 py-2 rounded-lg glass border border-accent/30 text-muted hover:text-accent hover:border-accent transition text-sm"
             >
-              ← Back to Home
+              Back to Home
             </Link>
           </div>
         </section>
