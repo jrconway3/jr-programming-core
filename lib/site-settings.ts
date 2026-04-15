@@ -30,7 +30,6 @@ export const siteSettingDefaults: Record<string, string> = {
   'home/status/message': 'Looking to automate workflows or integrate APIs?',
   'home/status/cta/label': 'Contact Me',
   'home/status/cta/href': '/contact#inquiry-form',
-  'footer/copy/year': String(new Date().getFullYear()),
   'footer/copy/name': 'David Conway Jr.',
   'footer/copy/rights': 'all rights reserved.',
   'footer/copy/built': 'Built using Next.js and Tailwind CSS, with assistance from GitHub Copilot.',

@@ -9,6 +9,28 @@ type SettingsPayload = {
 
 const editableSettingKeySet = new Set(editableSiteSettingKeys);
 
+// Keys whose values must be safe relative paths/anchors.
+const relativeHrefKeys = new Set([
+  'home/banner/cta/primary/href',
+  'home/banner/cta/secondary/href',
+  'home/status/cta/href',
+]);
+
+// Keys whose values must be valid https:// URLs.
+const httpsUrlKeys = new Set(['footer/font/url']);
+
+function isSafeRelativeHref(value: string): boolean {
+  return value.startsWith('/') || value.startsWith('#');
+}
+
+function isSafeHttpsUrl(value: string): boolean {
+  try {
+    return new URL(value).protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'PUT') {
     res.setHeader('Allow', 'PUT');
@@ -44,7 +66,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return;
     }
 
-    normalizedSettings[key] = value.trim();
+    const trimmed = value.trim();
+
+    if (relativeHrefKeys.has(key) && !isSafeRelativeHref(trimmed)) {
+      res.status(400).json({ error: `Value for '${key}' must be a relative path or anchor (starting with / or #).` });
+      return;
+    }
+
+    if (httpsUrlKeys.has(key) && !isSafeHttpsUrl(trimmed)) {
+      res.status(400).json({ error: `Value for '${key}' must be a valid https:// URL.` });
+      return;
+    }
+
+    normalizedSettings[key] = trimmed;
   }
 
   try {
@@ -75,7 +109,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (currentRow) {
           await transaction.settings.update({
             where: { id: currentRow.id },
-            data: { value },
+            data: { value, updated_at: new Date() },
           });
         } else {
           await transaction.settings.create({

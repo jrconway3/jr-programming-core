@@ -30,7 +30,7 @@ const preferredCompanyNames = [
   "Freight Access, Inc.",
 ];
 
-function toYear(value?: string): number | null {
+function toYear(value?: string | null): number | null {
   if (!value) {
     return null;
   }
@@ -318,10 +318,17 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
       take: 4,
     }),
     prisma.project.findMany({
-      include: {
+      select: {
+        start_date: true,
+        position: true,
+        name: true,
+        short: true,
+        role: true,
         categories: {
-          include: {
-            category: true,
+          select: {
+            category: {
+              select: { shortcode: true },
+            },
           },
         },
       },
@@ -329,7 +336,17 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
   ]);
 
   const featuredProjects = JSON.parse(JSON.stringify(featuredProjectsRaw)) as Project[];
-  const allProjects = JSON.parse(JSON.stringify(allProjectsRaw)) as Project[];
+
+  type ProjectStats = {
+    start_date?: string | null;
+    position?: string | null;
+    name: string;
+    short: string;
+    role?: string | null;
+    categories: { category: { shortcode: string } }[];
+  };
+
+  const allProjects = JSON.parse(JSON.stringify(allProjectsRaw)) as ProjectStats[];
 
   const startYears = allProjects
     .map((project) => toYear(project.start_date))

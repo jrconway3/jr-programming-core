@@ -9,7 +9,7 @@ type Props = { children: React.ReactNode }
 
 export default function Layout({ children }: Props) {
   const { settings } = useSettings()
-  const footerYear = getSettingValue(settings, 'footer/copy/year')
+  const footerYear = getSettingValue(settings, 'footer/copy/year') || String(new Date().getFullYear())
   const footerName = getSettingValue(settings, 'footer/copy/name')
   const footerRights = getSettingValue(settings, 'footer/copy/rights')
   const footerBuilt = getSettingValue(settings, 'footer/copy/built')

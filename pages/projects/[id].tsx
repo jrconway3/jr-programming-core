@@ -14,12 +14,20 @@ function formatDate(dateStr?: string | null): string {
   return d.toLocaleDateString("en-US", { year: "numeric", month: "short" });
 }
 
+function buildDateRange(startDate?: string | null, endDate?: string | null): string | null {
+  if (startDate == null && endDate == null) return null;
+  if (startDate != null && endDate != null) {
+    return `${formatDate(startDate)} – ${formatDate(endDate)}`;
+  }
+  if (startDate != null) {
+    return `${formatDate(startDate)} – Present`;
+  }
+  return formatDate(endDate);
+}
+
 export default function ProjectPage({ project }: Props) {
   const isExperienceEntry = project.categories.some((categoryEntry) => categoryEntry.category.shortcode === 'experience');
-  const dateRange =
-    project.start_date || project.end_date !== undefined
-      ? `${formatDate(project.start_date)} – ${formatDate(project.end_date)}`
-      : null;
+  const dateRange = buildDateRange(project.start_date, project.end_date);
   const primaryBackHref = isExperienceEntry ? '/experience' : '/projects';
   const primaryBackLabel = isExperienceEntry ? 'Back to Experience' : 'Back to Portfolio';
 
