@@ -20,12 +20,32 @@ const relativeHrefKeys = new Set([
 const httpsUrlKeys = new Set(['footer/font/url']);
 
 function isSafeRelativeHref(value: string): boolean {
-  return value.startsWith('/') || value.startsWith('#');
+  if (value.startsWith('#')) {
+    return true;
+  }
+
+  if (!value.startsWith('/') || value.startsWith('//') || value.startsWith('\\') || value.includes('\\')) {
+    return false;
+  }
+
+  try {
+    const baseUrl = new URL('https://example.com');
+    const resolvedUrl = new URL(value, baseUrl);
+    return resolvedUrl.origin === baseUrl.origin && resolvedUrl.pathname.startsWith('/');
+  } catch {
+    return false;
+  }
 }
 
 function isSafeHttpsUrl(value: string): boolean {
   try {
-    return new URL(value).protocol === 'https:';
+    const url = new URL(value);
+    return (
+      url.protocol === 'https:' &&
+      url.hostname.length > 0 &&
+      url.username === '' &&
+      url.password === ''
+    );
   } catch {
     return false;
   }

@@ -1,24 +1,15 @@
 import Link from "next/link";
-import { Project } from "models/projects";
+import { Project, buildDateRange } from "models/projects";
 
 interface Props {
   project: Project;
   variant?: "project" | "experience";
 }
 
-function formatDate(dateStr?: string | null): string {
-  if (!dateStr) return "Present";
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "short" });
-}
-
-function hasDateRange(project: Project): boolean {
-  return Boolean(project.start_date || project.end_date);
-}
-
 export default function ProjectCard({ project, variant = "project" }: Props) {
   const skills = project.skills?.slice(0, 4) ?? [];
   const categories = project.categories?.map((entry) => entry.category.title) ?? [];
+  const dateRange = buildDateRange(project.start_date, project.end_date);
 
   if (variant === "experience") {
     return (
@@ -39,10 +30,8 @@ export default function ProjectCard({ project, variant = "project" }: Props) {
             )}
           </div>
 
-          {hasDateRange(project) && (
-            <span className="whitespace-nowrap rounded-full border border-primary-accent/25 px-3 py-1 text-xs text-primary-text/65">
-              {formatDate(project.start_date)} {" – "} {formatDate(project.end_date)}
-            </span>
+          {dateRange && (
+            <span className="whitespace-nowrap rounded-full border border-primary-accent/25 px-3 py-1 text-xs text-primary-text/65">{dateRange}</span>
           )}
         </div>
 
@@ -81,10 +70,8 @@ export default function ProjectCard({ project, variant = "project" }: Props) {
           <h3 className="mt-2 text-2xl font-semibold text-primary-text">{project.name}</h3>
         </div>
 
-        {hasDateRange(project) && (
-          <span className="whitespace-nowrap rounded-full border border-primary-accent/40 bg-primary-accent/8 px-3 py-1 text-xs text-primary-text/75 shadow-[0_0_10px_rgba(168,85,247,0.12)]">
-            {formatDate(project.start_date)} {" – "} {formatDate(project.end_date)}
-          </span>
+        {dateRange && (
+          <span className="whitespace-nowrap rounded-full border border-primary-accent/40 bg-primary-accent/8 px-3 py-1 text-xs text-primary-text/75 shadow-[0_0_10px_rgba(168,85,247,0.12)]">{dateRange}</span>
         )}
       </div>
 

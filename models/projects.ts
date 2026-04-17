@@ -97,3 +97,20 @@ export function useProjects(options: { shortcode?: string; sort?: 'date' } = {})
 
   return { projects, loading, error };
 }
+
+function formatDate(dateStr?: string | null): string {
+  if (!dateStr) return "Present";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "short" });
+}
+
+export function buildDateRange(startDate?: string | null, endDate?: string | null): string | null {
+  if (startDate == null && endDate == null) return null;
+  if (startDate != null && endDate != null) {
+    return `${formatDate(startDate)} – ${formatDate(endDate)}`;
+  }
+  if (startDate != null) {
+    return `${formatDate(startDate)} – Present`;
+  }
+  return formatDate(endDate);
+}

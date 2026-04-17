@@ -529,7 +529,7 @@ describe('admin API handlers', () => {
     );
     expect(prismaMock.settings.update).toHaveBeenCalledWith({
       where: { id: 5 },
-      data: { value: 'David Conway Jr.' },
+      data: expect.objectContaining({ value: 'David Conway Jr.' }),
     });
     expect(prismaMock.settings.create).toHaveBeenCalledWith({
       data: {

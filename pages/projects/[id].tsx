@@ -2,27 +2,11 @@ import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { prisma } from "../../prisma/adapter";
+import { buildDateRange } from "../../models/projects";
 import type { ProjectDetail } from "../../models/projects";
 
 interface Props {
   project: ProjectDetail;
-}
-
-function formatDate(dateStr?: string | null): string {
-  if (!dateStr) return "Present";
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "short" });
-}
-
-function buildDateRange(startDate?: string | null, endDate?: string | null): string | null {
-  if (startDate == null && endDate == null) return null;
-  if (startDate != null && endDate != null) {
-    return `${formatDate(startDate)} – ${formatDate(endDate)}`;
-  }
-  if (startDate != null) {
-    return `${formatDate(startDate)} – Present`;
-  }
-  return formatDate(endDate);
 }
 
 export default function ProjectPage({ project }: Props) {
