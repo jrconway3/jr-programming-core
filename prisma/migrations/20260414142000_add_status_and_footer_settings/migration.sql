@@ -1,3 +1,6 @@
+-- Add unique index on key.
+ALTER TABLE `jr_settings` ADD UNIQUE INDEX `jr_settings_key_key` (`key`);
+
 UPDATE `jr_settings`
 SET `value` = 'Built using Next.js and Tailwind CSS, with assistance from GitHub Copilot.',
     `updated_at` = CURRENT_TIMESTAMP(3)

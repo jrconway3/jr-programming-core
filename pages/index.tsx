@@ -87,7 +87,7 @@ export default function Home({
   const secondaryCtaLabel = getSettingValue(settings, "home/banner/cta/secondary/label");
   const secondaryCtaHref = getSettingValue(settings, "home/banner/cta/secondary/href");
   const statusEnabledRaw = getSettingValue(settings, "home/status/enabled");
-  const statusState = getSettingValue(settings, "home/status/state").toLowerCase();
+  const statusState = getSettingValue(settings, "home/status/state").trim().toLowerCase();
   const configuredStatusLabel = getSettingValue(settings, "home/status/label");
   const configuredStatusMessage = getSettingValue(settings, "home/status/message");
   const statusCtaLabel = getSettingValue(settings, "home/status/cta/label");

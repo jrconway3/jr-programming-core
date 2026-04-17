@@ -102,45 +102,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    await prisma.$transaction(async (transaction) => {
-      const existingRows = await transaction.settings.findMany({
-        where: {
-          key: {
-            in: Object.keys(normalizedSettings),
-          },
-        },
-        orderBy: [
-          { updated_at: 'desc' },
-          { id: 'desc' },
-        ],
-      });
-
-      const currentRowsByKey = new Map<string, { id: number }>();
-
-      for (const row of existingRows) {
-        if (!currentRowsByKey.has(row.key)) {
-          currentRowsByKey.set(row.key, { id: row.id });
-        }
-      }
-
-      for (const [key, value] of Object.entries(normalizedSettings)) {
-        const currentRow = currentRowsByKey.get(key);
-
-        if (currentRow) {
-          await transaction.settings.update({
-            where: { id: currentRow.id },
-            data: { value, updated_at: new Date() },
-          });
-        } else {
-          await transaction.settings.create({
-            data: {
-              key,
-              value,
-            },
-          });
-        }
-      }
-    });
+    await prisma.$transaction(
+      Object.entries(normalizedSettings).map(([key, value]) =>
+        prisma.settings.upsert({
+          where: { key },
+          update: { value },
+          create: { key, value },
+        }),
+      ),
+    );
 
     res.status(200).json({
       settings: mergeSettingsWithDefaults(
