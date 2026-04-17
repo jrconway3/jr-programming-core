@@ -8,7 +8,7 @@ interface Props {
 
 export default function ProjectCard({ project, variant = "project" }: Props) {
   const skills = project.skills?.slice(0, 4) ?? [];
-  const categories = project.categories?.map((entry) => entry.category.title) ?? [];
+  const categories = project.categories ?? [];
   const dateRange = buildDateRange(project.start_date, project.end_date);
 
   if (variant === "experience") {
@@ -45,10 +45,10 @@ export default function ProjectCard({ project, variant = "project" }: Props) {
             <div className="flex flex-wrap gap-2 pt-1">
               {categories.slice(0, 3).map((category) => (
                 <span
-                  key={category}
+                  key={category.shortcode}
                   className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-primary-text/60"
                 >
-                  {category}
+                  {category.title}
                 </span>
               ))}
             </div>
