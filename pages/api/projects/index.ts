@@ -31,7 +31,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             ]
           : undefined,
       });
-      res.status(200).json(projects);
+      res.status(200).json(projects.map((project) => ({
+        ...project,
+        skills: project.skills.map(({ priority, skill }) => ({ id: skill.id, priority, name: skill.name, desc: skill.desc, rating: skill.rating })),
+        categories: project.categories.map(({ priority, category }) => ({ id: category.id, priority, title: category.title, shortcode: category.shortcode })),
+      })));
     } catch (error) {
       console.error('GET /api/projects failed', error);
       res.status(500).json({ error: 'Failed to fetch projects' });

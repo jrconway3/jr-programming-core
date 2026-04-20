@@ -45,10 +45,10 @@ export default function ProjectCard({ project, variant = "project" }: Props) {
             <div className="flex flex-wrap gap-2 pt-1">
               {categories.slice(0, 3).map((category) => (
                 <span
-                  key={category.shortcode}
+                  key={category.category.shortcode}
                   className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-primary-text/60"
                 >
-                  {category.title}
+                  {category.category.title}
                 </span>
               ))}
             </div>

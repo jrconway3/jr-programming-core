@@ -30,15 +30,18 @@ export interface ProjectGalleryItem {
 }
 
 export interface ProjectSkillEntry {
-  skill_id: number;
+  id: number;
   priority: number;
-  skill: { id: number; name: string; desc: string; rating: number };
+  name: string;
+  desc: string;
+  rating: number;
 }
 
 export interface ProjectCategoryEntry {
-  category_id: number;
+  id: number;
   priority: number;
-  category: { id: number; title: string; shortcode: string };
+  title: string;
+  shortcode: string;
 }
 
 export interface ProjectDetail extends Project {
