@@ -1,9 +1,9 @@
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { prisma } from "../../prisma/adapter";
 import { buildDateRange } from "../../models/projects";
 import type { ProjectDetail } from "../../models/projects";
+import { getProjectById } from "../../lib/projects";
 
 interface Props {
   project: ProjectDetail;
@@ -175,29 +175,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
   const id = parseInt(context.params?.id as string, 10);
   if (isNaN(id)) return { notFound: true };
 
-  const project = await prisma.project.findUnique({
-    where: { id },
-    include: {
-      links: { orderBy: { priority: "asc" } },
-      gallery: { orderBy: { priority: "asc" } },
-      skills: {
-        include: { skill: true },
-        orderBy: { priority: "asc" },
-      },
-      categories: {
-        include: { category: true },
-        orderBy: { priority: "asc" },
-      },
-    },
-  });
+  const project = await getProjectById(id);
 
   if (!project) return { notFound: true };
 
-  const serialized: ProjectDetail = JSON.parse(JSON.stringify({
-    ...project,
-    skills: project.skills.map(({ priority, skill }) => ({ id: skill.id, priority, name: skill.name, desc: skill.desc, rating: skill.rating })),
-    categories: project.categories.map(({ priority, category }) => ({ id: category.id, priority, title: category.title, shortcode: category.shortcode })),
-  }));
-
-  return { props: { project: serialized } };
+  return { props: { project } };
 };

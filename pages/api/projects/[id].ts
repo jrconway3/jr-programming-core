@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '../../../prisma/adapter';
+import { serializeProject } from '../../../models/projects';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
@@ -24,11 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
       });
       if (!project) return res.status(404).json({ error: 'Project not found' });
-      res.status(200).json({
-        ...project,
-        skills: project.skills.map(({ priority, skill }) => ({ id: skill.id, priority, name: skill.name, desc: skill.desc, rating: skill.rating })),
-        categories: project.categories.map(({ priority, category }) => ({ id: category.id, priority, title: category.title, shortcode: category.shortcode })),
-      });
+      res.status(200).json(serializeProject(project));
     } catch (error) {
       console.error('GET /api/projects/[id] failed', error);
       res.status(500).json({ error: 'Failed to fetch project' });

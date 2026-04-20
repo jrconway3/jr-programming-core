@@ -58,9 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
-  const session = requireAdminApi(req, res);
-
-  if (!session) {
+  if (!requireAdminApi(req, res)) {
     return;
   }
 

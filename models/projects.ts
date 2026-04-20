@@ -101,6 +101,28 @@ export function useProjects(options: { shortcode?: string; sort?: 'date' } = {})
   return { projects, loading, error };
 }
 
+type PrismaProjectWithRelations = {
+  skills: Array<{ priority: number; skill: { id: number; name: string; desc: string; rating: number } }>;
+  categories: Array<{ priority: number; category: { id: number; title: string; shortcode: string } }>;
+  [key: string]: unknown;
+};
+
+function flattenProjectRelations(project: PrismaProjectWithRelations): Record<string, unknown> {
+  return {
+    ...project,
+    skills: project.skills.map(({ priority, skill }) => ({ id: skill.id, priority, name: skill.name, desc: skill.desc, rating: skill.rating })),
+    categories: project.categories.map(({ priority, category }) => ({ id: category.id, priority, title: category.title, shortcode: category.shortcode })),
+  };
+}
+
+export function serializeProjects(projects: PrismaProjectWithRelations[]): Project[] {
+  return JSON.parse(JSON.stringify(projects.map(flattenProjectRelations)));
+}
+
+export function serializeProject<T extends Project>(project: PrismaProjectWithRelations): T {
+  return JSON.parse(JSON.stringify(flattenProjectRelations(project)));
+}
+
 function formatDate(dateStr?: string | null): string {
   if (!dateStr) return "Present";
   const d = new Date(dateStr);

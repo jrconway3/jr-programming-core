@@ -5,7 +5,7 @@ import type { Project } from "../models/projects";
 import { useSettings } from "../components/SettingsContext";
 import ProjectCard from "components/ProjectCard";
 import { getSettingValue, siteSettingDefaults } from "../lib/site-settings";
-import { prisma } from "../prisma/adapter";
+import { getFeaturedProjects, getAllProjectStats, type ProjectStatsEntry } from "../lib/projects";
 
 const legacyHeroSubtitles = new Set([
   "web software engineer & programmer",
@@ -286,71 +286,12 @@ export default function Home({
 }
 
 export const getServerSideProps: GetServerSideProps<HomePageProps> = async () => {
-  const [featuredProjectsRaw, allProjectsRaw] = await Promise.all([
-    prisma.project.findMany({
-      where: {
-        categories: {
-          some: {
-            category: {
-              shortcode: "featured-projects",
-            },
-          },
-        },
-      },
-      include: {
-        skills: {
-          include: {
-            skill: true,
-          },
-          orderBy: { priority: "asc" },
-        },
-        categories: {
-          include: {
-            category: true,
-          },
-          orderBy: { priority: "asc" },
-        },
-      },
-      orderBy: [
-        { end_date: { sort: "desc", nulls: "first" } },
-        { start_date: "asc" },
-      ],
-      take: 4,
-    }),
-    prisma.project.findMany({
-      select: {
-        start_date: true,
-        position: true,
-        name: true,
-        short: true,
-        role: true,
-        categories: {
-          select: {
-            category: {
-              select: { shortcode: true },
-            },
-          },
-        },
-      },
-    }),
+  const [featuredProjects, allProjectsRaw] = await Promise.all([
+    getFeaturedProjects(4),
+    getAllProjectStats(),
   ]);
 
-  const featuredProjects: Project[] = JSON.parse(JSON.stringify(featuredProjectsRaw.map((project) => ({
-    ...project,
-    skills: project.skills.map(({ priority, skill }) => ({ id: skill.id, priority, name: skill.name, desc: skill.desc, rating: skill.rating })),
-    categories: project.categories.map(({ priority, category }) => ({ id: category.id, priority, title: category.title, shortcode: category.shortcode })),
-  }))))
-
-  type ProjectStats = {
-    start_date?: string | null;
-    position?: string | null;
-    name: string;
-    short: string;
-    role?: string | null;
-    categories: { category: { shortcode: string } }[];
-  };
-
-  const allProjects = JSON.parse(JSON.stringify(allProjectsRaw)) as ProjectStats[];
+  const allProjects: ProjectStatsEntry[] = allProjectsRaw;
 
   const startYears = allProjects
     .map((project) => toYear(project.start_date))
