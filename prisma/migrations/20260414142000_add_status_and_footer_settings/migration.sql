@@ -1,3 +1,9 @@
+-- Deduplicate: keep only the newest row per key before adding the unique index.
+DELETE s1 FROM `jr_settings` s1
+INNER JOIN `jr_settings` s2
+  ON s1.`key` = s2.`key`
+ AND (s1.`updated_at` < s2.`updated_at` OR (s1.`updated_at` = s2.`updated_at` AND s1.`id` < s2.`id`));
+
 -- Add unique index on key.
 ALTER TABLE `jr_settings` ADD UNIQUE INDEX `jr_settings_key_key` (`key`);
 

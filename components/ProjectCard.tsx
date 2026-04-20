@@ -45,10 +45,10 @@ export default function ProjectCard({ project, variant = "project" }: Props) {
             <div className="flex flex-wrap gap-2 pt-1">
               {categories.slice(0, 3).map((category) => (
                 <span
-                  key={category.category.shortcode}
+                  key={category.shortcode}
                   className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-primary-text/60"
                 >
-                  {category.category.title}
+                  {category.title}
                 </span>
               ))}
             </div>
@@ -98,10 +98,10 @@ export default function ProjectCard({ project, variant = "project" }: Props) {
             <div className="mt-3 flex flex-wrap gap-2">
               {skills.map((skillEntry) => (
                 <span
-                  key={skillEntry.skill_id}
+                  key={skillEntry.id}
                   className="rounded-full border border-primary-accent/20 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-primary-accentLight"
                 >
-                  {skillEntry.skill.name}
+                  {skillEntry.name}
                 </span>
               ))}
             </div>

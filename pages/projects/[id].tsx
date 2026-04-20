@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function ProjectPage({ project }: Props) {
-  const isExperienceEntry = project.categories.some((categoryEntry) => categoryEntry.category.shortcode === 'experience');
+  const isExperienceEntry = project.categories.some((categoryEntry) => categoryEntry.shortcode === 'experience');
   const dateRange = buildDateRange(project.start_date, project.end_date);
   const primaryBackHref = isExperienceEntry ? '/experience' : '/projects';
   const primaryBackLabel = isExperienceEntry ? 'Back to Experience' : 'Back to Portfolio';
@@ -68,11 +68,11 @@ export default function ProjectPage({ project }: Props) {
                 <div className="mt-2 flex flex-wrap gap-2">
                   {project.categories.length > 0 ? project.categories.map((categoryEntry) => (
                     <Link
-                      key={categoryEntry.category_id}
-                      href={`/${categoryEntry.category.shortcode}`}
+                      key={categoryEntry.id}
+                      href={`/${categoryEntry.shortcode}`}
                       className="rounded-full border border-accent/20 px-3 py-1 text-xs text-primary-text/70 transition hover:border-accent hover:text-accent"
                     >
-                      {categoryEntry.category.title}
+                      {categoryEntry.title}
                     </Link>
                   )) : (
                     <span className="text-sm text-primary-text/60">Uncategorized</span>
@@ -117,11 +117,11 @@ export default function ProjectPage({ project }: Props) {
               <div className="flex flex-wrap gap-2">
                 {project.skills.map((s) => (
                   <span
-                    key={s.skill_id}
+                    key={s.id}
                     className="px-3 py-1 rounded-full text-sm glass border border-accent/20 text-primary-accentLight"
-                    title={s.skill.desc}
+                    title={s.desc}
                   >
-                    {s.skill.name}
+                    {s.name}
                   </span>
                 ))}
               </div>
@@ -193,8 +193,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 
   if (!project) return { notFound: true };
 
-  // Serialize dates to strings
-  const serialized = JSON.parse(JSON.stringify(project));
+  const serialized: ProjectDetail = JSON.parse(JSON.stringify({
+    ...project,
+    skills: project.skills.map(({ priority, skill }) => ({ id: skill.id, priority, name: skill.name, desc: skill.desc, rating: skill.rating })),
+    categories: project.categories.map(({ priority, category }) => ({ id: category.id, priority, title: category.title, shortcode: category.shortcode })),
+  }));
 
   return { props: { project: serialized } };
 };

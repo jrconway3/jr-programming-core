@@ -61,7 +61,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async () => {
     return { notFound: true };
   }
 
-  const projects = JSON.parse(JSON.stringify(projectsRaw)) as Project[];
+  const projects: Project[] = JSON.parse(JSON.stringify(projectsRaw.map((project) => ({
+    ...project,
+    skills: project.skills.map(({ priority, skill }) => ({ id: skill.id, priority, name: skill.name, desc: skill.desc, rating: skill.rating })),
+    categories: project.categories.map(({ priority, category }) => ({ id: category.id, priority, title: category.title, shortcode: category.shortcode })),
+  }))))
 
   return {
     props: {

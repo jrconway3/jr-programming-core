@@ -335,7 +335,11 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
     }),
   ]);
 
-  const featuredProjects = JSON.parse(JSON.stringify(featuredProjectsRaw)) as Project[];
+  const featuredProjects: Project[] = JSON.parse(JSON.stringify(featuredProjectsRaw.map((project) => ({
+    ...project,
+    skills: project.skills.map(({ priority, skill }) => ({ id: skill.id, priority, name: skill.name, desc: skill.desc, rating: skill.rating })),
+    categories: project.categories.map(({ priority, category }) => ({ id: category.id, priority, title: category.title, shortcode: category.shortcode })),
+  }))))
 
   type ProjectStats = {
     start_date?: string | null;
