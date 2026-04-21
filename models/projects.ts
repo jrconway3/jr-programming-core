@@ -139,3 +139,17 @@ export function buildDateRange(startDate?: string | null, endDate?: string | nul
   }
   return formatDate(endDate);
 }
+
+export function toSecureAssetUrl(value: string): string {
+  const trimmed = value.trim();
+
+  if (trimmed.startsWith('/')) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith('http://')) {
+    return `https://${trimmed.slice('http://'.length)}`;
+  }
+
+  return trimmed;
+}

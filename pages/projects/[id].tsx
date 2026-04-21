@@ -1,7 +1,7 @@
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { buildDateRange } from "../../models/projects";
+import { buildDateRange, toSecureAssetUrl } from "../../models/projects";
 import type { ProjectDetail } from "../../models/projects";
 import { getProjectById } from "../../lib/projects";
 
@@ -99,7 +99,7 @@ export default function ProjectPage({ project }: Props) {
                 {project.links.map((link) => (
                   <a
                     key={link.id}
-                    href={link.url}
+                    href={toSecureAssetUrl(link.url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-block px-5 py-2 rounded-lg glass border border-accent/30 text-accent hover:bg-accent/10 hover:border-accent transition text-sm font-medium"
@@ -135,7 +135,7 @@ export default function ProjectPage({ project }: Props) {
                 {project.gallery.map((item) => (
                   <figure key={item.id} className="rounded-lg overflow-hidden border border-accent/20">
                     <img
-                      src={item.image}
+                      src={toSecureAssetUrl(item.image)}
                       alt={item.title}
                       className="w-full object-cover"
                       loading="lazy"
