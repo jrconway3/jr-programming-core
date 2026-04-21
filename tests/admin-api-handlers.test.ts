@@ -51,6 +51,12 @@ const {
       delete: vi.fn(),
       findMany: vi.fn(),
     },
+    settings: {
+      findMany: vi.fn(),
+      update: vi.fn(),
+      create: vi.fn(),
+      upsert: vi.fn(),
+    },
     inquiry: {
       update: vi.fn(),
     },
@@ -138,6 +144,7 @@ let categoriesByIdHandler: typeof import('../pages/api/admin/categories/[id]').d
 let inquiriesByIdHandler: typeof import('../pages/api/admin/inquiries/[id]').default;
 let projectsCreateHandler: typeof import('../pages/api/admin/projects/index').default;
 let projectsByIdHandler: typeof import('../pages/api/admin/projects/[id]').default;
+let settingsHandler: typeof import('../pages/api/admin/settings').default;
 const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
 describe('admin API handlers', () => {
@@ -155,6 +162,7 @@ describe('admin API handlers', () => {
     inquiriesByIdHandler = (await import('../pages/api/admin/inquiries/[id]')).default;
     projectsCreateHandler = (await import('../pages/api/admin/projects/index')).default;
     projectsByIdHandler = (await import('../pages/api/admin/projects/[id]')).default;
+    settingsHandler = (await import('../pages/api/admin/settings')).default;
 
     requireAdminApiMock.mockReturnValue({ username: 'admin' });
     getAdminSessionMock.mockReturnValue(null);
@@ -164,7 +172,11 @@ describe('admin API handlers', () => {
 
     serializeAdminProjectMock.mockImplementation((project) => project);
 
-    prismaMock.$transaction.mockImplementation(async (callback) => callback(prismaMock));
+    prismaMock.$transaction.mockImplementation(async (callbackOrArray) =>
+      Array.isArray(callbackOrArray)
+        ? Promise.all(callbackOrArray)
+        : callbackOrArray(prismaMock)
+    );
     consoleErrorSpy.mockClear();
   });
 
@@ -467,6 +479,83 @@ describe('admin API handlers', () => {
 
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({ error: 'Failed to update inquiry.' });
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+
+  it('settings handler rejects invalid methods', async () => {
+    const req = createRequest({ method: 'GET' });
+    const res = createResponse();
+
+    await settingsHandler(req as never, res as never);
+
+    expect(res.statusCode).toBe(405);
+    expect(res.headers.Allow).toBe('PUT');
+    expect(res.body).toEqual({ error: 'Method not allowed' });
+  });
+
+  it('settings handler validates the request payload', async () => {
+    const req = createRequest({ method: 'PUT', body: {} });
+    const res = createResponse();
+
+    await settingsHandler(req as never, res as never);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: 'A settings object is required.' });
+  });
+
+  it('settings handler upserts all submitted keys', async () => {
+    prismaMock.settings.upsert.mockResolvedValue({ id: 5, key: 'home/banner/title', value: 'David Conway Jr.', page_id: null, created_at: new Date(), updated_at: new Date() });
+
+    const req = createRequest({
+      method: 'PUT',
+      body: {
+        settings: {
+          'home/banner/title': 'David Conway Jr.',
+          'home/banner/eyebrow': 'Backend Developer',
+        },
+      },
+    });
+    const res = createResponse();
+
+    await settingsHandler(req as never, res as never);
+
+    expect(prismaMock.settings.upsert).toHaveBeenCalledWith({
+      where: { key: 'home/banner/title' },
+      update: { value: 'David Conway Jr.' },
+      create: { key: 'home/banner/title', value: 'David Conway Jr.' },
+    });
+    expect(prismaMock.settings.upsert).toHaveBeenCalledWith({
+      where: { key: 'home/banner/eyebrow' },
+      update: { value: 'Backend Developer' },
+      create: { key: 'home/banner/eyebrow', value: 'Backend Developer' },
+    });
+    expect(prismaMock.settings.upsert).toHaveBeenCalledTimes(2);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject({
+      settings: {
+        'home/banner/title': 'David Conway Jr.',
+        'home/banner/eyebrow': 'Backend Developer',
+      },
+    });
+  });
+
+  it('settings handler returns 500 for unexpected errors', async () => {
+    prismaMock.settings.upsert.mockRejectedValue(new Error('db offline'));
+
+    const req = createRequest({
+      method: 'PUT',
+      body: {
+        settings: {
+          'home/banner/title': 'David Conway Jr.',
+        },
+      },
+    });
+    const res = createResponse();
+
+    await settingsHandler(req as never, res as never);
+
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({ error: 'Failed to save settings.' });
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 

@@ -2,10 +2,21 @@
 import Link from 'next/link'
 import React from 'react'
 import Head from 'next/head'
+import { useSettings } from './SettingsContext'
+import { getSettingValue } from '../lib/site-settings'
 
 type Props = { children: React.ReactNode }
 
 export default function Layout({ children }: Props) {
+  const { settings } = useSettings()
+  const footerYear = getSettingValue(settings, 'footer/copy/year') || String(new Date().getFullYear())
+  const footerName = getSettingValue(settings, 'footer/copy/name')
+  const footerRights = getSettingValue(settings, 'footer/copy/rights')
+  const footerBuilt = getSettingValue(settings, 'footer/copy/built')
+  const footerFontName = getSettingValue(settings, 'footer/font/name')
+  const footerFontAuthor = getSettingValue(settings, 'footer/font/author')
+  const footerFontUrl = getSettingValue(settings, 'footer/font/url')
+
   return (
     <>
       <Head>
@@ -30,11 +41,11 @@ export default function Layout({ children }: Props) {
 
         <main className="flex-1">{children}</main>
 
-        <footer className="w-full py-4 text-center text-muted border-t border-accent/30 glass text-xs">
-          <div className="neon-text">
-            <p><span className="copyright">&copy;</span> {new Date().getFullYear()} David Conway Jr, all rights reserved.</p>
-            <p>Built using Next.js and Tailwind CSS, with assistance from GitHub Copilot.</p>
-            <p>Free Font "Commodore 64" by <a href="https://www.dafont.com/commodore-64.font" className="underline" target="_blank" rel="noopener noreferrer">Devin Cook</a></p>
+        <footer className="w-full border-t border-accent/20 bg-slate-950/40 py-4 text-center text-xs text-muted backdrop-blur-sm">
+          <div className="text-primary-text/70">
+            <p><span className="copyright">&copy;</span> {footerYear} {footerName}, {footerRights}</p>
+            <p>{footerBuilt}</p>
+            <p>Free Font "{footerFontName}" by <a href={footerFontUrl} className="underline" target="_blank" rel="noopener noreferrer">{footerFontAuthor}</a></p>
           </div>
         </footer>
       </div>

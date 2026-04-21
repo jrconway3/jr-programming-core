@@ -12,10 +12,10 @@ generator client {
 model Settings {
   id         Int           @id @default(autoincrement())
   page_id    Int?
-  key        String
+  key        String        @unique
   value      String
   created_at DateTime      @default(now())
-  updated_at DateTime      @default(now())
+  updated_at DateTime      @default(now()) @updatedAt
   @@map("jr_settings")
 }
 

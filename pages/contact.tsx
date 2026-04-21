@@ -126,7 +126,7 @@ export default function Contact() {
             </div>
           </section>
 
-          <section className="terminal-card p-6 md:p-8">
+          <section id="inquiry-form" className="terminal-card p-6 md:p-8">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-primary-accentLight">Send Inquiry</h2>
               <p className="mt-3 text-xs leading-6 text-primary-text/75 md:text-sm">

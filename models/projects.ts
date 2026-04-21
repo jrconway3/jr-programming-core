@@ -11,6 +11,8 @@ export interface Project {
   end_date?: string;
   created_at: string;
   updated_at: string;
+  skills?: ProjectSkillEntry[];
+  categories?: ProjectCategoryEntry[];
 }
 
 export interface ProjectLink {
@@ -28,15 +30,18 @@ export interface ProjectGalleryItem {
 }
 
 export interface ProjectSkillEntry {
-  skill_id: number;
+  id: number;
   priority: number;
-  skill: { id: number; name: string; desc: string; rating: number };
+  name: string;
+  desc: string;
+  rating: number;
 }
 
 export interface ProjectCategoryEntry {
-  category_id: number;
+  id: number;
   priority: number;
-  category: { id: number; title: string; shortcode: string };
+  title: string;
+  shortcode: string;
 }
 
 export interface ProjectDetail extends Project {
@@ -94,4 +99,43 @@ export function useProjects(options: { shortcode?: string; sort?: 'date' } = {})
   }, [options.shortcode, options.sort]);
 
   return { projects, loading, error };
+}
+
+type PrismaProjectWithRelations = {
+  skills: Array<{ priority: number; skill: { id: number; name: string; desc: string; rating: number } }>;
+  categories: Array<{ priority: number; category: { id: number; title: string; shortcode: string } }>;
+  [key: string]: unknown;
+};
+
+function flattenProjectRelations(project: PrismaProjectWithRelations): Record<string, unknown> {
+  return {
+    ...project,
+    skills: project.skills.map(({ priority, skill }) => ({ id: skill.id, priority, name: skill.name, desc: skill.desc, rating: skill.rating })),
+    categories: project.categories.map(({ priority, category }) => ({ id: category.id, priority, title: category.title, shortcode: category.shortcode })),
+  };
+}
+
+export function serializeProjects(projects: PrismaProjectWithRelations[]): Project[] {
+  return JSON.parse(JSON.stringify(projects.map(flattenProjectRelations)));
+}
+
+export function serializeProject<T extends Project>(project: PrismaProjectWithRelations): T {
+  return JSON.parse(JSON.stringify(flattenProjectRelations(project)));
+}
+
+function formatDate(dateStr?: string | null): string {
+  if (!dateStr) return "Present";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "short" });
+}
+
+export function buildDateRange(startDate?: string | null, endDate?: string | null): string | null {
+  if (startDate == null && endDate == null) return null;
+  if (startDate != null && endDate != null) {
+    return `${formatDate(startDate)} – ${formatDate(endDate)}`;
+  }
+  if (startDate != null) {
+    return `${formatDate(startDate)} – Present`;
+  }
+  return formatDate(endDate);
 }

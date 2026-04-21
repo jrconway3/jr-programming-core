@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '../../../prisma/adapter';
+import { serializeProjects } from '../../../models/projects';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
@@ -10,6 +11,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         where: shortcode
           ? { categories: { some: { category: { shortcode } } } }
           : undefined,
+        include: {
+          skills: {
+            include: {
+              skill: true,
+            },
+            orderBy: { priority: 'asc' },
+          },
+          categories: {
+            include: {
+              category: true,
+            },
+            orderBy: { priority: 'asc' },
+          },
+        },
         orderBy: sortByDate
           ? [
               { end_date: { sort: 'desc', nulls: 'first' } },
@@ -17,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             ]
           : undefined,
       });
-      res.status(200).json(projects);
+      res.status(200).json(serializeProjects(projects));
     } catch (error) {
       console.error('GET /api/projects failed', error);
       res.status(500).json({ error: 'Failed to fetch projects' });
