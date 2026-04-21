@@ -605,7 +605,7 @@ export default function AdminProjects({ adminUser, categories, projects: initial
                           ...current,
                           links: current.links.map((item, itemIndex) => itemIndex === index ? { ...item, url: event.target.value } : item),
                         }))}
-                        placeholder="https://example.com"
+                        placeholder="https://example.com (https only)"
                         className="rounded-lg border border-primary-accent/30 bg-slate-950/65 px-4 py-3 text-sm text-primary-text focus:border-primary-accent focus:ring-primary-accent"
                       />
                       <button
@@ -692,7 +692,7 @@ export default function AdminProjects({ adminUser, categories, projects: initial
                           ...current,
                           gallery: current.gallery.map((galleryItem, itemIndex) => itemIndex === index ? { ...galleryItem, image: event.target.value } : galleryItem),
                         }))}
-                        placeholder="/images/project.png or https://..."
+                        placeholder="/images/project.png or https://example.com/image.png"
                         className="rounded-lg border border-primary-accent/30 bg-slate-950/65 px-4 py-3 text-sm text-primary-text focus:border-primary-accent focus:ring-primary-accent"
                       />
                       <button

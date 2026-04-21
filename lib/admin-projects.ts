@@ -124,13 +124,21 @@ function parseOptionalDate(value: unknown): Date | null | 'invalid' {
   return 'invalid';
 }
 
-function isValidHttpUrl(value: string): boolean {
+function isValidHttpsUrl(value: string): boolean {
   try {
     const parsed = new URL(value);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    return parsed.protocol === 'https:';
   } catch {
     return false;
   }
+}
+
+function isSafeGalleryImageSource(value: string): boolean {
+  if (value.startsWith('/')) {
+    return !value.startsWith('//') && !value.includes('\\');
+  }
+
+  return isValidHttpsUrl(value);
 }
 
 export function normalizeProjectPayload(body: unknown): NormalizationResult {
@@ -182,8 +190,8 @@ export function normalizeProjectPayload(body: unknown): NormalizationResult {
       return { ok: false, error: 'Each project link needs both a label and a URL.' };
     }
 
-    if (!isValidHttpUrl(url)) {
-      return { ok: false, error: 'Project links must use a valid http or https URL.' };
+    if (!isValidHttpsUrl(url)) {
+      return { ok: false, error: 'Project links must use a valid https URL.' };
     }
 
     links.push({
@@ -210,6 +218,10 @@ export function normalizeProjectPayload(body: unknown): NormalizationResult {
 
     if (!title || !image) {
       return { ok: false, error: 'Each gallery item needs both a title and an image URL.' };
+    }
+
+    if (!isSafeGalleryImageSource(image)) {
+      return { ok: false, error: 'Gallery images must use an absolute path or a valid https URL.' };
     }
 
     gallery.push({
