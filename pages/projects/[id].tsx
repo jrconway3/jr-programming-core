@@ -43,12 +43,12 @@ export default function ProjectPage({ project }: Props) {
             )}
           </div>
 
-          <div className="terminal-card p-6 mb-6">
+          <div className="terminal-card project-block-emphasis p-6 mb-6">
             <h2 className="mb-3 text-lg font-semibold text-accent">What It Does</h2>
             <p className="text-text leading-relaxed">{project.short}</p>
           </div>
 
-          <div className="terminal-card p-6 mb-6">
+          <div className="terminal-card project-block-emphasis p-6 mb-6">
             <h2 className="mb-4 text-lg font-semibold text-accent">Project Snapshot</h2>
             <div className="grid gap-5 md:grid-cols-2">
               <div>
@@ -83,7 +83,7 @@ export default function ProjectPage({ project }: Props) {
           </div>
 
           {project.extended && (
-            <div className="terminal-card p-6 mb-6">
+            <div className="terminal-card project-block-emphasis p-6 mb-6">
               <h2 className="text-lg font-semibold text-accent mb-3">What I Built</h2>
               <div
                 className="prose prose-invert max-w-none text-text leading-relaxed"
@@ -93,7 +93,7 @@ export default function ProjectPage({ project }: Props) {
           )}
 
           {project.links.length > 0 && (
-            <div className="terminal-card p-6 mb-6">
+            <div className="terminal-card project-block-emphasis p-6 mb-6">
               <h2 className="text-lg font-semibold text-accent mb-3">Proof & Links</h2>
               <div className="flex flex-wrap gap-3">
                 {project.links.map((link) => (
@@ -102,7 +102,7 @@ export default function ProjectPage({ project }: Props) {
                     href={toSecureAssetUrl(link.url)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block px-5 py-2 rounded-lg glass border border-accent/30 text-accent hover:bg-accent/10 hover:border-accent transition text-sm font-medium"
+                    className="btn-cta-outline inline-block px-5 py-2 text-sm font-medium"
                   >
                     {link.website}
                   </a>
@@ -112,7 +112,7 @@ export default function ProjectPage({ project }: Props) {
           )}
 
           {project.skills.length > 0 && (
-            <div className="terminal-card p-6 mb-6">
+            <div className="terminal-card project-block-emphasis p-6 mb-6">
               <h2 className="text-lg font-semibold text-accent mb-3">Skills & Technologies</h2>
               <div className="flex flex-wrap gap-2">
                 {project.skills.map((s) => (
@@ -129,7 +129,7 @@ export default function ProjectPage({ project }: Props) {
           )}
 
           {project.gallery.length > 0 && (
-            <div className="terminal-card p-6 mb-6">
+            <div className="terminal-card project-block-emphasis p-6 mb-6">
               <h2 className="text-lg font-semibold text-accent mb-3">Gallery</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {project.gallery.map((item) => (
@@ -154,13 +154,13 @@ export default function ProjectPage({ project }: Props) {
           <div className="mt-4 flex flex-wrap justify-center gap-3 text-center">
             <Link
               href={primaryBackHref}
-              className="inline-block px-6 py-2 rounded-lg glass border border-accent/30 text-muted hover:text-accent hover:border-accent transition text-sm"
+              className="btn-cta-outline inline-block px-6 py-2 text-sm"
             >
               ← {primaryBackLabel}
             </Link>
             <Link
               href="/"
-              className="inline-block px-6 py-2 rounded-lg glass border border-accent/30 text-muted hover:text-accent hover:border-accent transition text-sm"
+              className="btn-cta-outline inline-block px-6 py-2 text-sm"
             >
               Back to Home
             </Link>

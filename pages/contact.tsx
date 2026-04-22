@@ -238,7 +238,7 @@ export default function Contact() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center justify-center rounded-lg border border-primary-accent/40 bg-primary-accent px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-primary-accentDark disabled:cursor-not-allowed disabled:opacity-70"
+                  className="btn-cta-primary inline-flex items-center justify-center px-6 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit Inquiry'}
                 </button>

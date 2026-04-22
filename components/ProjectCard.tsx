@@ -16,7 +16,7 @@ export default function ProjectCard({ project, variant = "project" }: Props) {
       <Link
         key={project.id}
         href={`/projects/${project.id}`}
-        className="terminal-card block cursor-pointer p-6 transition-all duration-150 ease-out hover:scale-[1.01] hover:border-emerald-300/50 hover:shadow-[0_0_10px_rgba(74,222,128,0.1)]"
+        className="terminal-card block cursor-pointer p-6 transition-all duration-150 ease-out hover:scale-[1.01] hover:!border-emerald-300/50 hover:!shadow-[0_0_10px_rgba(74,222,128,0.1)]"
       >
         <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
@@ -62,8 +62,12 @@ export default function ProjectCard({ project, variant = "project" }: Props) {
     <Link
       key={project.id}
       href={`/projects/${project.id}`}
-      className="terminal-card group block cursor-pointer p-6 transition-all duration-150 ease-out hover:scale-[1.01] hover:border-emerald-300/50 hover:shadow-[0_0_10px_rgba(74,222,128,0.1)]"
+      className="terminal-card group relative block cursor-pointer p-6 transition-all duration-150 ease-out hover:scale-[1.01]"
     >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 rounded-[inherit] border border-transparent shadow-none transition-all duration-150 ease-out group-hover:border-emerald-300/50 group-hover:shadow-[0_0_10px_rgba(74,222,128,0.1)]"
+      />
       <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.28em] text-primary-accentLight">Case Study</p>

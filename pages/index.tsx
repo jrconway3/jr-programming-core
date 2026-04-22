@@ -150,13 +150,13 @@ export default function Home({
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
               <a
                 href={primaryCtaHref}
-                className="inline-block min-w-44 rounded-lg bg-primary-accent px-8 py-3 text-center font-semibold text-white shadow-[0_0_14px_rgba(168,85,247,0.28)] transition-all duration-150 ease-out hover:scale-[1.02] hover:bg-primary-accentDark hover:shadow-[0_0_12px_rgba(74,222,128,0.18)]"
+                className="btn-cta-primary inline-block min-w-44 px-8 py-3 text-center font-semibold"
               >
                 {primaryCtaLabel}
               </a>
               <Link
                 href={secondaryCtaHref}
-                className="inline-block min-w-44 rounded-lg border border-primary-accent/25 bg-slate-950/35 px-8 py-3 text-center font-semibold text-primary-accentLight/80 transition-all duration-150 ease-out hover:scale-[1.02] hover:border-emerald-300/65 hover:bg-slate-950/60 hover:text-emerald-200 hover:shadow-[0_0_10px_rgba(74,222,128,0.13)]"
+                className="btn-cta-outline inline-block min-w-44 px-8 py-3 text-center font-semibold"
               >
                 {secondaryCtaLabel}
               </Link>
@@ -191,7 +191,7 @@ export default function Home({
                   body: "Structure and optimize data models for faster queries, cleaner reporting, and easier scaling.",
                 },
               ].map((service) => (
-                <article key={service.title} className="rounded-xl border border-primary-accent/20 bg-slate-950/45 p-5 transition-all duration-150 ease-out hover:scale-[1.01] hover:cursor-pointer hover:border-emerald-300/60 hover:shadow-[0_0_10px_rgba(74,222,128,0.11)]">
+                <article key={service.title} className="project-block-emphasis rounded-xl border border-primary-accent/20 bg-slate-950/45 p-5">
                   <h3 className="flex items-center gap-2 text-lg font-semibold text-primary-text">
                     <span className="inline-block h-2 w-2 rounded-full bg-emerald-300/85" aria-hidden="true" />
                     {service.title}
@@ -212,19 +212,19 @@ export default function Home({
             </p>
 
             <div className="mt-8 grid gap-4 md:grid-cols-3">
-              <article className="rounded-xl border border-primary-accent/28 bg-slate-950/45 p-5 shadow-[0_0_8px_rgba(168,85,247,0.08)] transition-all duration-150 ease-out hover:scale-[1.01] hover:cursor-pointer hover:border-emerald-300/50 hover:shadow-[0_0_10px_rgba(74,222,128,0.1)]">
+              <article className="project-block-emphasis rounded-xl border border-primary-accent/28 bg-slate-950/45 p-5 shadow-[0_0_8px_rgba(168,85,247,0.08)]">
                 <p className="text-xs uppercase tracking-[0.24em] text-primary-accentLight/85">Experience</p>
                 <p className="mt-3 text-6xl font-black text-slate-50 drop-shadow-[0_0_14px_rgba(255,255,255,0.24)] md:text-[4.1rem]">{`${yearsExperience}+`}</p>
                 <p className="mt-2 text-sm text-primary-text/45">Years building production systems</p>
               </article>
 
-              <article className="rounded-xl border border-primary-accent/28 bg-slate-950/45 p-5 shadow-[0_0_8px_rgba(168,85,247,0.08)] transition-all duration-150 ease-out hover:scale-[1.01] hover:cursor-pointer hover:border-emerald-300/50 hover:shadow-[0_0_10px_rgba(74,222,128,0.1)]">
+              <article className="project-block-emphasis rounded-xl border border-primary-accent/28 bg-slate-950/45 p-5 shadow-[0_0_8px_rgba(168,85,247,0.08)]">
                 <p className="text-xs uppercase tracking-[0.24em] text-primary-accentLight/85">Delivered Work</p>
                 <p className="mt-3 text-6xl font-black text-slate-50 drop-shadow-[0_0_14px_rgba(255,255,255,0.24)] md:text-[4.1rem]">{totalProjectsDelivered}</p>
                 <p className="mt-2 text-sm text-primary-text/45">Total projects and major implementations</p>
               </article>
 
-              <article className="rounded-xl border border-primary-accent/28 bg-slate-950/45 p-5 shadow-[0_0_8px_rgba(168,85,247,0.08)] transition-all duration-150 ease-out hover:scale-[1.01] hover:cursor-pointer hover:border-emerald-300/50 hover:shadow-[0_0_10px_rgba(74,222,128,0.1)]">
+              <article className="project-block-emphasis rounded-xl border border-primary-accent/28 bg-slate-950/45 p-5 shadow-[0_0_8px_rgba(168,85,247,0.08)]">
                 <p className="text-xs uppercase tracking-[0.24em] text-primary-accentLight/85">Automation/API Focus</p>
                 <p className="mt-3 text-6xl font-black text-slate-50 drop-shadow-[0_0_14px_rgba(255,255,255,0.24)] md:text-[4.1rem]">{automationFocusedProjects}</p>
                 <p className="mt-2 text-sm text-primary-text/45">Projects centered on automation, APIs, and CRM workflows</p>
@@ -232,7 +232,7 @@ export default function Home({
             </div>
 
             <div className="mt-8">
-              <article className="mx-auto max-w-[58rem] rounded-xl border border-primary-accent/20 bg-slate-950/45 px-7 py-6 transition-all duration-150 ease-out hover:scale-[1.01] hover:cursor-pointer hover:border-emerald-300/60 hover:shadow-[0_0_10px_rgba(74,222,128,0.11)] md:px-8">
+              <article className="project-block-emphasis mx-auto max-w-[58rem] rounded-xl border border-primary-accent/20 bg-slate-950/45 px-7 py-6 md:px-8">
                 <h3 className="text-lg font-semibold text-primary-accentLight">Companies and Teams</h3>
                 <p className="mt-3 text-sm leading-7 text-primary-text/75">
                   Examples of organizations and teams I have delivered work for:
@@ -274,7 +274,7 @@ export default function Home({
           <div className="mt-10 text-center">
             <Link
               href="/projects"
-              className="inline-block rounded-lg border border-primary-accent/60 bg-primary-accent px-8 py-3 font-semibold text-white shadow-[0_0_16px_rgba(168,85,247,0.36)] transition duration-200 hover:scale-[1.025] hover:border-emerald-300/75 hover:bg-primary-accentDark hover:shadow-[0_0_24px_rgba(74,222,128,0.34)]"
+              className="btn-cta-primary inline-block px-8 py-3 font-semibold"
             >
               Browse Portfolio
             </Link>

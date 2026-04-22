@@ -89,7 +89,7 @@ export default function ProjectCategoryPage({
           <div className="mt-10 text-center">
             <Link
               href="/"
-              className="inline-block px-6 py-2 rounded-lg glass border border-accent/30 text-muted hover:text-accent hover:border-accent transition text-sm"
+              className="btn-cta-outline inline-block px-6 py-2 text-sm"
             >
               ← Back to Home
             </Link>
