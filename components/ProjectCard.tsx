@@ -16,7 +16,7 @@ export default function ProjectCard({ project, variant = "project" }: Props) {
       <Link
         key={project.id}
         href={`/projects/${project.id}`}
-        className="terminal-card block p-6 transition hover:scale-[1.01] hover:shadow-accent"
+        className="terminal-card block cursor-pointer p-6 transition-all duration-150 ease-out hover:scale-[1.01] hover:border-emerald-300/50 hover:shadow-[0_0_10px_rgba(74,222,128,0.1)]"
       >
         <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
@@ -62,12 +62,12 @@ export default function ProjectCard({ project, variant = "project" }: Props) {
     <Link
       key={project.id}
       href={`/projects/${project.id}`}
-      className="terminal-card group block cursor-pointer p-6 transition duration-200 hover:scale-[1.02] hover:shadow-[0_0_26px_rgba(168,85,247,0.34)]"
+      className="terminal-card group block cursor-pointer p-6 transition-all duration-150 ease-out hover:scale-[1.01] hover:border-emerald-300/50 hover:shadow-[0_0_10px_rgba(74,222,128,0.1)]"
     >
-      <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+      <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.28em] text-primary-accentLight">Case Study</p>
-          <h3 className="mt-2 text-2xl font-semibold text-primary-text">{project.name}</h3>
+          <h3 className="mt-2 text-2xl font-semibold text-primary-text transition group-hover:text-emerald-100">{project.name}</h3>
         </div>
 
         {dateRange && (
@@ -75,10 +75,10 @@ export default function ProjectCard({ project, variant = "project" }: Props) {
         )}
       </div>
 
-      <div className="space-y-6 text-sm leading-[1.9] text-primary-text/80">
+      <div className="space-y-7 text-sm leading-[1.9] text-primary-text/80">
         <div>
           <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight">What It Does</p>
-          <p className="mt-3">{project.short}</p>
+          <p className="mt-4">{project.short}</p>
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
