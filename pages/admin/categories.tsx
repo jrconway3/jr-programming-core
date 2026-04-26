@@ -2,7 +2,8 @@ import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import { FormEvent, useMemo, useState } from 'react';
 import AdminShell from '../../components/admin/AdminShell';
-import { getAdminPageProps } from '../../lib/admin-auth';
+import { getAdminPageProps } from 'app/services/admin/auth';
+import { extractApiErrorMessage } from 'app/helpers/response';
 import { prisma } from '../../prisma/adapter';
 
 type AdminCategory = {
@@ -87,16 +88,21 @@ export default function AdminCategories({ adminUser, categories: initialCategori
         body: JSON.stringify(form),
       });
 
-      const payload = (await response.json()) as { category?: AdminCategory; error?: string };
+      const payload = await response.json() as {
+        ok?: boolean;
+        data?: {
+          category?: AdminCategory;
+        };
+      };
 
-      if (!response.ok || !payload.category) {
-        throw new Error(payload.error || 'Unable to save category.');
+      if (!response.ok || !payload.ok || !payload.data?.category) {
+        throw new Error(extractApiErrorMessage(payload, 'Unable to save category.'));
       }
 
       if (editingId) {
-        setCategories((current) => current.map((category) => category.id === editingId ? payload.category! : category));
+        setCategories((current) => current.map((category) => category.id === editingId ? payload.data!.category! : category));
       } else {
-        setCategories((current) => [payload.category!, ...current]);
+        setCategories((current) => [payload.data!.category!, ...current]);
       }
 
       resetForm();
@@ -122,10 +128,15 @@ export default function AdminCategories({ adminUser, categories: initialCategori
         method: 'DELETE',
       });
 
-      const payload = (await response.json()) as { success?: boolean; error?: string };
+      const payload = await response.json() as {
+        ok?: boolean;
+        data?: {
+          success?: boolean;
+        };
+      };
 
-      if (!response.ok || !payload.success) {
-        throw new Error(payload.error || 'Unable to delete category.');
+      if (!response.ok || !payload.ok || !payload.data?.success) {
+        throw new Error(extractApiErrorMessage(payload, 'Unable to delete category.'));
       }
 
       setCategories((current) => current.filter((item) => item.id !== category.id));

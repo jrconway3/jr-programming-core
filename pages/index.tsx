@@ -1,67 +1,11 @@
 import Head from "next/head";
 import Link from "next/link";
 import type { GetServerSideProps } from "next";
-import type { Project } from "../models/projects";
+import type { HomePageProps, HomeProjectStatsEntry } from "app/models/home";
 import { useSettings } from "../components/SettingsContext";
 import ProjectCard from "components/ProjectCard";
-import { getSettingValue, siteSettingDefaults } from "../lib/site-settings";
-import { getFeaturedProjects, getAllProjectStats, type ProjectStatsEntry } from "../lib/projects";
-
-const legacyHeroSubtitles = new Set([
-  "web software engineer & programmer",
-  "systems engineer / web developer",
-]);
-
-const legacyStatusMessages = new Set([
-  "looking for a developer to build or improve your system?",
-]);
-
-const legacyStatusLabels = new Set([
-  "status: available for work",
-]);
-
-const preferredCompanyNames = [
-  "TrailerCentral",
-  "LeadVenture",
-  "Yazamo",
-  "SEO Strong",
-  "KloutFire",
-  "Ponticlaro",
-  "Freight Access, Inc.",
-];
-
-function toYear(value?: string | null): number | null {
-  if (!value) {
-    return null;
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return null;
-  }
-
-  return date.getUTCFullYear();
-}
-
-function calculateYearsExperience(startYears: number[]): number {
-  if (startYears.length === 0) {
-    return 10;
-  }
-
-  const earliestYear = Math.min(...startYears);
-  const currentYear = new Date().getUTCFullYear();
-  return Math.max(1, currentYear - earliestYear + 1);
-}
-
-type HomePageProps = {
-  featuredProjects: Project[];
-  yearsExperience: number;
-  totalProjectsDelivered: number;
-  automationFocusedProjects: number;
-  portfolioProjects: number;
-  displayedCompanies: string[];
-};
+import { getFeaturedProjects, getAllProjectStats } from "app/repositories/projects";
+import { transformHomePageMetrics } from "app/transformers/home";
 
 export default function Home({
   featuredProjects,
@@ -71,36 +15,7 @@ export default function Home({
   portfolioProjects,
   displayedCompanies,
 }: HomePageProps) {
-  const { settings, isLoaded } = useSettings();
-  const configuredHeadline = settings["home/banner/subtitle"]?.trim();
-  const heroHeadline = isLoaded
-    ? (!configuredHeadline || legacyHeroSubtitles.has(configuredHeadline.toLowerCase())
-        ? siteSettingDefaults["home/banner/subtitle"]
-        : configuredHeadline)
-    : "...";
-  const heroTitle = isLoaded ? getSettingValue(settings, "home/banner/title") : "...";
-  const heroEyebrow = getSettingValue(settings, "home/banner/eyebrow");
-  const supportingLineOne = getSettingValue(settings, "home/banner/supporting/line1");
-  const supportingLineTwo = getSettingValue(settings, "home/banner/supporting/line2");
-  const primaryCtaLabel = getSettingValue(settings, "home/banner/cta/primary/label");
-  const primaryCtaHref = getSettingValue(settings, "home/banner/cta/primary/href");
-  const secondaryCtaLabel = getSettingValue(settings, "home/banner/cta/secondary/label");
-  const secondaryCtaHref = getSettingValue(settings, "home/banner/cta/secondary/href");
-  const statusEnabledRaw = getSettingValue(settings, "home/status/enabled");
-  const statusState = getSettingValue(settings, "home/status/state").trim().toLowerCase();
-  const configuredStatusLabel = getSettingValue(settings, "home/status/label");
-  const configuredStatusMessage = getSettingValue(settings, "home/status/message");
-  const statusCtaLabel = getSettingValue(settings, "home/status/cta/label");
-  const statusCtaHref = getSettingValue(settings, "home/status/cta/href");
-  const showStatusCta = statusEnabledRaw.trim().toLowerCase() !== "false";
-  const displayStatusLabel = legacyStatusLabels.has(configuredStatusLabel.trim().toLowerCase())
-    ? "Status: Available"
-    : configuredStatusLabel;
-  const displayStatusCtaLabel = statusCtaLabel.trim().toLowerCase() === "contact me" ? "Contact" : statusCtaLabel;
-  const displayStatusMessage = legacyStatusMessages.has(configuredStatusMessage.trim().toLowerCase())
-    ? "Looking to automate workflows or integrate APIs?"
-    : configuredStatusMessage;
-  const statusLedClass = statusState === "busy" ? "status-led status-led--busy" : "status-led status-led--available";
+  const { settings } = useSettings();
 
   return (
     <>
@@ -109,56 +24,56 @@ export default function Home({
       </Head>
       <main className="min-h-screen px-4 py-10 md:px-6 md:py-16">
         <section className="mx-auto w-full max-w-5xl pb-8 pt-3 md:pt-4">
-          {showStatusCta && (
-            <div className={`mb-8 flex items-center gap-3 rounded-lg px-4 py-3 md:mb-9 ${statusState === "busy" ? "border border-amber-400/35 bg-amber-500/10" : "border border-emerald-400/35 bg-emerald-500/10"}`}>
+          {settings.show_status_cta && (
+            <div className={`mb-8 flex items-center gap-3 rounded-lg px-4 py-3 md:mb-9 ${settings.home_status_state === "busy" ? "border border-amber-400/35 bg-amber-500/10" : "border border-emerald-400/35 bg-emerald-500/10"}`}>
               <div className="flex min-w-0 flex-1 items-center gap-3">
-                <span className={statusLedClass} aria-hidden="true" />
-                <p className={`hidden text-xs font-semibold uppercase tracking-[0.24em] sm:block ${statusState === "busy" ? "text-amber-200" : "text-emerald-200"}`}>
-                  {displayStatusLabel}
+                <span className={settings.status_led_class} aria-hidden="true" />
+                <p className={`hidden text-xs font-semibold uppercase tracking-[0.24em] sm:block ${settings.home_status_state === "busy" ? "text-amber-200" : "text-emerald-200"}`}>
+                  {settings.display_status_label}
                 </p>
                 <span className="hidden text-primary-text/50 sm:inline">|</span>
-                <p className="text-sm leading-snug text-primary-text/90 sm:text-[15px]">{displayStatusMessage}</p>
+                <p className="text-sm leading-snug text-primary-text/90 sm:text-[15px]">{settings.display_status_message}</p>
               </div>
 
               <Link
-                href={statusCtaHref}
-                className={`inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.14em] transition ${statusState === "busy" ? "border border-amber-300/50 bg-amber-500/20 text-amber-100 hover:border-amber-200 hover:bg-amber-500/30" : "border border-emerald-300/50 bg-emerald-500/20 text-emerald-100 hover:border-emerald-200 hover:bg-emerald-500/30"}`}
+                href={settings.home_status_cta_href}
+                className={`inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.14em] transition ${settings.home_status_state === "busy" ? "border border-amber-300/50 bg-amber-500/20 text-amber-100 hover:border-amber-200 hover:bg-amber-500/30" : "border border-emerald-300/50 bg-emerald-500/20 text-emerald-100 hover:border-emerald-200 hover:bg-emerald-500/30"}`}
               >
-                {displayStatusCtaLabel}
+                {settings.display_status_cta_label}
               </Link>
             </div>
           )}
 
           <div className="terminal-card px-6 pb-8 pt-14 text-center md:px-10 md:pb-10 md:pt-16">
             <p className="mb-4 text-xs uppercase tracking-[0.38em] text-primary-accentLight/60">
-              {heroEyebrow}
+              {settings.home_banner_eyebrow}
             </p>
             <p className="mb-2 w-full pl-1 text-left text-xs uppercase tracking-[0.22em] text-emerald-300/55 md:pl-3">
               {"> user: jrconway"}
             </p>
             <h1 className="mb-4 text-5xl font-extrabold gradient-text animate-gradient md:text-7xl">
-              {heroTitle}
+              {settings.home_banner_title}
             </h1>
             <div className="mx-auto mb-6 h-[2px] w-64 bg-gradient-to-r from-transparent via-primary-accent to-transparent shadow-[0_0_10px_rgba(168,85,247,0.35)] md:w-72" aria-hidden="true" />
             <p className="mx-auto mb-6 max-w-4xl text-[1.5rem] font-semibold leading-[1.42] text-primary-text md:text-[2.15rem] md:leading-[1.48]">
-              {heroHeadline}
+              {settings.home_banner_subtitle}
             </p>
             <div className="mx-auto mb-8 max-w-3xl space-y-2 text-sm leading-7 text-primary-text/72 md:text-lg">
-              <p>{supportingLineOne}</p>
-              <p>{supportingLineTwo}</p>
+              <p>{settings.home_banner_supporting_line1}</p>
+              <p>{settings.home_banner_supporting_line2}</p>
             </div>
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
               <a
-                href={primaryCtaHref}
+                href={settings.home_banner_cta_primary_href}
                 className="btn-cta-primary inline-block min-w-44 px-8 py-3 text-center font-semibold"
               >
-                {primaryCtaLabel}
+                {settings.home_banner_cta_primary_label}
               </a>
               <Link
-                href={secondaryCtaHref}
+                href={settings.home_banner_cta_secondary_href}
                 className="btn-cta-outline inline-block min-w-44 px-8 py-3 text-center font-semibold"
               >
-                {secondaryCtaLabel}
+                {settings.home_banner_cta_secondary_label}
               </Link>
             </div>
           </div>
@@ -291,46 +206,13 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
     getAllProjectStats(),
   ]);
 
-  const allProjects: ProjectStatsEntry[] = allProjectsRaw;
-
-  const startYears = allProjects
-    .map((project) => toYear(project.start_date))
-    .filter((year): year is number => year !== null);
-  const yearsExperience = calculateYearsExperience(startYears);
-
-  const uniqueCompanies = Array.from(
-    new Set(
-      allProjects
-        .map((project) => project.position?.trim())
-        .filter((position): position is string => Boolean(position && position.length > 0))
-        .filter((position) => !["Freelancer", "JR Programming"].includes(position)),
-    ),
-  );
-
-  const companySet = new Set(uniqueCompanies.map((company) => company.toLowerCase()));
-  const prioritizedCompanies = preferredCompanyNames.filter((company) => companySet.has(company.toLowerCase()));
-  const fallbackCompanies = uniqueCompanies
-    .filter((company) => !prioritizedCompanies.some((preferred) => preferred.toLowerCase() === company.toLowerCase()))
-    .slice(0, 3);
-  const displayedCompanies = [...prioritizedCompanies, ...fallbackCompanies].slice(0, 6);
-
-  const totalProjectsDelivered = allProjects.length;
-  const portfolioProjects = allProjects.filter((project) => (
-    (project.categories ?? []).some((entry) => ["projects", "featured-projects"].includes(entry.category.shortcode))
-  )).length;
-  const automationFocusedProjects = allProjects.filter((project) => {
-    const searchable = `${project.name} ${project.short} ${project.role ?? ""}`.toLowerCase();
-    return ["automation", "api", "integration", "workflow", "crm"].some((keyword) => searchable.includes(keyword));
-  }).length;
+  const allProjects: HomeProjectStatsEntry[] = allProjectsRaw;
+  const metrics = transformHomePageMetrics(allProjects);
 
   return {
     props: {
       featuredProjects,
-      yearsExperience,
-      totalProjectsDelivered,
-      automationFocusedProjects,
-      portfolioProjects,
-      displayedCompanies,
+      ...metrics,
     },
   };
 };

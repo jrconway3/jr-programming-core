@@ -1,18 +1,127 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Prisma } from '@prisma/client';
-import { requireAdminApi } from '../../../../lib/admin-auth';
+import { requireAdminApi } from 'app/services/admin/auth';
+import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
 import {
   adminProjectInclude,
+  type NormalizedJobAssignment,
   normalizeProjectPayload,
   serializeAdminProject,
-} from '../../../../lib/admin-projects';
+} from 'app/services/admin/projects';
 import { prisma } from '../../../../prisma/adapter';
 
-type ProjectResponse = {
+type ProjectResponse = ApiEnvelope<{
   project?: ReturnType<typeof serializeAdminProject>;
   success?: boolean;
-  error?: string;
-};
+}>;
+
+async function resolveJobIdForAssignment(
+  tx: Prisma.TransactionClient,
+  assignment: NormalizedJobAssignment | null,
+): Promise<number | null> {
+  if (!assignment) {
+    return null;
+  }
+
+  let resolvedJobId = assignment.job_id;
+
+  if (!assignment.job_payload) {
+    return resolvedJobId;
+  }
+
+  const now = new Date();
+  const jobPayload = assignment.job_payload;
+  let companyId = jobPayload.company_id;
+
+  if (!companyId && jobPayload.company_name) {
+    const existingCompany = await tx.company.findUnique({
+      where: { name: jobPayload.company_name },
+      select: { id: true },
+    });
+
+    if (existingCompany) {
+      companyId = existingCompany.id;
+
+      await tx.company.update({
+        where: { id: companyId },
+        data: {
+          shortcode: jobPayload.company_shortcode,
+          website: jobPayload.company_website,
+          updated_at: now,
+        },
+      });
+    } else {
+      const company = await tx.company.create({
+        data: {
+          name: jobPayload.company_name,
+          shortcode: jobPayload.company_shortcode,
+          website: jobPayload.company_website,
+        },
+        select: { id: true },
+      });
+
+      companyId = company.id;
+    }
+  }
+
+  if (resolvedJobId == null) {
+    resolvedJobId = jobPayload.id;
+  }
+
+  const roleRows = jobPayload.roles.map((role, index) => ({
+    title: role.title,
+    short_summary: role.short_summary,
+    start_date: role.start_date,
+    end_date: role.end_date,
+    priority: Number.isInteger(role.priority) ? role.priority : index,
+    is_current: role.is_current,
+  }));
+
+  if (resolvedJobId == null) {
+    const createdJob = await tx.job.create({
+      data: {
+        company_id: companyId,
+        summary: jobPayload.summary,
+        start_date: jobPayload.start_date,
+        end_date: jobPayload.end_date,
+        priority: jobPayload.priority,
+        roles: {
+          create: roleRows,
+        },
+      },
+      select: { id: true },
+    });
+
+    return createdJob.id;
+  }
+
+  await tx.job.update({
+    where: { id: resolvedJobId },
+    data: {
+      company_id: companyId,
+      summary: jobPayload.summary,
+      start_date: jobPayload.start_date,
+      end_date: jobPayload.end_date,
+      priority: jobPayload.priority,
+      updated_at: now,
+    },
+  });
+
+  await tx.jobRole.deleteMany({
+    where: { job_id: resolvedJobId },
+  });
+
+  if (roleRows.length > 0) {
+    await tx.jobRole.createMany({
+      data: roleRows.map((role) => ({
+        ...role,
+        job_id: resolvedJobId as number,
+      })),
+    });
+  }
+
+  return resolvedJobId;
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ProjectResponse>) {
   if (!requireAdminApi(req, res)) {
@@ -22,20 +131,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const rawId = req.query.id;
 
   if (typeof rawId !== 'string' || !/^\d+$/.test(rawId)) {
-    return res.status(400).json({ error: 'Invalid project id.' });
+    return sendApiError(res, 400, 'Invalid project id.');
   }
 
   const id = Number.parseInt(rawId, 10);
 
   if (!Number.isInteger(id)) {
-    return res.status(400).json({ error: 'Invalid project id.' });
+    return sendApiError(res, 400, 'Invalid project id.');
   }
 
   if (req.method === 'PUT') {
     const normalized = normalizeProjectPayload(req.body);
 
     if (!normalized.ok) {
-      return res.status(400).json({ error: normalized.error });
+      return sendApiError(res, 400, normalized.error);
     }
 
     const { data } = normalized;
@@ -50,7 +159,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       });
 
       if (existingCategories.length !== categoryIds.length) {
-        return res.status(400).json({ error: 'One or more selected categories no longer exist.' });
+        return sendApiError(res, 400, 'One or more selected categories no longer exist.');
       }
     }
 
@@ -60,6 +169,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
           where: { id },
           data: {
             name: data.name,
+            shortcode: data.shortcode,
             short: data.short,
             role: data.role,
             position: data.position,
@@ -82,6 +192,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
           where: { project_id: id },
         });
 
+        await tx.jobProjectRelation.deleteMany({
+          where: { project_id: id },
+        });
+
+        const resolvedJobId = await resolveJobIdForAssignment(tx, data.job_assignment);
+
+        if (resolvedJobId != null && data.job_assignment) {
+          await tx.jobProjectRelation.create({
+            data: {
+              job_id: resolvedJobId,
+              project_id: id,
+              relation_type: data.job_assignment.relation_type,
+              priority: data.job_assignment.relation_priority,
+            },
+          });
+        }
+
         return tx.project.update({
           where: { id },
           data: {
@@ -103,18 +230,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         });
       });
 
-      return res.status(200).json({ project: serializeAdminProject(project) });
+      return sendApiSuccess(res, 200, { project: serializeAdminProject(project) });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        return res.status(404).json({ error: 'Project not found.' });
+        return sendApiError(res, 404, 'Project not found.');
       }
 
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        return res.status(400).json({ error: 'Unable to update project with the submitted data.' });
+        return sendApiError(res, 400, 'Unable to update project with the submitted data.');
       }
 
       console.error('PUT /api/admin/projects/[id] failed', error);
-      return res.status(500).json({ error: 'Failed to update project.' });
+      return sendApiError(res, 500, 'Failed to update project.');
     }
   }
 
@@ -142,17 +269,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         });
       });
 
-      return res.status(200).json({ success: true });
+      return sendApiSuccess(res, 200, { success: true });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        return res.status(404).json({ error: 'Project not found.' });
+        return sendApiError(res, 404, 'Project not found.');
       }
 
       console.error('DELETE /api/admin/projects/[id] failed', error);
-      return res.status(500).json({ error: 'Failed to delete project.' });
+      return sendApiError(res, 500, 'Failed to delete project.');
     }
   }
 
   res.setHeader('Allow', 'PUT, DELETE');
-  return res.status(405).json({ error: 'Method not allowed' });
+  return sendApiError(res, 405, 'Method not allowed');
 }

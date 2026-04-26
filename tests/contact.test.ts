@@ -5,11 +5,13 @@ import {
   MAX_WEBSITE_LENGTH,
   ONE_HOUR_MS,
   SPAM_THRESHOLD,
+} from 'app/models/inquiries';
+import {
   isSpamScore,
   normalizeContactPayload,
   scoreSubmission,
   validateContactPayload,
-} from '../lib/contact';
+} from 'app/services/inquiries';
 
 function createBasePayload() {
   return {

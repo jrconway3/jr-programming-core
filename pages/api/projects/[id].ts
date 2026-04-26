@@ -1,17 +1,40 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '../../../prisma/adapter';
-import { serializeProject } from '../../../models/projects';
+import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
+import { transformProject } from 'app/transformers/projects';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+type ProjectResponse = ApiEnvelope<ReturnType<typeof transformProject>>;
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse<ProjectResponse>) {
   if (req.method === 'GET') {
     const id = parseInt(req.query.id as string, 10);
     if (isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid project id' });
+      return sendApiError(res, 400, 'Invalid project id');
     }
     try {
       const project = await prisma.project.findUnique({
         where: { id },
         include: {
+          job: {
+            take: 1,
+            orderBy: { priority: 'asc' },
+            include: {
+              job: {
+                include: {
+                  company: true,
+                  roles: {
+                    orderBy: [
+                      { priority: 'asc' },
+                      { start_date: 'asc' },
+                    ],
+                  },
+                  impacts: {
+                    orderBy: { priority: 'asc' },
+                  },
+                },
+              },
+            },
+          },
           links: { orderBy: { priority: 'asc' } },
           gallery: { orderBy: { priority: 'asc' } },
           skills: {
@@ -24,13 +47,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           },
         },
       });
-      if (!project) return res.status(404).json({ error: 'Project not found' });
-      res.status(200).json(serializeProject(project));
+      if (!project) return sendApiError(res, 404, 'Project not found');
+      return sendApiSuccess(res, 200, transformProject(project));
     } catch (error) {
       console.error('GET /api/projects/[id] failed', error);
-      res.status(500).json({ error: 'Failed to fetch project' });
+      return sendApiError(res, 500, 'Failed to fetch project');
     }
   } else {
-    res.status(405).json({ error: 'Method not allowed' });
+    return sendApiError(res, 405, 'Method not allowed');
   }
 }

@@ -1,19 +1,19 @@
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { buildDateRange, toSecureAssetUrl } from "../../models/projects";
-import type { ProjectDetail } from "../../models/projects";
-import { getProjectById } from "../../lib/projects";
+import { buildDateRange, toSecureAssetUrl } from "app/helpers/common";
+import type { ProjectDetail } from "app/models/projects";
+import { getProjectById } from "app/repositories/projects";
 
 interface Props {
   project: ProjectDetail;
 }
 
-export default function ProjectPage({ project }: Props) {
+export function ProjectDetailView({ project }: Props) {
   const isExperienceEntry = project.categories.some((categoryEntry) => categoryEntry.shortcode === 'experience');
   const dateRange = buildDateRange(project.start_date, project.end_date);
-  const primaryBackHref = isExperienceEntry ? '/experience' : '/projects';
-  const primaryBackLabel = isExperienceEntry ? 'Back to Experience' : 'Back to Portfolio';
+  const parentJob = project.job ?? null;
+  const parentJobHref = parentJob?.shortcode ? `/experience/${parentJob.shortcode}` : null;
 
   return (
     <>
@@ -23,10 +23,25 @@ export default function ProjectPage({ project }: Props) {
       </Head>
       <main className="min-h-screen px-4 py-12">
         <section className="w-full max-w-4xl mx-auto">
+          <nav className="mb-4 text-sm text-primary-text/65">
+            <Link href="/" className="hover:text-primary-accentLight">Home</Link>
+            <span className="px-2 text-primary-text/40">/</span>
+            <Link href={isExperienceEntry ? '/experience' : '/projects'} className="hover:text-primary-accentLight">
+              {isExperienceEntry ? 'Experience' : 'Portfolio'}
+            </Link>
+            {parentJob && parentJobHref && (
+              <>
+                <span className="px-2 text-primary-text/40">/</span>
+                <Link href={parentJobHref} className="hover:text-primary-accentLight">
+                  {parentJob.company?.name || 'Role Breakdown'}
+                </Link>
+              </>
+            )}
+            <span className="px-2 text-primary-text/40">/</span>
+            <span className="text-primary-text/85">{project.name}</span>
+          </nav>
+
           <div className="terminal-card mb-8 px-6 pb-8 pt-14 md:px-8">
-            <p className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">
-              {isExperienceEntry ? 'Experience Entry' : 'Case Study'}
-            </p>
             <div className="mt-4 flex flex-wrap justify-between items-start gap-2 mb-2">
               <h1 className="text-4xl md:text-5xl font-extrabold gradient-text animate-gradient">
                 {project.name}
@@ -48,36 +63,37 @@ export default function ProjectPage({ project }: Props) {
             <p className="text-text leading-relaxed">{project.short}</p>
           </div>
 
-          <div className="terminal-card project-block-emphasis p-6 mb-6">
-            <h2 className="mb-4 text-lg font-semibold text-accent">Project Snapshot</h2>
-            <div className="grid gap-5 md:grid-cols-2">
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-primary-accentLight">Built For</p>
-                <p className="mt-2 text-sm leading-7 text-primary-text/80">{project.position || 'Client project'}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-primary-accentLight">Focus</p>
-                <p className="mt-2 text-sm leading-7 text-primary-text/80">{project.role || 'Custom software development'}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-primary-accentLight">Timeline</p>
-                <p className="mt-2 text-sm leading-7 text-primary-text/80">{dateRange || 'Timeline not specified'}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-primary-accentLight">Categories</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {project.categories.length > 0 ? project.categories.map((categoryEntry) => (
-                    <Link
-                      key={categoryEntry.id}
-                      href={`/${categoryEntry.shortcode}`}
-                      className="rounded-full border border-accent/20 px-3 py-1 text-xs text-primary-text/70 transition hover:border-accent hover:text-accent"
-                    >
-                      {categoryEntry.title}
-                    </Link>
-                  )) : (
-                    <span className="text-sm text-primary-text/60">Uncategorized</span>
-                  )}
-                </div>
+          <h2 className="mb-4 text-lg font-semibold text-accent">Project Snapshot</h2>
+          <div className="grid gap-5 md:grid-cols-2 mb-6">
+            <div className="terminal-card project-block-emphasis p-6">
+              <p className="text-xs uppercase tracking-[0.24em] text-primary-accentLight">Built For</p>
+              <p className="mt-2 text-sm leading-7 text-primary-text/80">{project.position || 'Client project'}</p>
+            </div>
+
+            <div className="terminal-card project-block-emphasis p-6">
+              <p className="text-xs uppercase tracking-[0.24em] text-primary-accentLight">Focus</p>
+              <p className="mt-2 text-sm leading-7 text-primary-text/80">{project.role || 'Custom software development'}</p>
+            </div>
+
+            <div className="terminal-card project-block-emphasis p-6">
+              <p className="text-xs uppercase tracking-[0.24em] text-primary-accentLight">Timeline</p>
+              <p className="mt-2 text-sm leading-7 text-primary-text/80">{dateRange || 'Timeline not specified'}</p>
+            </div>
+
+            <div className="terminal-card project-block-emphasis p-6">
+              <p className="text-xs uppercase tracking-[0.24em] text-primary-accentLight">Categories</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {project.categories.length > 0 ? project.categories.map((categoryEntry) => (
+                  <Link
+                    key={categoryEntry.id}
+                    href={`/${categoryEntry.shortcode}`}
+                    className="rounded-full border border-accent/20 px-3 py-1 text-xs text-primary-text/70 transition hover:border-accent hover:text-accent"
+                  >
+                    {categoryEntry.title}
+                  </Link>
+                )) : (
+                  <span className="text-sm text-primary-text/60">Uncategorized</span>
+                )}
               </div>
             </div>
           </div>
@@ -151,24 +167,14 @@ export default function ProjectPage({ project }: Props) {
             </div>
           )}
 
-          <div className="mt-4 flex flex-wrap justify-center gap-3 text-center">
-            <Link
-              href={primaryBackHref}
-              className="btn-cta-outline inline-block px-6 py-2 text-sm"
-            >
-              ← {primaryBackLabel}
-            </Link>
-            <Link
-              href="/"
-              className="btn-cta-outline inline-block px-6 py-2 text-sm"
-            >
-              Back to Home
-            </Link>
-          </div>
         </section>
       </main>
     </>
   );
+}
+
+export default function ProjectPage({ project }: Props) {
+  return <ProjectDetailView project={project} />;
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {

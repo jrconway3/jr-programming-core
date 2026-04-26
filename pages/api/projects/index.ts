@@ -1,8 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '../../../prisma/adapter';
-import { serializeProjects } from '../../../models/projects';
+import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
+import { transformProjects } from 'app/transformers/projects';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+type ProjectsResponse = ApiEnvelope<ReturnType<typeof transformProjects>>;
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse<ProjectsResponse>) {
   if (req.method === 'GET') {
     try {
       const shortcode = typeof req.query.shortcode === 'string' ? req.query.shortcode : undefined;
@@ -12,6 +15,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           ? { categories: { some: { category: { shortcode } } } }
           : undefined,
         include: {
+          job: {
+            take: 1,
+            orderBy: { priority: 'asc' },
+            include: {
+              job: {
+                include: {
+                  company: true,
+                  roles: {
+                    orderBy: [
+                      { priority: 'asc' },
+                      { start_date: 'asc' },
+                    ],
+                  },
+                  impacts: {
+                    orderBy: { priority: 'asc' },
+                  },
+                },
+              },
+            },
+          },
           skills: {
             include: {
               skill: true,
@@ -32,12 +55,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             ]
           : undefined,
       });
-      res.status(200).json(serializeProjects(projects));
+      return sendApiSuccess(res, 200, transformProjects(projects));
     } catch (error) {
       console.error('GET /api/projects failed', error);
-      res.status(500).json({ error: 'Failed to fetch projects' });
+      return sendApiError(res, 500, 'Failed to fetch projects');
     }
   } else {
-    res.status(405).json({ error: 'Method not allowed' });
+    return sendApiError(res, 405, 'Method not allowed');
   }
 }

@@ -1,111 +1,205 @@
-// Prisma schema for MySQL/MariaDB
-// Run `npx prisma migrate dev --name init` after editing
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "mysql"
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model Settings {
-  id         Int           @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   page_id    Int?
-  key        String        @unique
+  key        String   @unique
   value      String
-  created_at DateTime      @default(now())
-  updated_at DateTime      @default(now()) @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
   @@map("jr_settings")
 }
 
 model Project {
-  id         Int         @id @default(autoincrement())
+  id         Int                  @id @default(autoincrement())
   name       String
   short      String
   role       String?
   position   String?
-  extended   String?     @db.Text
+  extended   String?              @db.Text
   start_date DateTime?
   end_date   DateTime?
-  created_at DateTime    @default(now())
-  updated_at DateTime    @default(now())
-  links      ProjectLink[]
-  gallery    ProjectGallery[]
-  skills     ProjectSkill[]
+  created_at DateTime             @default(now())
+  updated_at DateTime             @default(now())
+  shortcode  String?              @unique
+  job        JobProjectRelation[]
   categories ProjectCategory[]
+  gallery    ProjectGallery[]
+  links      ProjectLink[]
+  skills     ProjectSkill[]
+
   @@map("jr_projects")
 }
 
+model Company {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  shortcode  String?  @unique
+  website    String?
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  jobs       Job[]
+
+  @@map("jr_companies")
+}
+
+model Job {
+  id                Int                  @id @default(autoincrement())
+  shortcode         String?              @unique
+  company_id        Int?
+  is_primary_tier   Boolean              @default(false)
+  summary           String?              @db.Text
+  start_date        DateTime?
+  end_date          DateTime?
+  priority          Int                  @default(0)
+  created_at        DateTime             @default(now())
+  updated_at        DateTime             @default(now())
+  impacts           JobImpact[]
+  project_relations JobProjectRelation[]
+  roles             JobRole[]
+  company           Company?             @relation(fields: [company_id], references: [id])
+
+  @@index([company_id, priority])
+  @@index([is_primary_tier, priority])
+  @@map("jr_jobs")
+}
+
+model JobImpact {
+  id          Int      @id @default(autoincrement())
+  job_id       Int
+  description  String   @db.Text
+  priority     Int      @default(0)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now())
+  job          Job      @relation(fields: [job_id], references: [id], onDelete: Cascade)
+
+  @@unique([job_id, priority])
+  @@index([job_id, priority])
+  @@map("jr_job_impacts")
+}
+
+model JobRole {
+  id            Int       @id @default(autoincrement())
+  job_id        Int
+  title         String
+  short_summary String?   @db.Text
+  start_date    DateTime?
+  end_date      DateTime?
+  priority      Int       @default(0)
+  is_current    Boolean   @default(false)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @default(now())
+  job           Job       @relation(fields: [job_id], references: [id], onDelete: Cascade)
+
+  @@unique([job_id, priority])
+  @@index([job_id, is_current])
+  @@map("jr_job_roles")
+}
+
+model JobProjectRelation {
+  id            Int      @id @default(autoincrement())
+  job_id        Int
+  project_id    Int
+  relation_type String   @default("key_system")
+  priority      Int      @default(0)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now())
+  job           Job      @relation(fields: [job_id], references: [id], onDelete: Cascade)
+  project       Project  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  @@unique([job_id, project_id], map: "jr_job_project_relations_job_project_key")
+  @@index([job_id, relation_type, priority], map: "jr_job_project_relations_job_relation_priority_idx")
+  @@index([project_id, relation_type], map: "jr_job_project_relations_project_relation_idx")
+  @@map("jr_job_project_relations")
+}
+
 model ProjectLink {
-  id         Int         @id @default(autoincrement())
+  id         Int              @id @default(autoincrement())
   project_id Int
-  project    Project     @relation(fields: [project_id], references: [id])
   website    String
   url        String
-  priority   Int         @default(0)
-  created_at DateTime    @default(now())
-  updated_at DateTime    @default(now())
+  priority   Int              @default(0)
+  created_at DateTime         @default(now())
+  updated_at DateTime         @default(now())
   gallery    ProjectGallery[]
+  project    Project          @relation(fields: [project_id], references: [id])
+
+  @@index([project_id], map: "jr_projects_links_project_id_fkey")
   @@map("jr_projects_links")
 }
 
 model ProjectGallery {
-  id         Int           @id @default(autoincrement())
+  id         Int          @id @default(autoincrement())
   project_id Int
-  project    Project       @relation(fields: [project_id], references: [id])
-  link_id    Int?
-  link       ProjectLink?  @relation(fields: [link_id], references: [id])
   title      String
   image      String
-  priority   Int           @default(0)
-  created_at DateTime      @default(now())
-  updated_at DateTime      @default(now())
+  priority   Int          @default(0)
+  created_at DateTime     @default(now())
+  updated_at DateTime     @default(now())
+  link_id    Int?
+  link       ProjectLink? @relation(fields: [link_id], references: [id])
+  project    Project      @relation(fields: [project_id], references: [id])
+
+  @@index([link_id], map: "jr_projects_gallery_link_id_fkey")
+  @@index([project_id], map: "jr_projects_gallery_project_id_fkey")
   @@map("jr_projects_gallery")
 }
 
 model ProjectSkill {
   project_id Int
-  project    Project       @relation(fields: [project_id], references: [id])
   skill_id   Int
-  skill      Skill         @relation(fields: [skill_id], references: [id])
-  priority   Int           @default(0)
-  created_at DateTime      @default(now())
-  updated_at DateTime      @default(now())
+  priority   Int      @default(0)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  project    Project  @relation(fields: [project_id], references: [id])
+  skill      Skill    @relation(fields: [skill_id], references: [id])
+
   @@id([project_id, skill_id])
+  @@index([skill_id], map: "jr_projects_skills_skill_id_fkey")
   @@map("jr_projects_skills")
 }
 
 model ProjectCategory {
-  project_id    Int
-  project       Project    @relation(fields: [project_id], references: [id])
-  category_id   Int
-  category      Category   @relation(fields: [category_id], references: [id])
-  priority      Int        @default(0)
-  created_at    DateTime   @default(now())
-  updated_at    DateTime   @default(now())
+  project_id  Int
+  category_id Int
+  priority    Int      @default(0)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+  category    Category @relation(fields: [category_id], references: [id])
+  project     Project  @relation(fields: [project_id], references: [id])
+
   @@id([project_id, category_id])
+  @@index([category_id], map: "jr_projects_cats_category_id_fkey")
   @@map("jr_projects_cats")
 }
 
 model Skill {
-  id         Int           @id @default(autoincrement())
+  id         Int            @id @default(autoincrement())
   name       String
   desc       String
-  rating     Int           @db.TinyInt @default(5)
-  created_at DateTime      @default(now())
-  updated_at DateTime      @default(now())
+  rating     Int            @default(5) @db.TinyInt
+  created_at DateTime       @default(now())
+  updated_at DateTime       @default(now())
   projects   ProjectSkill[]
+
   @@map("jr_skills")
 }
 
 model Category {
-  id         Int           @id @default(autoincrement())
+  id         Int               @id @default(autoincrement())
   title      String
-  shortcode  String        @unique
-  created_at DateTime      @default(now())
-  updated_at DateTime      @default(now())
+  shortcode  String            @unique
+  created_at DateTime          @default(now())
+  updated_at DateTime          @default(now())
   projects   ProjectCategory[]
+
   @@map("jr_cats")
 }
 

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import React from 'react'
 import Head from 'next/head'
 import { useSettings } from './SettingsContext'
-import { getSettingValue } from '../lib/site-settings'
+import { getSettingValue } from 'app/services/settings'
 
 type Props = { children: React.ReactNode }
 

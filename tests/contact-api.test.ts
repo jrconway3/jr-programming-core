@@ -1,6 +1,6 @@
 import { createHash, createHmac } from 'node:crypto';
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ONE_HOUR_MS } from '../lib/contact';
+import { ONE_HOUR_MS } from 'app/models/inquiries';
 
 type JsonValue = Record<string, unknown>;
 
@@ -133,7 +133,7 @@ describe('contact API handler', () => {
 
     expect(res.statusCode).toBe(405);
     expect(res.headers.Allow).toBe('POST');
-    expect(res.body).toEqual({ error: 'Method not allowed' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Method not allowed' } });
   });
 
   it('rejects invalid payloads before touching persistence', async () => {
@@ -151,7 +151,7 @@ describe('contact API handler', () => {
     await handler(req as never, res as never);
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'Please enter a valid email address.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Please enter a valid email address.' } });
     expect(prismaMock.inquiry.findFirst).not.toHaveBeenCalled();
     expect(prismaMock.inquiry.create).not.toHaveBeenCalled();
   });
@@ -435,7 +435,7 @@ describe('contact API handler', () => {
     await handler(req as never, res as never);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ message: 'Your inquiry has already been received.' });
+    expect(res.body).toEqual({ ok: true, data: { message: 'Your inquiry has already been received.' } });
     expect(prismaMock.inquiry.create).not.toHaveBeenCalled();
     expect(sendMailMock).not.toHaveBeenCalled();
   });
@@ -467,7 +467,7 @@ describe('contact API handler', () => {
     await handler(blockedReq as never, blockedRes as never);
 
     expect(blockedRes.statusCode).toBe(429);
-    expect(blockedRes.body).toEqual({ error: 'Too many submissions from this network. Please try again later.' });
+    expect(blockedRes.body).toEqual({ ok: false, error: { message: 'Too many submissions from this network. Please try again later.' } });
     expect(prismaMock.inquiry.create).not.toHaveBeenCalled();
   });
 

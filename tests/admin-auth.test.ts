@@ -8,7 +8,7 @@ import {
   requireAdminApi,
   sanitizeAdminNextPath,
   validateAdminCredentials,
-} from '../lib/admin-auth';
+} from 'app/services/admin/auth';
 
 type JsonValue = Record<string, unknown>;
 

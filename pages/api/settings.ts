@@ -1,16 +1,20 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '../../prisma/adapter';
+import { transformSettings } from 'app/transformers/settings';
+import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+type SettingsResponse = ApiEnvelope<ReturnType<typeof transformSettings>>;
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse<SettingsResponse>) {
   if (req.method === 'GET') {
     try {
       const settings = await prisma.settings.findMany();
-      res.status(200).json(settings);
+      return sendApiSuccess(res, 200, transformSettings(settings));
     } catch (error) {
       console.error('GET /api/settings failed', error);
-      res.status(500).json({ error: 'Failed to fetch settings' });
+      return sendApiError(res, 500, 'Failed to fetch settings');
     }
   } else {
-    res.status(405).json({ error: 'Method not allowed' });
+    return sendApiError(res, 405, 'Method not allowed');
   }
 }

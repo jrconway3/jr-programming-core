@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { ADMIN_SESSION_COOKIE, readAdminSessionValue, sanitizeAdminNextPath } from './lib/admin-session';
+import { ADMIN_SESSION_COOKIE, readAdminSessionValue, sanitizeAdminNextPath } from './app/services/admin/session';
 
 const publicAdminPagePaths = new Set([
   '/admin/login',

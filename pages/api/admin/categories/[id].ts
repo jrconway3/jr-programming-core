@@ -1,21 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Prisma } from '@prisma/client';
-import { requireAdminApi } from '../../../../lib/admin-auth';
-import { normalizeShortcode } from '../../../../lib/admin-categories';
+import { requireAdminApi } from 'app/services/admin/auth';
+import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
+import { transformAdminCategory } from 'app/transformers/categories';
+import { normalizeShortcode } from 'app/services/admin/categories';
 import { prisma } from '../../../../prisma/adapter';
 
-type CategoryResponse = {
-  category?: {
-    id: number;
-    title: string;
-    shortcode: string;
-    created_at: string;
-    updated_at: string;
-    projectCount: number;
-  };
+type CategoryResponse = ApiEnvelope<{
+  category?: ReturnType<typeof transformAdminCategory>;
   success?: boolean;
-  error?: string;
-};
+}>;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<CategoryResponse>) {
   if (!requireAdminApi(req, res)) {
@@ -25,13 +19,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const rawId = req.query.id;
 
   if (typeof rawId !== 'string' || !/^\d+$/.test(rawId)) {
-    return res.status(400).json({ error: 'Invalid category id.' });
+    return sendApiError(res, 400, 'Invalid category id.');
   }
 
   const id = Number.parseInt(rawId, 10);
 
   if (!Number.isInteger(id)) {
-    return res.status(400).json({ error: 'Invalid category id.' });
+    return sendApiError(res, 400, 'Invalid category id.');
   }
 
   if (req.method === 'PUT') {
@@ -39,11 +33,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const shortcode = normalizeShortcode(typeof req.body?.shortcode === 'string' ? req.body.shortcode : '');
 
     if (!title) {
-      return res.status(400).json({ error: 'Category title is required.' });
+      return sendApiError(res, 400, 'Category title is required.');
     }
 
     if (!shortcode) {
-      return res.status(400).json({ error: 'Category shortcode is required.' });
+      return sendApiError(res, 400, 'Category shortcode is required.');
     }
 
     try {
@@ -63,27 +57,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         },
       });
 
-      return res.status(200).json({
-        category: {
-          id: category.id,
-          title: category.title,
-          shortcode: category.shortcode,
-          created_at: category.created_at.toISOString(),
-          updated_at: category.updated_at.toISOString(),
-          projectCount: category._count.projects,
-        },
+      return sendApiSuccess(res, 200, {
+        category: transformAdminCategory(category),
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-        return res.status(409).json({ error: 'That shortcode is already in use.' });
+        return sendApiError(res, 409, 'That shortcode is already in use.');
       }
 
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        return res.status(404).json({ error: 'Category not found.' });
+        return sendApiError(res, 404, 'Category not found.');
       }
 
       console.error('PUT /api/admin/categories/[id] failed', error);
-      return res.status(500).json({ error: 'Failed to update category.' });
+      return sendApiError(res, 500, 'Failed to update category.');
     }
   }
 
@@ -99,17 +86,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         });
       });
 
-      return res.status(200).json({ success: true });
+      return sendApiSuccess(res, 200, { success: true });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        return res.status(404).json({ error: 'Category not found.' });
+        return sendApiError(res, 404, 'Category not found.');
       }
 
       console.error('DELETE /api/admin/categories/[id] failed', error);
-      return res.status(500).json({ error: 'Failed to delete category.' });
+      return sendApiError(res, 500, 'Failed to delete category.');
     }
   }
 
   res.setHeader('Allow', 'PUT, DELETE');
-  return res.status(405).json({ error: 'Method not allowed' });
+  return sendApiError(res, 405, 'Method not allowed');
 }

@@ -1,24 +1,28 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '../../../prisma/adapter';
+import { transformCategory } from 'app/transformers/categories';
+import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+type CategoryResponse = ApiEnvelope<ReturnType<typeof transformCategory>>;
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse<CategoryResponse>) {
   if (req.method === 'GET') {
     const { shortcode } = req.query;
     if (typeof shortcode !== 'string') {
-      return res.status(400).json({ error: 'Invalid shortcode' });
+      return sendApiError(res, 400, 'Invalid shortcode');
     }
     try {
       const category = await prisma.category.findUnique({
         where: { shortcode },
         select: { id: true, title: true, shortcode: true },
       });
-      if (!category) return res.status(404).json({ error: 'Category not found' });
-      res.status(200).json(category);
+      if (!category) return sendApiError(res, 404, 'Category not found');
+      return sendApiSuccess(res, 200, transformCategory(category));
     } catch (error) {
       console.error('GET /api/categories/[shortcode] failed', error);
-      res.status(500).json({ error: 'Failed to fetch category' });
+      return sendApiError(res, 500, 'Failed to fetch category');
     }
   } else {
-    res.status(405).json({ error: 'Method not allowed' });
+    return sendApiError(res, 405, 'Method not allowed');
   }
 }

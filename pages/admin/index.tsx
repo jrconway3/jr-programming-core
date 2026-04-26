@@ -2,7 +2,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import type { GetServerSideProps } from 'next';
 import AdminShell from '../../components/admin/AdminShell';
-import { getAdminPageProps } from '../../lib/admin-auth';
+import { getAdminPageProps } from 'app/services/admin/auth';
 import { prisma } from '../../prisma/adapter';
 
 type DashboardInquiry = {

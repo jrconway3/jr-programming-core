@@ -1,11 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { requireAdminApi } from '../../../lib/admin-auth';
-import { editableSiteSettingKeys, mergeSettingsWithDefaults } from '../../../lib/site-settings';
+import { requireAdminApi } from 'app/services/admin/auth';
+import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
+import { editableSiteSettingKeys, mergeSettingsWithDefaults } from 'app/services/settings';
 import { prisma } from '../../../prisma/adapter';
 
 type SettingsPayload = {
   settings?: Record<string, unknown>;
 };
+
+type AdminSettingsResponse = ApiEnvelope<{ settings: Record<string, unknown> }>;
 
 const editableSettingKeySet = new Set(editableSiteSettingKeys);
 
@@ -51,10 +54,10 @@ function isSafeHttpsUrl(value: string): boolean {
   }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<AdminSettingsResponse>) {
   if (req.method !== 'PUT') {
     res.setHeader('Allow', 'PUT');
-    res.status(405).json({ error: 'Method not allowed' });
+    sendApiError(res, 405, 'Method not allowed');
     return;
   }
 
@@ -65,14 +68,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { settings } = (req.body ?? {}) as SettingsPayload;
 
   if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
-    res.status(400).json({ error: 'A settings object is required.' });
+    sendApiError(res, 400, 'A settings object is required.');
     return;
   }
 
   const submittedEntries = Object.entries(settings).filter(([key]) => editableSettingKeySet.has(key));
 
   if (submittedEntries.length === 0) {
-    res.status(400).json({ error: 'No editable settings were provided.' });
+    sendApiError(res, 400, 'No editable settings were provided.');
     return;
   }
 
@@ -80,19 +83,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   for (const [key, value] of submittedEntries) {
     if (typeof value !== 'string') {
-      res.status(400).json({ error: `Invalid value supplied for ${key}.` });
+      sendApiError(res, 400, `Invalid value supplied for ${key}.`);
       return;
     }
 
     const trimmed = value.trim();
 
     if (relativeHrefKeys.has(key) && !isSafeRelativeHref(trimmed)) {
-      res.status(400).json({ error: `Value for '${key}' must be a relative path or anchor (starting with / or #).` });
+      sendApiError(res, 400, `Value for '${key}' must be a relative path or anchor (starting with / or #).`);
       return;
     }
 
     if (httpsUrlKeys.has(key) && !isSafeHttpsUrl(trimmed)) {
-      res.status(400).json({ error: `Value for '${key}' must be a valid https:// URL.` });
+      sendApiError(res, 400, `Value for '${key}' must be a valid https:// URL.`);
       return;
     }
 
@@ -110,13 +113,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ),
     );
 
-    res.status(200).json({
+    return sendApiSuccess(res, 200, {
       settings: mergeSettingsWithDefaults(
         Object.entries(normalizedSettings).map(([key, value]) => ({ key, value })),
       ),
     });
   } catch (error) {
     console.error('PUT /api/admin/settings failed', error);
-    res.status(500).json({ error: 'Failed to save settings.' });
+    return sendApiError(res, 500, 'Failed to save settings.');
   }
 }

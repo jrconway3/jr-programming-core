@@ -1,8 +1,8 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { ADMIN_SESSION_COOKIE, SESSION_DURATION_SECONDS, sanitizeAdminNextPath } from './admin-session';
-export { sanitizeAdminNextPath } from './admin-session';
+import { ADMIN_SESSION_COOKIE, SESSION_DURATION_SECONDS, sanitizeAdminNextPath } from './session';
+export { sanitizeAdminNextPath } from './session';
 
 type AdminSession = {
   username: string;
