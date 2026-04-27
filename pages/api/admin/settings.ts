@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireAdminApi } from 'app/services/admin/auth';
 import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
 import { editableSiteSettingKeys, mergeSettingsWithDefaults } from 'app/services/settings';
-import { prisma } from '../../../prisma/adapter';
+import { prisma } from 'prisma/adapter';
 
 type SettingsPayload = {
   settings?: Record<string, unknown>;

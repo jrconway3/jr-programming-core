@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { requireAdminApi } from 'app/services/admin/auth';
 import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
 import { transformInquiryStatus } from 'app/transformers/inquiries';
-import { prisma } from '../../../../prisma/adapter';
+import { prisma } from 'prisma/adapter';
 
 type InquiryResponse = ApiEnvelope<{ inquiry: ReturnType<typeof transformInquiryStatus> }>;
 

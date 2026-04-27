@@ -4,121 +4,13 @@ import { requireAdminApi } from 'app/services/admin/auth';
 import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
 import {
   adminProjectInclude,
-  type NormalizedJobAssignment,
   normalizeProjectPayload,
   serializeAdminProject,
 } from 'app/services/admin/projects';
-import { prisma } from '../../../../prisma/adapter';
+import { resolveJobIdForAssignment } from 'app/repositories/projects';
+import { prisma } from 'prisma/adapter';
 
 type ProjectResponse = ApiEnvelope<{ project: ReturnType<typeof serializeAdminProject> }>;
-
-async function resolveJobIdForAssignment(
-  tx: Prisma.TransactionClient,
-  assignment: NormalizedJobAssignment | null,
-): Promise<number | null> {
-  if (!assignment) {
-    return null;
-  }
-
-  let resolvedJobId = assignment.job_id;
-
-  if (!assignment.job_payload) {
-    return resolvedJobId;
-  }
-
-  const now = new Date();
-  const jobPayload = assignment.job_payload;
-  let companyId = jobPayload.company_id;
-
-  if (!companyId && jobPayload.company_name) {
-    const existingCompany = await tx.company.findUnique({
-      where: { name: jobPayload.company_name },
-      select: { id: true },
-    });
-
-    if (existingCompany) {
-      companyId = existingCompany.id;
-
-      await tx.company.update({
-        where: { id: companyId },
-        data: {
-          shortcode: jobPayload.company_shortcode,
-          website: jobPayload.company_website,
-          updated_at: now,
-        },
-      });
-    } else {
-      const company = await tx.company.create({
-        data: {
-          name: jobPayload.company_name,
-          shortcode: jobPayload.company_shortcode,
-          website: jobPayload.company_website,
-        },
-        select: { id: true },
-      });
-
-      companyId = company.id;
-    }
-  }
-
-  if (resolvedJobId == null) {
-    resolvedJobId = jobPayload.id;
-  }
-
-  const roleRows = jobPayload.roles.map((role, index) => ({
-    title: role.title,
-    short_summary: role.short_summary,
-    start_date: role.start_date,
-    end_date: role.end_date,
-    priority: Number.isInteger(role.priority) ? role.priority : index,
-    is_current: role.is_current,
-  }));
-
-  if (resolvedJobId == null) {
-    const createdJob = await tx.job.create({
-      data: {
-        company_id: companyId,
-        summary: jobPayload.summary,
-        start_date: jobPayload.start_date,
-        end_date: jobPayload.end_date,
-        priority: jobPayload.priority,
-        roles: {
-          create: roleRows,
-        },
-      },
-      select: { id: true },
-    });
-
-    return createdJob.id;
-  }
-
-  await tx.job.update({
-    where: { id: resolvedJobId },
-    data: {
-      company_id: companyId,
-      summary: jobPayload.summary,
-      start_date: jobPayload.start_date,
-      end_date: jobPayload.end_date,
-      priority: jobPayload.priority,
-      updated_at: now,
-    },
-  });
-
-  await tx.jobRole.deleteMany({
-    where: { job_id: resolvedJobId },
-  });
-
-  if (roleRows.length > 0) {
-    await tx.jobRole.createMany({
-      data: roleRows.map((role) => ({
-        ...role,
-        job_id: resolvedJobId as number,
-      })),
-    });
-  }
-
-  return resolvedJobId;
-}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ProjectResponse>) {
   if (!requireAdminApi(req, res)) {

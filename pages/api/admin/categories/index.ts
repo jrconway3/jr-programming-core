@@ -4,7 +4,7 @@ import { requireAdminApi } from 'app/services/admin/auth';
 import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
 import { transformAdminCategory } from 'app/transformers/categories';
 import { normalizeShortcode } from 'app/services/admin/categories';
-import { prisma } from '../../../../prisma/adapter';
+import { prisma } from 'prisma/adapter';
 
 type CategoryResponse = ApiEnvelope<{ category: ReturnType<typeof transformAdminCategory> }>;
 
