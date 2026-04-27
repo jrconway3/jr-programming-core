@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../prisma/adapter';
+import { prisma } from 'prisma/adapter';
 import { transformCategory } from 'app/transformers/categories';
 import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
 

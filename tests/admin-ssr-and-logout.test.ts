@@ -56,7 +56,7 @@ vi.mock('app/services/admin/projects', () => ({
   serializeAdminProject: serializeAdminProjectMock,
 }));
 
-vi.mock('../prisma/adapter', () => ({
+vi.mock('prisma/adapter', () => ({
   prisma: prismaMock,
 }));
 

@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import { FormEvent, useState } from 'react';
-import AdminShell from '../../components/admin/AdminShell';
+import AdminShell from 'components/admin/AdminShell';
 import { getAdminPageProps } from 'app/services/admin/auth';
 import { extractApiErrorMessage } from 'app/helpers/response';
 import {
@@ -10,7 +10,7 @@ import {
   mergeSettingsWithDefaults,
   type SiteSettingField,
 } from 'app/services/settings';
-import { prisma } from '../../prisma/adapter';
+import { prisma } from 'prisma/adapter';
 
 type AdminSettingsPageProps = {
   adminUser: string;

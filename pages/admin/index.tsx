@@ -1,9 +1,9 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import type { GetServerSideProps } from 'next';
-import AdminShell from '../../components/admin/AdminShell';
+import AdminShell from 'components/admin/AdminShell';
 import { getAdminPageProps } from 'app/services/admin/auth';
-import { prisma } from '../../prisma/adapter';
+import { prisma } from 'prisma/adapter';
 
 type DashboardInquiry = {
   id: number;

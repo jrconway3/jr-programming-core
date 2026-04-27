@@ -2,6 +2,17 @@
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": "./",
+    "paths": {
+      "app/*": [
+        "app/*"
+      ],
+      "components/*": [
+        "components/*"
+      ],
+      "prisma/*": [
+        "prisma/*"
+      ]
+    },
     "target": "esnext",
     "lib": [
       "dom",

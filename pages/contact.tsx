@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import { ChangeEvent, FormEvent, useRef, useState } from 'react';
-import { extractApiErrorMessage } from '../app/helpers/response';
+import { extractApiErrorMessage } from 'app/helpers/response';
 
 type ContactFormData = {
   name: string;

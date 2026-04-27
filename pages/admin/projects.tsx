@@ -1,12 +1,12 @@
 import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import { DragEvent, useMemo, useState } from 'react';
-import AdminShell from '../../components/admin/AdminShell';
+import AdminShell from 'components/admin/AdminShell';
 import { getAdminPageProps } from 'app/services/admin/auth';
 import { extractApiErrorMessage } from 'app/helpers/response';
 import type { AdminCategoryOption, AdminProjectRecord } from 'app/services/admin/projects';
 import { adminProjectInclude, serializeAdminProject } from 'app/services/admin/projects';
-import { prisma } from '../../prisma/adapter';
+import { prisma } from 'prisma/adapter';
 
 type ProjectsPageProps = {
   adminUser: string;

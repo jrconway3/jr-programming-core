@@ -1,10 +1,10 @@
 import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import { FormEvent, useMemo, useState } from 'react';
-import AdminShell from '../../components/admin/AdminShell';
+import AdminShell from 'components/admin/AdminShell';
 import { getAdminPageProps } from 'app/services/admin/auth';
 import { extractApiErrorMessage } from 'app/helpers/response';
-import { prisma } from '../../prisma/adapter';
+import { prisma } from 'prisma/adapter';
 
 type AdminCategory = {
   id: number;

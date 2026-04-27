@@ -32,7 +32,7 @@ vi.mock('nodemailer', () => ({
   },
 }));
 
-vi.mock('../prisma/adapter', () => ({
+vi.mock('prisma/adapter', () => ({
   prisma: prismaMock,
 }));
 

@@ -5,6 +5,8 @@ export default defineConfig({
   resolve: {
     alias: {
       app: path.resolve(__dirname, 'app'),
+      components: path.resolve(__dirname, 'components'),
+      prisma: path.resolve(__dirname, 'prisma'),
     },
   },
   test: {

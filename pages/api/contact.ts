@@ -13,7 +13,7 @@ import {
   validateContactPayload,
 } from 'app/services/inquiries';
 import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
-import { prisma } from '../../prisma/adapter';
+import { prisma } from 'prisma/adapter';
 
 type ContactResponse = ApiEnvelope<{ message: string }>;
 
