@@ -3,7 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import type { Project } from "app/models/projects";
 import type { Category } from "app/models/categories";
-import ProjectCard from "./ProjectCard";
+import ProjectCard from "./projects/ProjectCard";
 
 interface Props {
   titleOverride?: string;

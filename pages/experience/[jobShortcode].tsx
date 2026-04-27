@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { buildDateRange } from 'app/helpers/common';
 import type { Job } from 'app/models/jobs';
 import { getJobByShortcode } from 'app/repositories/projects';
-import ProjectCard from '../../components/ProjectCard';
+import ProjectCard from '../../components/projects/ProjectCard';
 
 type Props = {
   job: Job;

@@ -193,7 +193,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         });
       }
 
-      return createdProject;
+      const projectWithRelations = await tx.project.findUnique({
+        where: { id: createdProject.id },
+        include: adminProjectInclude,
+      });
+
+      if (!projectWithRelations) {
+        throw new Error('Created project could not be reloaded.');
+      }
+
+      return projectWithRelations;
     });
 
     return sendApiSuccess(res, 201, { project: serializeAdminProject(project) });

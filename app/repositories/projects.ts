@@ -50,6 +50,14 @@ const projectWithFullInclude = {
   ...projectWithRelationsInclude,
   links: { orderBy: { priority: 'asc' } },
   gallery: { orderBy: { priority: 'asc' } },
+  skills: {
+    include: { skill: true },
+    orderBy: { priority: 'asc' },
+  },
+  categories: {
+    include: { category: true },
+    orderBy: { priority: 'asc' },
+  },
 } as const;
 
 const dateOrder = [
@@ -58,22 +66,19 @@ const dateOrder = [
 ];
 
 async function mapJob(
-  prismaWithJobs: PrismaExperienceFacade,
   job: JobRow,
 ): Promise<Job> {
-  const allProjects = await prismaWithJobs.project.findMany({
-    where: {
-      job: {
-        some: { job_id: job.id },
-      },
-    },
-    include: projectWithRelationsInclude,
-    orderBy: dateOrder,
-  });
+  const keySystemRelations = job.project_relations
+    .filter((relation) => relation.relation_type === 'key_system')
+    .sort((left, right) => left.priority - right.priority);
 
-  const keySystems = transformProjects(job.project_relations.map((relation) => relation.project));
+  const nonKeySystemRelations = job.project_relations
+    .filter((relation) => relation.relation_type !== 'key_system')
+    .sort((left, right) => left.priority - right.priority);
+
+  const keySystems = transformProjects(keySystemRelations.map((relation) => relation.project));
   const keySystemIds = new Set(keySystems.map((project) => project.id));
-  const moreProjects = transformProjects(allProjects)
+  const moreProjects = transformProjects(nonKeySystemRelations.map((relation) => relation.project))
     .filter((project) => !keySystemIds.has(project.id));
 
   return JSON.parse(JSON.stringify(transformJob({
@@ -157,7 +162,6 @@ export async function getJobs(): Promise<Job[]> {
         orderBy: { priority: 'asc' },
       },
       project_relations: {
-        where: { relation_type: 'key_system' },
         orderBy: { priority: 'asc' },
         include: {
           project: {
@@ -174,7 +178,7 @@ export async function getJobs(): Promise<Job[]> {
     ],
   });
 
-  const entries = await Promise.all(jobs.map((job) => mapJob(prismaWithJobs, job)));
+  const entries = await Promise.all(jobs.map((job) => mapJob(job)));
 
   return entries;
 }
@@ -193,7 +197,6 @@ export async function getJobByShortcode(shortcode: string): Promise<Job | null> 
         orderBy: { priority: 'asc' },
       },
       project_relations: {
-        where: { relation_type: 'key_system' },
         orderBy: { priority: 'asc' },
         include: {
           project: {
@@ -208,7 +211,7 @@ export async function getJobByShortcode(shortcode: string): Promise<Job | null> 
     return null;
   }
 
-  return mapJob(prismaWithJobs, job);
+  return mapJob(job);
 }
 
 export async function getExperienceProjectByShortcodes(

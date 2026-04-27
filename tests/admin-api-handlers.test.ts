@@ -62,6 +62,7 @@ const {
     },
     project: {
       create: vi.fn(),
+      findUnique: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
     },
@@ -623,6 +624,7 @@ describe('admin API handlers', () => {
       },
     });
     prismaMock.project.create.mockResolvedValue({ id: 101, name: 'Project A' });
+    prismaMock.project.findUnique.mockResolvedValue({ id: 101, name: 'Project A' });
     serializeAdminProjectMock.mockReturnValue({ id: 101, name: 'Project A' });
 
     const req = createRequest({ method: 'POST', body: { name: 'Project A' } });

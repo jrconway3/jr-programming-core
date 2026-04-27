@@ -124,7 +124,26 @@ export type NormalizedProjectInput = {
   job_assignment: NormalizedJobAssignment | null;
 };
 
+const adminJobRoleOrder = [
+  { priority: 'asc' as const },
+  { start_date: 'asc' as const },
+];
+
 export const adminProjectInclude = Prisma.validator<Prisma.ProjectInclude>()({
+  job: {
+    take: 1,
+    orderBy: { priority: 'asc' },
+    include: {
+      job: {
+        include: {
+          company: true,
+          roles: {
+            orderBy: adminJobRoleOrder,
+          },
+        },
+      },
+    },
+  },
   links: {
     orderBy: { priority: 'asc' },
   },

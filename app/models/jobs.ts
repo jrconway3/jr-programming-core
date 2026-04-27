@@ -121,6 +121,9 @@ export type JobRow = {
     priority: number;
   }>;
   project_relations: Array<{
+    id: number;
+    relation_type: string;
+    priority: number;
     project: ProjectTransformerInput;
   }>;
 };

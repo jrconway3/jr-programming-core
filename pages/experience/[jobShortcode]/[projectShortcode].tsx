@@ -1,7 +1,7 @@
 import type { GetServerSideProps } from 'next';
 import { getExperienceProjectByShortcodes } from 'app/repositories/projects';
 import type { ProjectDetail } from 'app/models/projects';
-import { ProjectDetailView } from '../../projects/[id]';
+import { ProjectDetailView } from 'components/projects/ProjectDetailView';
 
 type Params = {
   jobShortcode: string;

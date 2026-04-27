@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { GetServerSideProps } from "next";
 import type { HomePageProps, HomeProjectStatsEntry } from "app/models/home";
 import { useSettings } from "../components/SettingsContext";
-import ProjectCard from "components/ProjectCard";
+import ProjectCard from "components/projects/ProjectCard";
 import { getFeaturedProjects, getAllProjectStats } from "app/repositories/projects";
 import { transformHomePageMetrics } from "app/transformers/home";
 
