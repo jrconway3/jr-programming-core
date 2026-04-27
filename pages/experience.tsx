@@ -15,7 +15,6 @@ type Props = {
 
 export default function ExperiencePage({ category, projects, jobs }: Props) {
   const {
-    primaryJobs,
     earlierJobs,
     featuredPrimary,
     primaryRole,
@@ -83,14 +82,6 @@ export default function ExperiencePage({ category, projects, jobs }: Props) {
           </div>
 
           <div className="terminal-card px-6 pb-7 pt-12 md:px-8 md:pt-13">
-            <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">Primary Work</p>
-            </div>
-
-            <div className="mt-6">
-              {primaryJobs.length > 0 ? renderJobCards(primaryJobs) : null}
-            </div>
-
             {featuredPrimary ? (
               <article className="mt-10">
                 <div className="pb-5">

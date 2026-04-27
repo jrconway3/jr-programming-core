@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Project } from "models/projects";
-import { buildDateRange } from "models/projects";
+import { Project } from "app/models/projects";
+import { buildDateRange } from "app/helpers/common";
 
 interface Props {
   project: Project;

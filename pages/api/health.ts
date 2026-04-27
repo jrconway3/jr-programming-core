@@ -3,9 +3,8 @@ import {
   transformHealthMisconfigured,
   transformHealthOk,
   transformHealthUnavailable,
-  type HealthRecord,
 } from 'app/transformers/health';
-import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
+import { sendApiError, sendApiSuccess } from 'app/helpers/response';
 
 const requiredDbEnv = ['DB_HOST', 'DB_USER', 'DB_NAME'] as const;
 
@@ -22,7 +21,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const missingEnv = getMissingDbEnv();
   if (missingEnv.length > 0) {
-    return sendApiSuccess(res as NextApiResponse<ApiEnvelope<HealthRecord>>, 503, transformHealthMisconfigured(missingEnv));
+    const health = transformHealthMisconfigured(missingEnv);
+    return sendApiError(res, 503, 'Database configuration is incomplete.', undefined, health);
   }
 
   let prisma: PrismaInstance | null = null;
@@ -33,15 +33,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await prisma.$connect();
     await prisma.$queryRaw`SELECT 1`;
 
-    return sendApiSuccess(res as NextApiResponse<ApiEnvelope<HealthRecord>>, 200, transformHealthOk());
+    return sendApiSuccess(res, 200, transformHealthOk());
   } catch (error) {
     console.error('GET /api/health failed', error);
 
-    return sendApiSuccess(
-      res as NextApiResponse<ApiEnvelope<HealthRecord>>,
-      503,
-      transformHealthUnavailable(error instanceof Error ? error.message : 'Unknown error'),
-    );
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    const health = transformHealthUnavailable(message);
+    return sendApiError(res, 503, 'Database is unavailable.', undefined, health);
   } finally {
     if (prisma) {
       await prisma.$disconnect().catch(() => undefined);

@@ -15,7 +15,7 @@ export default function Home({
   portfolioProjects,
   displayedCompanies,
 }: HomePageProps) {
-  const { settings } = useSettings();
+  const { homeSettings } = useSettings();
 
   return (
     <>
@@ -24,56 +24,56 @@ export default function Home({
       </Head>
       <main className="min-h-screen px-4 py-10 md:px-6 md:py-16">
         <section className="mx-auto w-full max-w-5xl pb-8 pt-3 md:pt-4">
-          {settings.show_status_cta && (
-            <div className={`mb-8 flex items-center gap-3 rounded-lg px-4 py-3 md:mb-9 ${settings.home_status_state === "busy" ? "border border-amber-400/35 bg-amber-500/10" : "border border-emerald-400/35 bg-emerald-500/10"}`}>
+          {homeSettings.show_status_cta && (
+            <div className={`mb-8 flex items-center gap-3 rounded-lg px-4 py-3 md:mb-9 ${homeSettings.home_status_state === "busy" ? "border border-amber-400/35 bg-amber-500/10" : "border border-emerald-400/35 bg-emerald-500/10"}`}>
               <div className="flex min-w-0 flex-1 items-center gap-3">
-                <span className={settings.status_led_class} aria-hidden="true" />
-                <p className={`hidden text-xs font-semibold uppercase tracking-[0.24em] sm:block ${settings.home_status_state === "busy" ? "text-amber-200" : "text-emerald-200"}`}>
-                  {settings.display_status_label}
+                <span className={homeSettings.status_led_class} aria-hidden="true" />
+                <p className={`hidden text-xs font-semibold uppercase tracking-[0.24em] sm:block ${homeSettings.home_status_state === "busy" ? "text-amber-200" : "text-emerald-200"}`}>
+                  {homeSettings.display_status_label}
                 </p>
                 <span className="hidden text-primary-text/50 sm:inline">|</span>
-                <p className="text-sm leading-snug text-primary-text/90 sm:text-[15px]">{settings.display_status_message}</p>
+                <p className="text-sm leading-snug text-primary-text/90 sm:text-[15px]">{homeSettings.display_status_message}</p>
               </div>
 
               <Link
-                href={settings.home_status_cta_href}
-                className={`inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.14em] transition ${settings.home_status_state === "busy" ? "border border-amber-300/50 bg-amber-500/20 text-amber-100 hover:border-amber-200 hover:bg-amber-500/30" : "border border-emerald-300/50 bg-emerald-500/20 text-emerald-100 hover:border-emerald-200 hover:bg-emerald-500/30"}`}
+                href={homeSettings.home_status_cta_href}
+                className={`inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.14em] transition ${homeSettings.home_status_state === "busy" ? "border border-amber-300/50 bg-amber-500/20 text-amber-100 hover:border-amber-200 hover:bg-amber-500/30" : "border border-emerald-300/50 bg-emerald-500/20 text-emerald-100 hover:border-emerald-200 hover:bg-emerald-500/30"}`}
               >
-                {settings.display_status_cta_label}
+                {homeSettings.display_status_cta_label}
               </Link>
             </div>
           )}
 
           <div className="terminal-card px-6 pb-8 pt-14 text-center md:px-10 md:pb-10 md:pt-16">
             <p className="mb-4 text-xs uppercase tracking-[0.38em] text-primary-accentLight/60">
-              {settings.home_banner_eyebrow}
+              {homeSettings.home_banner_eyebrow}
             </p>
             <p className="mb-2 w-full pl-1 text-left text-xs uppercase tracking-[0.22em] text-emerald-300/55 md:pl-3">
               {"> user: jrconway"}
             </p>
             <h1 className="mb-4 text-5xl font-extrabold gradient-text animate-gradient md:text-7xl">
-              {settings.home_banner_title}
+              {homeSettings.home_banner_title}
             </h1>
             <div className="mx-auto mb-6 h-[2px] w-64 bg-gradient-to-r from-transparent via-primary-accent to-transparent shadow-[0_0_10px_rgba(168,85,247,0.35)] md:w-72" aria-hidden="true" />
             <p className="mx-auto mb-6 max-w-4xl text-[1.5rem] font-semibold leading-[1.42] text-primary-text md:text-[2.15rem] md:leading-[1.48]">
-              {settings.home_banner_subtitle}
+              {homeSettings.home_banner_subtitle}
             </p>
             <div className="mx-auto mb-8 max-w-3xl space-y-2 text-sm leading-7 text-primary-text/72 md:text-lg">
-              <p>{settings.home_banner_supporting_line1}</p>
-              <p>{settings.home_banner_supporting_line2}</p>
+              <p>{homeSettings.home_banner_supporting_line1}</p>
+              <p>{homeSettings.home_banner_supporting_line2}</p>
             </div>
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
               <a
-                href={settings.home_banner_cta_primary_href}
+                href={homeSettings.home_banner_cta_primary_href}
                 className="btn-cta-primary inline-block min-w-44 px-8 py-3 text-center font-semibold"
               >
-                {settings.home_banner_cta_primary_label}
+                {homeSettings.home_banner_cta_primary_label}
               </a>
               <Link
-                href={settings.home_banner_cta_secondary_href}
+                href={homeSettings.home_banner_cta_secondary_href}
                 className="btn-cta-outline inline-block min-w-44 px-8 py-3 text-center font-semibold"
               >
-                {settings.home_banner_cta_secondary_label}
+                {homeSettings.home_banner_cta_secondary_label}
               </Link>
             </div>
           </div>

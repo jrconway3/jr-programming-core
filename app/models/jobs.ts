@@ -75,7 +75,6 @@ export type ExperiencePageDataInput = {
 };
 
 export type ExperiencePageData = {
-  primaryJobs: Job[];
   earlierJobs: Job[];
   featuredPrimary: Project | null;
   primaryRole: string;

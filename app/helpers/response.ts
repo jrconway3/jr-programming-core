@@ -10,6 +10,7 @@ export type ApiError = {
   error: {
     message: string;
     code?: string;
+    details?: unknown;
   };
 };
 
@@ -27,12 +28,14 @@ export function sendApiError(
   status: number,
   message: string,
   code?: string,
+  details?: unknown,
 ) {
   return res.status(status).json({
     ok: false,
     error: {
       message,
       ...(code ? { code } : {}),
+      ...(details !== undefined ? { details } : {}),
     },
   });
 }

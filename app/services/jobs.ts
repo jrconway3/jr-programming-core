@@ -90,7 +90,6 @@ export function buildExperiencePageData({ projects, jobs }: ExperiencePageDataIn
   const href = featuredJob?.shortcode ? `/experience/${featuredJob.shortcode}` : '/experience';
 
   return {
-    primaryJobs,
     earlierJobs,
     featuredPrimary,
     primaryRole,
