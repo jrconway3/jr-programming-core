@@ -1,9 +1,10 @@
 import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import { useMemo, useState } from 'react';
-import AdminShell from '../../components/admin/AdminShell';
-import { getAdminPageProps } from '../../lib/admin-auth';
-import { prisma } from '../../prisma/adapter';
+import AdminShell from 'components/admin/AdminShell';
+import { getAdminPageProps } from 'app/services/admin/auth';
+import { extractApiErrorMessage } from 'app/helpers/response';
+import { prisma } from 'prisma/adapter';
 
 type AdminInquiry = {
   id: number;
@@ -83,18 +84,20 @@ export default function AdminInquiries({ adminUser, inquiries: initialInquiries 
         body: JSON.stringify({ status }),
       });
 
-      const payload = (await response.json()) as {
-        inquiry?: { id: number; status: string; updated_at: string };
-        error?: string;
+      const payload = await response.json() as {
+        ok?: boolean;
+        data?: {
+          inquiry?: { id: number; status: string; updated_at: string };
+        };
       };
 
-      if (!response.ok || !payload.inquiry) {
-        throw new Error(payload.error || 'Unable to update inquiry.');
+      if (!response.ok || !payload.ok || !payload.data?.inquiry) {
+        throw new Error(extractApiErrorMessage(payload, 'Unable to update inquiry.'));
       }
 
       setInquiries((current) => current.map((inquiry) => (
         inquiry.id === id
-          ? { ...inquiry, status: payload.inquiry!.status, updated_at: payload.inquiry!.updated_at }
+          ? { ...inquiry, status: payload.data!.inquiry!.status, updated_at: payload.data!.inquiry!.updated_at }
           : inquiry
       )));
     } catch (requestError) {

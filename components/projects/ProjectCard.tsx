@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Project, buildDateRange } from "models/projects";
+import { Project } from "app/models/projects";
+import { buildDateRange } from "app/helpers/common";
 
 interface Props {
   project: Project;
@@ -7,15 +8,19 @@ interface Props {
 }
 
 export default function ProjectCard({ project, variant = "project" }: Props) {
-  const skills = project.skills?.slice(0, 4) ?? [];
-  const categories = project.categories ?? [];
   const dateRange = buildDateRange(project.start_date, project.end_date);
+  const experienceProjectHref = project.job?.shortcode && project.shortcode
+    ? `/experience/${project.job.shortcode}/${project.shortcode}`
+    : `/projects/${project.id}`;
+  const projectHref = `/projects/${project.id}`;
+  const skills = project.skills.slice(0, 4);
+  const categories = project.categories;
 
   if (variant === "experience") {
     return (
       <Link
         key={project.id}
-        href={`/projects/${project.id}`}
+        href={experienceProjectHref}
         className="terminal-card block cursor-pointer p-6 transition-all duration-150 ease-out hover:scale-[1.01] hover:!border-emerald-300/50 hover:!shadow-[0_0_10px_rgba(74,222,128,0.1)]"
       >
         <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -61,7 +66,7 @@ export default function ProjectCard({ project, variant = "project" }: Props) {
   return (
     <Link
       key={project.id}
-      href={`/projects/${project.id}`}
+      href={projectHref}
       className="terminal-card group relative block cursor-pointer p-6 transition-all duration-150 ease-out hover:scale-[1.01]"
     >
       <span

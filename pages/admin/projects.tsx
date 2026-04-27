@@ -1,11 +1,12 @@
 import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import { DragEvent, useMemo, useState } from 'react';
-import AdminShell from '../../components/admin/AdminShell';
-import { getAdminPageProps } from '../../lib/admin-auth';
-import type { AdminCategoryOption, AdminProjectRecord } from '../../lib/admin-projects';
-import { adminProjectInclude, serializeAdminProject } from '../../lib/admin-projects';
-import { prisma } from '../../prisma/adapter';
+import AdminShell from 'components/admin/AdminShell';
+import { getAdminPageProps } from 'app/services/admin/auth';
+import { extractApiErrorMessage } from 'app/helpers/response';
+import type { AdminCategoryOption, AdminProjectRecord } from 'app/services/admin/projects';
+import { adminProjectInclude, serializeAdminProject } from 'app/services/admin/projects';
+import { prisma } from 'prisma/adapter';
 
 type ProjectsPageProps = {
   adminUser: string;
@@ -289,19 +290,24 @@ export default function AdminProjects({ adminUser, categories, projects: initial
         body: JSON.stringify(buildPayload(form)),
       });
 
-      const payload = (await response.json()) as { project?: AdminProjectRecord; error?: string };
+      const payload = await response.json() as {
+        ok?: boolean;
+        data?: {
+          project?: AdminProjectRecord;
+        };
+      };
 
-      if (!response.ok || !payload.project) {
-        throw new Error(payload.error || 'Unable to save project.');
+      if (!response.ok || !payload.ok || !payload.data?.project) {
+        throw new Error(extractApiErrorMessage(payload, 'Unable to save project.'));
       }
 
       setProjects((current) => {
-        const remaining = current.filter((project) => project.id !== payload.project!.id);
-        return [payload.project!, ...remaining].sort((left, right) => right.updated_at.localeCompare(left.updated_at));
+        const remaining = current.filter((project) => project.id !== payload.data!.project!.id);
+        return [payload.data!.project!, ...remaining].sort((left, right) => right.updated_at.localeCompare(left.updated_at));
       });
 
-      setSelectedProjectId(payload.project.id);
-      setForm(createFormFromProject(payload.project, categories));
+      setSelectedProjectId(payload.data.project.id);
+      setForm(createFormFromProject(payload.data.project, categories));
       setSuccessMessage(selectedProjectId ? 'Project updated.' : 'Project created.');
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Unable to save project.');
@@ -336,10 +342,15 @@ export default function AdminProjects({ adminUser, categories, projects: initial
         method: 'DELETE',
       });
 
-      const payload = (await response.json()) as { success?: boolean; error?: string };
+      const payload = await response.json() as {
+        ok?: boolean;
+        data?: {
+          success?: boolean;
+        };
+      };
 
-      if (!response.ok || !payload.success) {
-        throw new Error(payload.error || 'Unable to delete project.');
+      if (!response.ok || !payload.ok || !payload.data?.success) {
+        throw new Error(extractApiErrorMessage(payload, 'Unable to delete project.'));
       }
 
       const remainingProjects = projects.filter((item) => item.id !== selectedProjectId);

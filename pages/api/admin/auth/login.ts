@@ -4,23 +4,21 @@ import {
   getAdminSession,
   sanitizeAdminNextPath,
   validateAdminCredentials,
-} from '../../../../lib/admin-auth';
+} from 'app/services/admin/auth';
+import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
 
-type LoginResponse = {
-  error?: string;
-  next?: string;
-};
+type LoginResponse = ApiEnvelope<{ next: string }>;
 
 export default function handler(req: NextApiRequest, res: NextApiResponse<LoginResponse>) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
-    return res.status(405).json({ error: 'Method not allowed' });
+    return sendApiError(res, 405, 'Method not allowed');
   }
 
   const existingSession = getAdminSession(req);
 
   if (existingSession) {
-    return res.status(200).json({ next: sanitizeAdminNextPath(req.body?.next) });
+    return sendApiSuccess(res, 200, { next: sanitizeAdminNextPath(req.body?.next) });
   }
 
   const username = typeof req.body?.username === 'string' ? req.body.username.trim() : '';
@@ -28,15 +26,15 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<LoginR
   const nextPath = sanitizeAdminNextPath(req.body?.next);
 
   if (!validateAdminCredentials(username, password)) {
-    return res.status(401).json({ error: 'Invalid username or password.' });
+    return sendApiError(res, 401, 'Invalid username or password.');
   }
 
   const sessionCookie = createAdminSessionCookie(username);
 
   if (!sessionCookie) {
-    return res.status(500).json({ error: 'Unable to create an admin session.' });
+    return sendApiError(res, 500, 'Unable to create an admin session.');
   }
 
   res.setHeader('Set-Cookie', sessionCookie);
-  return res.status(200).json({ next: nextPath });
+  return sendApiSuccess(res, 200, { next: nextPath });
 }

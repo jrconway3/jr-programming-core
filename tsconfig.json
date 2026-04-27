@@ -2,6 +2,17 @@
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": "./",
+    "paths": {
+      "app/*": [
+        "app/*"
+      ],
+      "components/*": [
+        "components/*"
+      ],
+      "prisma/*": [
+        "prisma/*"
+      ]
+    },
     "target": "esnext",
     "lib": [
       "dom",
@@ -19,12 +30,19 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "incremental": true
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

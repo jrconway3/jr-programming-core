@@ -1,15 +1,16 @@
 import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import { FormEvent, useState } from 'react';
-import AdminShell from '../../components/admin/AdminShell';
-import { getAdminPageProps } from '../../lib/admin-auth';
+import AdminShell from 'components/admin/AdminShell';
+import { getAdminPageProps } from 'app/services/admin/auth';
+import { extractApiErrorMessage } from 'app/helpers/response';
 import {
   editableSiteSettingSections,
   editableSiteSettingKeys,
   mergeSettingsWithDefaults,
   type SiteSettingField,
-} from '../../lib/site-settings';
-import { prisma } from '../../prisma/adapter';
+} from 'app/services/settings';
+import { prisma } from 'prisma/adapter';
 
 type AdminSettingsPageProps = {
   adminUser: string;
@@ -81,16 +82,18 @@ export default function AdminSettings({ adminUser, settings: initialSettings }: 
         body: JSON.stringify({ settings: payload }),
       });
 
-      const responsePayload = (await response.json()) as {
-        settings?: Record<string, string>;
-        error?: string;
+      const responsePayload = await response.json() as {
+        ok?: boolean;
+        data?: {
+          settings?: Record<string, string>;
+        };
       };
 
-      if (!response.ok || !responsePayload.settings) {
-        throw new Error(responsePayload.error || 'Unable to save settings.');
+      if (!response.ok || !responsePayload.ok || !responsePayload.data?.settings) {
+        throw new Error(extractApiErrorMessage(responsePayload, 'Unable to save settings.'));
       }
 
-      setSettings(responsePayload.settings);
+      setSettings(responsePayload.data.settings);
       setSuccessMessage('Settings saved successfully.');
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Unable to save settings.');

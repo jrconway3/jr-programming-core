@@ -1,12 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { clearAdminSessionCookie } from '../../../../lib/admin-auth';
+import { clearAdminSessionCookie } from 'app/services/admin/auth';
+import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
 
-export default function handler(req: NextApiRequest, res: NextApiResponse<{ success: true } | { error: string }>) {
+type LogoutResponse = ApiEnvelope<{ success: true }>;
+
+export default function handler(req: NextApiRequest, res: NextApiResponse<LogoutResponse>) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
-    return res.status(405).json({ error: 'Method not allowed' });
+    return sendApiError(res, 405, 'Method not allowed');
   }
 
   res.setHeader('Set-Cookie', clearAdminSessionCookie());
-  return res.status(200).json({ success: true });
+  return sendApiSuccess(res, 200, { success: true });
 }

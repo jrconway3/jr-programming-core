@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
 import { unstable_doesMiddlewareMatch } from 'next/experimental/testing/server';
-import { createAdminSessionCookie } from '../lib/admin-auth';
+import { createAdminSessionCookie } from 'app/services/admin/auth';
 import nextConfig from '../next.config.mjs';
 import { config, proxy } from '../proxy';
 

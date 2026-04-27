@@ -1,8 +1,8 @@
 import { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import type { Project } from "../models/projects";
-import type { Category } from "../models/categories";
+import type { Project } from "app/models/projects";
+import type { Category } from "app/models/categories";
 import ProjectCard from "./ProjectCard";
 
 interface Props {

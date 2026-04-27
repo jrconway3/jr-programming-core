@@ -5,17 +5,17 @@ import {
   DUPLICATE_SUBMISSION_WINDOW_MS,
   ONE_HOUR_MS,
   TEN_MINUTES_MS,
+} from 'app/models/inquiries';
+import {
   isSpamScore,
   normalizeContactPayload,
   scoreSubmission,
   validateContactPayload,
-} from '../../lib/contact';
-import { prisma } from '../../prisma/adapter';
+} from 'app/services/inquiries';
+import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
+import { prisma } from 'prisma/adapter';
 
-type ContactResponse = {
-  message?: string;
-  error?: string;
-};
+type ContactResponse = ApiEnvelope<{ message: string }>;
 
 const rateLimitStore = new Map<string, number[]>();
 const RATE_LIMIT_PRUNE_INTERVAL_MS = 5 * 60 * 1000;
@@ -281,7 +281,7 @@ async function sendContactNotification(config: MailConfig, payload: {
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ContactResponse>) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
-    return res.status(405).json({ error: 'Method not allowed' });
+    return sendApiError(res, 405, 'Method not allowed');
   }
 
   try {
@@ -289,7 +289,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const validationError = validateContactPayload(payload);
 
     if (validationError) {
-      return res.status(400).json({ error: validationError });
+      return sendApiError(res, 400, validationError);
     }
 
     const now = Date.now();
@@ -298,7 +298,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const rateLimitKey = ipHash ?? hashValue(clientIp);
 
     if (isRateLimited(rateLimitKey, now)) {
-      return res.status(429).json({ error: 'Too many submissions from this network. Please try again later.' });
+      return sendApiError(res, 429, 'Too many submissions from this network. Please try again later.');
     }
 
     const { score, reasons } = scoreSubmission({
@@ -329,7 +329,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     });
 
     if (recentDuplicate) {
-      return res.status(200).json({
+      return sendApiSuccess(res, 200, {
         message: 'Your inquiry has already been received.',
       });
     }
@@ -386,11 +386,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       }
     }
 
-    return res.status(200).json({
+    return sendApiSuccess(res, 200, {
       message: 'Your inquiry has been received. I will review it and follow up if a response is needed.',
     });
   } catch (error) {
     console.error('POST /api/contact failed', error);
-    return res.status(500).json({ error: 'Unable to submit your inquiry right now.' });
+    return sendApiError(res, 500, 'Unable to submit your inquiry right now.');
   }
 }

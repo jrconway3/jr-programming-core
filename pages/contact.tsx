@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import { ChangeEvent, FormEvent, useRef, useState } from 'react';
+import { extractApiErrorMessage } from 'app/helpers/response';
 
 type ContactFormData = {
   name: string;
@@ -58,26 +59,33 @@ export default function Contact() {
         body: JSON.stringify({ ...formData, submittedAt: formOpenedAt }),
       });
 
-      let payload: { message?: string; error?: string } = {};
+      let payload: unknown = {};
       const contentType = response.headers.get('content-type')?.toLowerCase() ?? '';
 
       if (contentType.includes('application/json')) {
         try {
-          payload = (await response.json()) as { message?: string; error?: string };
+          payload = await response.json();
         } catch {
           payload = {};
         }
       }
 
-      if (!response.ok) {
-        throw new Error(payload.error || 'Unable to submit your inquiry right now.');
+      const envelope = payload as {
+        ok?: boolean;
+        data?: {
+          message?: string;
+        };
+      };
+
+      if (!response.ok || !envelope.ok) {
+        throw new Error(extractApiErrorMessage(payload, 'Unable to submit your inquiry right now.'));
       }
 
       setFormData(initialFormData);
       setSubmittedAt(Date.now());
       setSubmissionState({
         type: 'success',
-        message: payload.message || 'Your inquiry has been sent successfully.',
+        message: envelope.data?.message || 'Your inquiry has been sent successfully.',
       });
     } catch (error) {
       setSubmissionState({

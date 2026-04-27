@@ -2,7 +2,8 @@ import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/router';
-import { getAdminSession, sanitizeAdminNextPath } from '../../lib/admin-auth';
+import { getAdminSession, sanitizeAdminNextPath } from 'app/services/admin/auth';
+import { extractApiErrorMessage } from 'app/helpers/response';
 
 type LoginPageProps = {
   nextPath: string;
@@ -30,13 +31,18 @@ export default function AdminLogin({ nextPath }: LoginPageProps) {
         body: JSON.stringify({ username, password, next: nextPath }),
       });
 
-      const payload = (await response.json()) as { error?: string; next?: string };
+      const payload = await response.json() as {
+        ok?: boolean;
+        data?: {
+          next?: string;
+        };
+      };
 
-      if (!response.ok) {
-        throw new Error(payload.error || 'Unable to sign in.');
+      if (!response.ok || !payload.ok) {
+        throw new Error(extractApiErrorMessage(payload, 'Unable to sign in.'));
       }
 
-      await router.push(payload.next || '/admin');
+      await router.push(payload.data?.next || '/admin');
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'Unable to sign in.');
     } finally {

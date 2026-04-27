@@ -62,6 +62,7 @@ const {
     },
     project: {
       create: vi.fn(),
+      findUnique: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
     },
@@ -87,7 +88,7 @@ vi.mock('@prisma/client', () => ({
   },
 }));
 
-vi.mock('../lib/admin-auth', () => ({
+vi.mock('app/services/admin/auth', () => ({
   requireAdminApi: requireAdminApiMock,
   getAdminSession: getAdminSessionMock,
   sanitizeAdminNextPath: sanitizeAdminNextPathMock,
@@ -95,13 +96,13 @@ vi.mock('../lib/admin-auth', () => ({
   createAdminSessionCookie: createAdminSessionCookieMock,
 }));
 
-vi.mock('../lib/admin-projects', () => ({
+vi.mock('app/services/admin/projects', () => ({
   adminProjectInclude: { _count: true },
   normalizeProjectPayload: normalizeProjectPayloadMock,
   serializeAdminProject: serializeAdminProjectMock,
 }));
 
-vi.mock('../prisma/adapter', () => ({
+vi.mock('prisma/adapter', () => ({
   prisma: prismaMock,
 }));
 
@@ -188,7 +189,7 @@ describe('admin API handlers', () => {
 
     expect(res.statusCode).toBe(405);
     expect(res.headers.Allow).toBe('POST');
-    expect(res.body).toEqual({ error: 'Method not allowed' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Method not allowed' } });
   });
 
   it('login handler returns next path when session already exists', async () => {
@@ -200,7 +201,7 @@ describe('admin API handlers', () => {
     await loginHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ next: '/admin/projects' });
+    expect(res.body).toEqual({ ok: true, data: { next: '/admin/projects' } });
     expect(validateAdminCredentialsMock).not.toHaveBeenCalled();
   });
 
@@ -217,7 +218,7 @@ describe('admin API handlers', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.headers['Set-Cookie']).toContain('jr_admin_session=signed');
-    expect(res.body).toEqual({ next: '/admin/inquiries' });
+    expect(res.body).toEqual({ ok: true, data: { next: '/admin/inquiries' } });
   });
 
   it('categories create handler rejects invalid method', async () => {
@@ -228,7 +229,7 @@ describe('admin API handlers', () => {
 
     expect(res.statusCode).toBe(405);
     expect(res.headers.Allow).toBe('POST');
-    expect(res.body).toEqual({ error: 'Method not allowed' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Method not allowed' } });
   });
 
   it('categories create handler validates required fields', async () => {
@@ -238,7 +239,7 @@ describe('admin API handlers', () => {
     await categoriesCreateHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'Category title is required.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Category title is required.' } });
     expect(prismaMock.category.create).not.toHaveBeenCalled();
   });
 
@@ -268,11 +269,14 @@ describe('admin API handlers', () => {
       }),
     );
     expect(res.body).toMatchObject({
-      category: {
-        id: 22,
-        title: 'Work History',
-        shortcode: 'work-history',
-        projectCount: 3,
+      ok: true,
+      data: {
+        category: {
+          id: 22,
+          title: 'Work History',
+          shortcode: 'work-history',
+          projectCount: 3,
+        },
       },
     });
   });
@@ -289,7 +293,7 @@ describe('admin API handlers', () => {
     await categoriesCreateHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(409);
-    expect(res.body).toEqual({ error: 'That shortcode is already in use.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'That shortcode is already in use.' } });
   });
 
   it('categories create handler returns 500 for unexpected errors', async () => {
@@ -304,7 +308,7 @@ describe('admin API handlers', () => {
     await categoriesCreateHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(500);
-    expect(res.body).toEqual({ error: 'Failed to create category.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Failed to create category.' } });
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
@@ -315,7 +319,7 @@ describe('admin API handlers', () => {
     await categoriesByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'Invalid category id.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Invalid category id.' } });
   });
 
   it('categories by id handler rejects array id values', async () => {
@@ -325,7 +329,7 @@ describe('admin API handlers', () => {
     await categoriesByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'Invalid category id.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Invalid category id.' } });
   });
 
   it('categories by id handler deletes category within transaction', async () => {
@@ -337,7 +341,7 @@ describe('admin API handlers', () => {
     expect(prismaMock.projectCategory.deleteMany).toHaveBeenCalledWith({ where: { category_id: 12 } });
     expect(prismaMock.category.delete).toHaveBeenCalledWith({ where: { id: 12 } });
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ success: true });
+    expect(res.body).toEqual({ ok: true, data: { success: true } });
   });
 
   it('categories by id handler maps missing records to 404 on update', async () => {
@@ -353,7 +357,7 @@ describe('admin API handlers', () => {
     await categoriesByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({ error: 'Category not found.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Category not found.' } });
   });
 
   it('categories by id handler maps duplicate shortcode errors to 409 on update', async () => {
@@ -369,7 +373,7 @@ describe('admin API handlers', () => {
     await categoriesByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(409);
-    expect(res.body).toEqual({ error: 'That shortcode is already in use.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'That shortcode is already in use.' } });
   });
 
   it('categories by id handler maps missing records to 404 on delete', async () => {
@@ -381,7 +385,7 @@ describe('admin API handlers', () => {
     await categoriesByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({ error: 'Category not found.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Category not found.' } });
   });
 
   it('categories by id handler returns 500 for unexpected update errors', async () => {
@@ -397,7 +401,7 @@ describe('admin API handlers', () => {
     await categoriesByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(500);
-    expect(res.body).toEqual({ error: 'Failed to update category.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Failed to update category.' } });
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
@@ -410,7 +414,7 @@ describe('admin API handlers', () => {
     await categoriesByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(500);
-    expect(res.body).toEqual({ error: 'Failed to delete category.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Failed to delete category.' } });
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
@@ -421,7 +425,7 @@ describe('admin API handlers', () => {
     await inquiriesByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'Invalid inquiry status.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Invalid inquiry status.' } });
   });
 
   it('inquiries handler rejects array id values', async () => {
@@ -435,7 +439,7 @@ describe('admin API handlers', () => {
     await inquiriesByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'Invalid inquiry id.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Invalid inquiry id.' } });
   });
 
   it('inquiries handler returns updated inquiry payload', async () => {
@@ -449,10 +453,13 @@ describe('admin API handlers', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
-      inquiry: {
-        id: 5,
-        status: 'reviewed',
-        updated_at: updatedAt.toISOString(),
+      ok: true,
+      data: {
+        inquiry: {
+          id: 5,
+          status: 'reviewed',
+          updated_at: updatedAt.toISOString(),
+        },
       },
     });
   });
@@ -466,7 +473,7 @@ describe('admin API handlers', () => {
     await inquiriesByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({ error: 'Inquiry not found.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Inquiry not found.' } });
   });
 
   it('inquiries handler returns 500 for unexpected errors', async () => {
@@ -478,7 +485,7 @@ describe('admin API handlers', () => {
     await inquiriesByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(500);
-    expect(res.body).toEqual({ error: 'Failed to update inquiry.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Failed to update inquiry.' } });
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
@@ -490,7 +497,7 @@ describe('admin API handlers', () => {
 
     expect(res.statusCode).toBe(405);
     expect(res.headers.Allow).toBe('PUT');
-    expect(res.body).toEqual({ error: 'Method not allowed' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Method not allowed' } });
   });
 
   it('settings handler validates the request payload', async () => {
@@ -500,7 +507,7 @@ describe('admin API handlers', () => {
     await settingsHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'A settings object is required.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'A settings object is required.' } });
   });
 
   it('settings handler upserts all submitted keys', async () => {
@@ -532,9 +539,12 @@ describe('admin API handlers', () => {
     expect(prismaMock.settings.upsert).toHaveBeenCalledTimes(2);
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
-      settings: {
-        'home/banner/title': 'David Conway Jr.',
-        'home/banner/eyebrow': 'Backend Developer',
+      ok: true,
+      data: {
+        settings: {
+          'home/banner/title': 'David Conway Jr.',
+          'home/banner/eyebrow': 'Backend Developer',
+        },
       },
     });
   });
@@ -555,7 +565,7 @@ describe('admin API handlers', () => {
     await settingsHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(500);
-    expect(res.body).toEqual({ error: 'Failed to save settings.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Failed to save settings.' } });
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
@@ -567,7 +577,7 @@ describe('admin API handlers', () => {
     await projectsCreateHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'Project name is required.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Project name is required.' } });
   });
 
   it('projects create handler checks category existence', async () => {
@@ -594,7 +604,7 @@ describe('admin API handlers', () => {
     await projectsCreateHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'One or more selected categories no longer exist.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'One or more selected categories no longer exist.' } });
   });
 
   it('projects create handler returns serialized project on success', async () => {
@@ -614,6 +624,7 @@ describe('admin API handlers', () => {
       },
     });
     prismaMock.project.create.mockResolvedValue({ id: 101, name: 'Project A' });
+    prismaMock.project.findUnique.mockResolvedValue({ id: 101, name: 'Project A' });
     serializeAdminProjectMock.mockReturnValue({ id: 101, name: 'Project A' });
 
     const req = createRequest({ method: 'POST', body: { name: 'Project A' } });
@@ -622,7 +633,7 @@ describe('admin API handlers', () => {
     await projectsCreateHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(201);
-    expect(res.body).toEqual({ project: { id: 101, name: 'Project A' } });
+    expect(res.body).toEqual({ ok: true, data: { project: { id: 101, name: 'Project A' } } });
   });
 
   it('projects create handler maps known Prisma errors to 400', async () => {
@@ -649,7 +660,7 @@ describe('admin API handlers', () => {
     await projectsCreateHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'Unable to create project with the submitted data.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Unable to create project with the submitted data.' } });
   });
 
   it('projects create handler returns 500 for unexpected errors', async () => {
@@ -676,7 +687,7 @@ describe('admin API handlers', () => {
     await projectsCreateHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(500);
-    expect(res.body).toEqual({ error: 'Failed to create project.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Failed to create project.' } });
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
@@ -687,7 +698,7 @@ describe('admin API handlers', () => {
     await projectsByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'Invalid project id.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Invalid project id.' } });
   });
 
   it('projects by id handler rejects array id values', async () => {
@@ -697,7 +708,7 @@ describe('admin API handlers', () => {
     await projectsByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'Invalid project id.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Invalid project id.' } });
   });
 
   it('projects by id handler deletes project-related records in transaction', async () => {
@@ -712,7 +723,7 @@ describe('admin API handlers', () => {
     expect(prismaMock.projectLink.deleteMany).toHaveBeenCalledWith({ where: { project_id: 41 } });
     expect(prismaMock.project.delete).toHaveBeenCalledWith({ where: { id: 41 } });
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ success: true });
+    expect(res.body).toEqual({ ok: true, data: { success: true } });
   });
 
   it('projects by id handler maps missing records to 404 on update', async () => {
@@ -739,7 +750,7 @@ describe('admin API handlers', () => {
     await projectsByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({ error: 'Project not found.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Project not found.' } });
   });
 
   it('projects by id handler maps known Prisma errors to 400 on update', async () => {
@@ -766,7 +777,7 @@ describe('admin API handlers', () => {
     await projectsByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'Unable to update project with the submitted data.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Unable to update project with the submitted data.' } });
   });
 
   it('projects by id handler maps missing records to 404 on delete', async () => {
@@ -778,7 +789,7 @@ describe('admin API handlers', () => {
     await projectsByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({ error: 'Project not found.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Project not found.' } });
   });
 
   it('projects by id handler returns 500 for unexpected update errors', async () => {
@@ -805,7 +816,7 @@ describe('admin API handlers', () => {
     await projectsByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(500);
-    expect(res.body).toEqual({ error: 'Failed to update project.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Failed to update project.' } });
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
@@ -818,7 +829,7 @@ describe('admin API handlers', () => {
     await projectsByIdHandler(req as never, res as never);
 
     expect(res.statusCode).toBe(500);
-    expect(res.body).toEqual({ error: 'Failed to delete project.' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Failed to delete project.' } });
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 });

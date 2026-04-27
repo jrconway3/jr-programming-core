@@ -1,18 +1,19 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Prisma } from '@prisma/client';
-import { requireAdminApi } from '../../../../lib/admin-auth';
+import { requireAdminApi } from 'app/services/admin/auth';
+import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
 import {
   adminProjectInclude,
   normalizeProjectPayload,
   serializeAdminProject,
-} from '../../../../lib/admin-projects';
-import { prisma } from '../../../../prisma/adapter';
+} from 'app/services/admin/projects';
+import { resolveJobIdForAssignment } from 'app/repositories/projects';
+import { prisma } from 'prisma/adapter';
 
-type ProjectResponse = {
+type ProjectResponse = ApiEnvelope<{
   project?: ReturnType<typeof serializeAdminProject>;
   success?: boolean;
-  error?: string;
-};
+}>;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ProjectResponse>) {
   if (!requireAdminApi(req, res)) {
@@ -22,20 +23,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const rawId = req.query.id;
 
   if (typeof rawId !== 'string' || !/^\d+$/.test(rawId)) {
-    return res.status(400).json({ error: 'Invalid project id.' });
+    return sendApiError(res, 400, 'Invalid project id.');
   }
 
   const id = Number.parseInt(rawId, 10);
 
   if (!Number.isInteger(id)) {
-    return res.status(400).json({ error: 'Invalid project id.' });
+    return sendApiError(res, 400, 'Invalid project id.');
   }
 
   if (req.method === 'PUT') {
     const normalized = normalizeProjectPayload(req.body);
 
     if (!normalized.ok) {
-      return res.status(400).json({ error: normalized.error });
+      return sendApiError(res, 400, normalized.error);
     }
 
     const { data } = normalized;
@@ -50,7 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       });
 
       if (existingCategories.length !== categoryIds.length) {
-        return res.status(400).json({ error: 'One or more selected categories no longer exist.' });
+        return sendApiError(res, 400, 'One or more selected categories no longer exist.');
       }
     }
 
@@ -60,6 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
           where: { id },
           data: {
             name: data.name,
+            shortcode: data.shortcode,
             short: data.short,
             role: data.role,
             position: data.position,
@@ -82,6 +84,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
           where: { project_id: id },
         });
 
+        await tx.jobProjectRelation.deleteMany({
+          where: { project_id: id },
+        });
+
+        const resolvedJobId = await resolveJobIdForAssignment(tx, data.job_assignment);
+
+        if (resolvedJobId != null && data.job_assignment) {
+          await tx.jobProjectRelation.create({
+            data: {
+              job_id: resolvedJobId,
+              project_id: id,
+              relation_type: data.job_assignment.relation_type,
+              priority: data.job_assignment.relation_priority,
+            },
+          });
+        }
+
         return tx.project.update({
           where: { id },
           data: {
@@ -103,18 +122,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         });
       });
 
-      return res.status(200).json({ project: serializeAdminProject(project) });
+      return sendApiSuccess(res, 200, { project: serializeAdminProject(project) });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        return res.status(404).json({ error: 'Project not found.' });
+        return sendApiError(res, 404, 'Project not found.');
       }
 
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        return res.status(400).json({ error: 'Unable to update project with the submitted data.' });
+        return sendApiError(res, 400, 'Unable to update project with the submitted data.');
       }
 
       console.error('PUT /api/admin/projects/[id] failed', error);
-      return res.status(500).json({ error: 'Failed to update project.' });
+      return sendApiError(res, 500, 'Failed to update project.');
     }
   }
 
@@ -142,17 +161,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         });
       });
 
-      return res.status(200).json({ success: true });
+      return sendApiSuccess(res, 200, { success: true });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        return res.status(404).json({ error: 'Project not found.' });
+        return sendApiError(res, 404, 'Project not found.');
       }
 
       console.error('DELETE /api/admin/projects/[id] failed', error);
-      return res.status(500).json({ error: 'Failed to delete project.' });
+      return sendApiError(res, 500, 'Failed to delete project.');
     }
   }
 
   res.setHeader('Allow', 'PUT, DELETE');
-  return res.status(405).json({ error: 'Method not allowed' });
+  return sendApiError(res, 405, 'Method not allowed');
 }

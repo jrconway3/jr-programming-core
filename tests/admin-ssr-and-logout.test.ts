@@ -46,17 +46,17 @@ const {
   },
 }));
 
-vi.mock('../lib/admin-auth', () => ({
+vi.mock('app/services/admin/auth', () => ({
   getAdminPageProps: getAdminPagePropsMock,
   clearAdminSessionCookie: clearAdminSessionCookieMock,
 }));
 
-vi.mock('../lib/admin-projects', () => ({
+vi.mock('app/services/admin/projects', () => ({
   adminProjectInclude: { include: 'adminProjectInclude' },
   serializeAdminProject: serializeAdminProjectMock,
 }));
 
-vi.mock('../prisma/adapter', () => ({
+vi.mock('prisma/adapter', () => ({
   prisma: prismaMock,
 }));
 
@@ -129,7 +129,7 @@ describe('admin logout and page server loaders', () => {
 
     expect(res.statusCode).toBe(405);
     expect(res.headers.Allow).toBe('POST');
-    expect(res.body).toEqual({ error: 'Method not allowed' });
+    expect(res.body).toEqual({ ok: false, error: { message: 'Method not allowed' } });
   });
 
   it('logout handler clears the session cookie', async () => {
@@ -141,7 +141,7 @@ describe('admin logout and page server loaders', () => {
     expect(clearAdminSessionCookieMock).toHaveBeenCalledOnce();
     expect(res.headers['Set-Cookie']).toBe('jr_admin_session=; Path=/; HttpOnly');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ success: true });
+    expect(res.body).toEqual({ ok: true, data: { success: true } });
   });
 
   it('dashboard getServerSideProps loads and serializes summary data', async () => {
