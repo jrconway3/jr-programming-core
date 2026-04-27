@@ -2,7 +2,7 @@ import type { GetServerSideProps } from 'next';
 import type { Category } from 'app/models/categories';
 import type { Project } from 'app/models/projects';
 import { getProjectsByShortcode, getCategoryByShortcode } from 'app/repositories/projects';
-import ProjectCategoryPage from '../../components/ProjectCategoryPage';
+import ProjectCategoryPage from 'components/projects/ProjectCategoryPage';
 
 type Props = {
   category: Category;

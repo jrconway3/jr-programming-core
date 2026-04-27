@@ -9,7 +9,9 @@
     "build": "next build",
     "start": "next start",
     "smoke": "node scripts/smoke-prod.mjs",
-    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run",
+    "test": "npm run typecheck && npm run test:unit",
     "test:watch": "vitest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
