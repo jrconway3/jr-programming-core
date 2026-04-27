@@ -1,9 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { sendApiError, sendApiSuccess, type ApiEnvelope } from 'app/helpers/response';
+import { sendApiError, sendApiSuccess } from 'app/helpers/response';
+import { ProjectResponse } from 'app/transformers';
 import { getProjectById } from 'app/repositories/projects';
-import { transformProject } from 'app/transformers/projects';
-
-type ProjectResponse = ApiEnvelope<ReturnType<typeof transformProject>>;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ProjectResponse>) {
   if (req.method === 'GET') {

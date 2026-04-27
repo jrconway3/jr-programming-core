@@ -1,5 +1,6 @@
 import type { Project, ProjectTransformerInput } from 'app/models/projects';
-import { buildDateRange, toIsoDate, toIsoRequired } from '../helpers/common';
+import { buildDateRange, toIsoDate, toIsoRequired } from 'app/helpers/common';
+import { ApiEnvelope } from 'app/helpers/response';
 
 export function transformProject(project: ProjectTransformerInput): Project {
   const relation = project.job?.[0] ?? null;
@@ -90,3 +91,5 @@ export function transformProject(project: ProjectTransformerInput): Project {
 export function transformProjects(projects: ProjectTransformerInput[]): Project[] {
   return projects.map((project) => transformProject(project));
 }
+
+export type ProjectResponse = ApiEnvelope<ReturnType<typeof transformProject>>;

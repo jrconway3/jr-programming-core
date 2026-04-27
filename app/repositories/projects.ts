@@ -1,4 +1,4 @@
-import { prisma } from '../../prisma/adapter';
+import { prisma } from 'prisma/adapter';
 import type { Project, ProjectDetail } from 'app/models/projects';
 import type { Category } from 'app/models/categories';
 import type { HomeProjectStatsEntry } from 'app/models/home';
