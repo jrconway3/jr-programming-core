@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Project } from "app/models/projects";
 import type { Category } from "app/models/categories";
 import ProjectCard from "./ProjectCard";
+import { withProjectCardView } from "app/helpers/project-card";
 
 interface Props {
   titleOverride?: string;
@@ -83,7 +84,7 @@ export default function ProjectCategoryPage({
             {filtered.length === 0 && (
               <div className="terminal-card px-6 py-8 text-primary-text/70">{emptyStateLabel}</div>
             )}
-            {filtered.map((project) => <ProjectCard key={project.id} project={project} variant={cardVariant} />)}
+            {filtered.map((project) => <ProjectCard key={project.id} project={withProjectCardView(project, cardVariant)} />)}
           </div>
               
           <div className="mt-10 text-center">

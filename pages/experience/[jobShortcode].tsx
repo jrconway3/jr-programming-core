@@ -2,6 +2,7 @@ import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { buildDateRange } from 'app/helpers/common';
+import { withProjectCardView } from 'app/helpers/project-card';
 import type { Job } from 'app/models/jobs';
 import { getJobByShortcode } from 'app/repositories/projects';
 import ProjectCard from 'components/projects/ProjectCard';
@@ -49,6 +50,15 @@ export default function ExperienceJobPage({ job }: Props) {
             )}
           </div>
 
+          {job.keySystems.length > 0 && (
+            <div className="space-y-4">
+              <h2 className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">Key Systems</h2>
+              <div className="grid gap-8 md:grid-cols-2">
+                {job.keySystems.map((project) => <ProjectCard key={project.id} project={withProjectCardView(project, "experience")} />)}
+              </div>
+            </div>
+          )}
+
           {job.impacts.length > 0 && (
             <div className="terminal-card px-6 pb-7 pt-8 md:px-8">
               <h2 className="text-[11px] uppercase tracking-[0.24em] text-primary-accentLight">Impact</h2>
@@ -57,13 +67,6 @@ export default function ExperienceJobPage({ job }: Props) {
               </ul>
             </div>
           )}
-
-          <div className="space-y-4">
-            <h2 className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">Projects</h2>
-            <div className="grid gap-8 md:grid-cols-2">
-              {allProjects.map((project) => <ProjectCard key={project.id} project={project} variant="experience" />)}
-            </div>
-          </div>
         </section>
       </main>
     </>
