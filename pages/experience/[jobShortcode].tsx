@@ -52,6 +52,15 @@ export default function ExperienceJobPage({ job }: Props) {
             </div>
           )}
 
+          {job.moreProjects.length > 0 && (
+            <div className="space-y-4">
+              <h2 className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">Additional Projects</h2>
+              <div className="grid gap-8 md:grid-cols-2">
+                {job.moreProjects.map((project) => <ProjectCard key={project.id} project={withProjectCardView(project, "experience")} />)}
+              </div>
+            </div>
+          )}
+
           {job.impacts.length > 0 && (
             <div className="terminal-card px-6 pb-7 pt-8 md:px-8">
               <h2 className="text-[11px] uppercase tracking-[0.24em] text-primary-accentLight">Impact</h2>

@@ -6,6 +6,7 @@ interface Props {
 }
 
 export default function ProjectCard({ project }: Props) {
+  const technologyPreview = project.preview_skills.length > 0 ? project.preview_skills : project.skills;
 
   return (
     <Link
@@ -52,11 +53,11 @@ export default function ProjectCard({ project }: Props) {
           </div>
         </div>
 
-        {project.skills.length > 0 && (
+        {technologyPreview.length > 0 && (
           <div>
             <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight">Technologies</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              {project.skills.map((skillEntry) => (
+              {technologyPreview.map((skillEntry) => (
                 <span
                   key={skillEntry.id}
                   className="rounded-full border border-primary-accent/20 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-primary-accentLight"
