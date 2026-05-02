@@ -3,8 +3,8 @@ import type { GetServerSideProps } from 'next';
 import { FormEvent, useMemo, useState } from 'react';
 import AdminShell from 'components/admin/AdminShell';
 import { getAdminPageProps } from 'app/services/admin/auth';
+import { getAdminCategoriesPageData } from 'app/services/admin/categories';
 import { extractApiErrorMessage } from 'app/helpers/response';
-import { prisma } from 'prisma/adapter';
 
 type AdminCategory = {
   id: number;
@@ -286,27 +286,5 @@ export default function AdminCategories({ adminUser, categories: initialCategori
 }
 
 export const getServerSideProps: GetServerSideProps<CategoriesPageProps> = async (context) => {
-  return getAdminPageProps(context, async () => {
-    const categories = await prisma.category.findMany({
-      orderBy: { title: 'asc' },
-      include: {
-        _count: {
-          select: {
-            projects: true,
-          },
-        },
-      },
-    });
-
-    return {
-      categories: categories.map((category) => ({
-        id: category.id,
-        title: category.title,
-        shortcode: category.shortcode,
-        created_at: category.created_at.toISOString(),
-        updated_at: category.updated_at.toISOString(),
-        projectCount: category._count.projects,
-      })),
-    };
-  });
+  return getAdminPageProps(context, async () => getAdminCategoriesPageData());
 };

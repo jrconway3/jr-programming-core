@@ -1,7 +1,7 @@
 import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
-import { buildDateRange } from 'app/helpers/common';
+import { withProjectCardView } from 'app/helpers/project-card';
 import type { Job } from 'app/models/jobs';
 import { getJobByShortcode } from 'app/repositories/projects';
 import ProjectCard from 'components/projects/ProjectCard';
@@ -11,12 +11,6 @@ type Props = {
 };
 
 export default function ExperienceJobPage({ job }: Props) {
-  const roleNames = job.roles.map((role) => role.title);
-  const primaryRole = job.roles.find((role) => role.is_current)?.title ?? roleNames[0] ?? 'Role';
-  const priorRoles = roleNames.filter((role) => role !== primaryRole);
-  const dateRange = buildDateRange(job.start_date, job.end_date);
-  const allProjects = [...job.keySystems, ...job.moreProjects];
-
   return (
     <>
       <Head>
@@ -35,19 +29,37 @@ export default function ExperienceJobPage({ job }: Props) {
 
           <div className="terminal-card px-6 pb-8 pt-12 md:px-8">
             <p className="text-xs uppercase tracking-[0.22em] text-emerald-300/70">{`> company: ${job.company?.name || 'Experience'}`}</p>
-            {dateRange && (
-              <p className="mt-2 text-xs uppercase tracking-[0.22em] text-emerald-300/70">{`> years: ${dateRange}`}</p>
+            {job.date_range && (
+              <p className="mt-2 text-xs uppercase tracking-[0.22em] text-emerald-300/70">{`> years: ${job.date_range}`}</p>
             )}
 
-            <h1 className="mt-5 text-3xl font-bold text-primary-text md:text-4xl">{primaryRole}</h1>
-            {priorRoles.length > 0 && (
-              <p className="mt-2 text-sm text-primary-text/70">Previously: {priorRoles.join(' · ')}</p>
+            <h1 className="mt-5 text-3xl font-bold text-primary-text md:text-4xl">{job.primary_role}</h1>
+            {job.prior_roles.length > 0 && (
+              <p className="mt-2 text-sm text-primary-text/70">Previously: {job.prior_roles.join(' · ')}</p>
             )}
 
             {job.summary && (
               <p className="mt-5 text-sm leading-7 text-primary-text/80">{job.summary}</p>
             )}
           </div>
+
+          {job.keySystems.length > 0 && (
+            <div className="space-y-4">
+              <h2 className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">Key Systems</h2>
+              <div className="grid gap-8 md:grid-cols-2">
+                {job.keySystems.map((project) => <ProjectCard key={project.id} project={withProjectCardView(project, "experience")} />)}
+              </div>
+            </div>
+          )}
+
+          {job.moreProjects.length > 0 && (
+            <div className="space-y-4">
+              <h2 className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">Additional Projects</h2>
+              <div className="grid gap-8 md:grid-cols-2">
+                {job.moreProjects.map((project) => <ProjectCard key={project.id} project={withProjectCardView(project, "experience")} />)}
+              </div>
+            </div>
+          )}
 
           {job.impacts.length > 0 && (
             <div className="terminal-card px-6 pb-7 pt-8 md:px-8">
@@ -57,13 +69,6 @@ export default function ExperienceJobPage({ job }: Props) {
               </ul>
             </div>
           )}
-
-          <div className="space-y-4">
-            <h2 className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">Projects</h2>
-            <div className="grid gap-8 md:grid-cols-2">
-              {allProjects.map((project) => <ProjectCard key={project.id} project={project} variant="experience" />)}
-            </div>
-          </div>
         </section>
       </main>
     </>

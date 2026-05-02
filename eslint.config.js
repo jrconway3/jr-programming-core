@@ -26,6 +26,21 @@ export default defineConfig([
             react: { version: 'detect' },
         },
     },
+    // Enforce layer boundary: pages/ (excluding pages/api/) must not import from the DB layer directly
+    {
+        files: ['pages/**/*.{ts,tsx}'],
+        ignores: ['pages/api/**'],
+        rules: {
+            'no-restricted-imports': ['error', {
+                patterns: [
+                    {
+                        regex: '^(prisma/adapter|@prisma/client)',
+                        message: 'Pages must not import from the DB layer directly. Move DB access into app/services/ or app/repositories/.',
+                    },
+                ],
+            }],
+        },
+    },
     {
         ignores: [
             'node_modules/*',

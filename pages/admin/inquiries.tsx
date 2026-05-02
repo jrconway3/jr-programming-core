@@ -3,8 +3,8 @@ import type { GetServerSideProps } from 'next';
 import { useMemo, useState } from 'react';
 import AdminShell from 'components/admin/AdminShell';
 import { getAdminPageProps } from 'app/services/admin/auth';
+import { getAdminInquiriesPageData } from 'app/services/admin/inquiries';
 import { extractApiErrorMessage } from 'app/helpers/response';
-import { prisma } from 'prisma/adapter';
 
 type AdminInquiry = {
   id: number;
@@ -241,19 +241,5 @@ export default function AdminInquiries({ adminUser, inquiries: initialInquiries 
 }
 
 export const getServerSideProps: GetServerSideProps<InquiriesPageProps> = async (context) => {
-  return getAdminPageProps(context, async () => {
-    const inquiries = await prisma.inquiry.findMany({
-      orderBy: { created_at: 'desc' },
-      take: 150,
-    });
-
-    return {
-      inquiries: inquiries.map((inquiry) => ({
-        ...inquiry,
-        sent_at: inquiry.sent_at ? inquiry.sent_at.toISOString() : null,
-        created_at: inquiry.created_at.toISOString(),
-        updated_at: inquiry.updated_at.toISOString(),
-      })),
-    };
-  });
+  return getAdminPageProps(context, async () => getAdminInquiriesPageData());
 };

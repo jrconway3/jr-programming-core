@@ -1,9 +1,10 @@
 import Head from "next/head";
 import Link from "next/link";
 import type { GetServerSideProps } from "next";
-import type { HomePageProps, HomeProjectStatsEntry } from "app/models/home";
+import type { HomePageProps } from "app/models/home";
 import { useSettings } from "components/SettingsContext";
 import ProjectCard from "components/projects/ProjectCard";
+import { withProjectCardView } from "app/helpers/project-card";
 import { getFeaturedProjects, getAllProjectStats } from "app/repositories/projects";
 import { transformHomePageMetrics } from "app/transformers/home";
 
@@ -184,7 +185,7 @@ export default function Home({
             {featuredProjects.length === 0 && (
               <div className="terminal-card px-6 py-8 text-primary-text/70">No featured case studies are available yet.</div>
             )}
-            {featuredProjects.map((project) => <ProjectCard key={project.id} project={project} />)}
+            {featuredProjects.map((project) => <ProjectCard key={project.id} project={withProjectCardView(project, "project")} />)}
           </div>
           <div className="mt-10 text-center">
             <Link
@@ -206,8 +207,7 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
     getAllProjectStats(),
   ]);
 
-  const allProjects: HomeProjectStatsEntry[] = allProjectsRaw;
-  const metrics = transformHomePageMetrics(allProjects);
+  const metrics = transformHomePageMetrics(allProjectsRaw);
 
   return {
     props: {

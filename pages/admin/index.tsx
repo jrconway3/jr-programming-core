@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { GetServerSideProps } from 'next';
 import AdminShell from 'components/admin/AdminShell';
 import { getAdminPageProps } from 'app/services/admin/auth';
-import { prisma } from 'prisma/adapter';
+import { getAdminDashboardPageData } from 'app/services/admin/dashboard';
 
 type DashboardInquiry = {
   id: number;
@@ -122,35 +122,5 @@ export default function AdminDashboard({
 }
 
 export const getServerSideProps: GetServerSideProps<DashboardPageProps> = async (context) => {
-  return getAdminPageProps(context, async () => {
-    const [projectCount, categoryCount, inquiryCount, pendingInquiryCount, recentInquiries] = await Promise.all([
-      prisma.project.count(),
-      prisma.category.count(),
-      prisma.inquiry.count(),
-      prisma.inquiry.count({ where: { status: 'pending' } }),
-      prisma.inquiry.findMany({
-        orderBy: { created_at: 'desc' },
-        take: 6,
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          subject: true,
-          status: true,
-          created_at: true,
-        },
-      }),
-    ]);
-
-    return {
-      projectCount,
-      categoryCount,
-      inquiryCount,
-      pendingInquiryCount,
-      recentInquiries: recentInquiries.map((inquiry) => ({
-        ...inquiry,
-        created_at: inquiry.created_at.toISOString(),
-      })),
-    };
-  });
+  return getAdminPageProps(context, async () => getAdminDashboardPageData());
 };
