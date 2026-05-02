@@ -21,11 +21,13 @@ type MockResponse = {
 const {
   getAdminPagePropsMock,
   clearAdminSessionCookieMock,
+  getAdminProjectsPageDataMock,
   serializeAdminProjectMock,
   prismaMock,
 } = vi.hoisted(() => ({
   getAdminPagePropsMock: vi.fn(),
   clearAdminSessionCookieMock: vi.fn(),
+  getAdminProjectsPageDataMock: vi.fn(),
   serializeAdminProjectMock: vi.fn(),
   prismaMock: {
     project: {
@@ -52,6 +54,7 @@ vi.mock('app/services/admin/auth', () => ({
 }));
 
 vi.mock('app/services/admin/projects', () => ({
+  getAdminProjectsPageData: getAdminProjectsPageDataMock,
   adminProjectInclude: { include: 'adminProjectInclude' },
   serializeAdminProject: serializeAdminProjectMock,
 }));
@@ -109,6 +112,11 @@ describe('admin logout and page server loaders', () => {
     settingsGetServerSideProps = (await import('../pages/admin/settings')).getServerSideProps;
 
     clearAdminSessionCookieMock.mockReturnValue('jr_admin_session=; Path=/; HttpOnly');
+    getAdminProjectsPageDataMock.mockReset();
+    getAdminProjectsPageDataMock.mockResolvedValue({
+      categories: [],
+      projects: [],
+    });
 
     getAdminPagePropsMock.mockImplementation(async (_context, loadPageProps) => {
       const extraProps = loadPageProps ? await loadPageProps() : {};
@@ -287,27 +295,14 @@ describe('admin logout and page server loaders', () => {
   });
 
   it('projects getServerSideProps returns selected categories and serialized projects', async () => {
-    prismaMock.category.findMany.mockResolvedValue([
-      { id: 1, title: 'Projects', shortcode: 'projects' },
-    ]);
-    prismaMock.project.findMany.mockResolvedValue([
-      { id: 10, name: 'Raw Project' },
-    ]);
-    serializeAdminProjectMock.mockReturnValue({ id: 10, name: 'Serialized Project' });
+    getAdminProjectsPageDataMock.mockResolvedValue({
+      categories: [{ id: 1, title: 'Projects', shortcode: 'projects' }],
+      projects: [{ id: 10, name: 'Serialized Project' }],
+    });
 
     const result = await projectsGetServerSideProps({} as never);
 
-    expect(prismaMock.category.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        orderBy: { title: 'asc' },
-      }),
-    );
-    expect(prismaMock.project.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        orderBy: { updated_at: 'desc' },
-      }),
-    );
-    expect(serializeAdminProjectMock).toHaveBeenCalledWith({ id: 10, name: 'Raw Project' });
+    expect(getAdminProjectsPageDataMock).toHaveBeenCalledOnce();
     expect(result).toEqual({
       props: {
         adminUser: 'admin',
