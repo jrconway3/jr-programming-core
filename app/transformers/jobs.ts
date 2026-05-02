@@ -14,8 +14,15 @@ export function transformJob(job: JobTransformerInput): Job {
     is_current: role.is_current,
   }));
   const roleNames = roles.map((role) => role.title);
-  const primaryRole = roles.find((role) => role.is_current)?.title ?? roleNames[0] ?? 'Role';
+  const currentRole = roles.find((role) => role.is_current);
+  const primaryRole = currentRole?.title ?? roleNames[0] ?? 'Role';
   const priorRoles = roleNames.filter((role) => role !== primaryRole);
+  const displayCompanyLabel = job.company?.name ?? 'Company';
+  const displaySummary = currentRole?.short_summary
+    ?? roles[0]?.short_summary
+    ?? job.summary
+    ?? 'Additional details are available on this role page.';
+  const href = job.shortcode ? `/experience/${job.shortcode}` : '/experience';
 
   return {
     id: job.id,
@@ -40,5 +47,8 @@ export function transformJob(job: JobTransformerInput): Job {
     prior_roles: priorRoles,
     date_range: buildDateRange(startDate, endDate),
     all_projects: [...job.keySystems, ...job.moreProjects],
+    display_company_label: displayCompanyLabel,
+    display_summary: displaySummary,
+    href,
   };
 }

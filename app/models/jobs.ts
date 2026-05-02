@@ -35,6 +35,9 @@ export type Job = {
   prior_roles: string[];
   date_range: string | null;
   all_projects: Project[];
+  display_company_label: string;
+  display_summary: string;
+  href: string;
 };
 
 export type JobTransformerInput = {

@@ -1,7 +1,6 @@
 import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
-import { buildDateRange } from 'app/helpers/common';
 import { withProjectCardView } from 'app/helpers/project-card';
 import type { Job } from 'app/models/jobs';
 import { getJobByShortcode } from 'app/repositories/projects';
@@ -12,12 +11,6 @@ type Props = {
 };
 
 export default function ExperienceJobPage({ job }: Props) {
-  const roleNames = job.roles.map((role) => role.title);
-  const primaryRole = job.roles.find((role) => role.is_current)?.title ?? roleNames[0] ?? 'Role';
-  const priorRoles = roleNames.filter((role) => role !== primaryRole);
-  const dateRange = buildDateRange(job.start_date, job.end_date);
-  const allProjects = [...job.keySystems, ...job.moreProjects];
-
   return (
     <>
       <Head>
@@ -36,13 +29,13 @@ export default function ExperienceJobPage({ job }: Props) {
 
           <div className="terminal-card px-6 pb-8 pt-12 md:px-8">
             <p className="text-xs uppercase tracking-[0.22em] text-emerald-300/70">{`> company: ${job.company?.name || 'Experience'}`}</p>
-            {dateRange && (
-              <p className="mt-2 text-xs uppercase tracking-[0.22em] text-emerald-300/70">{`> years: ${dateRange}`}</p>
+            {job.date_range && (
+              <p className="mt-2 text-xs uppercase tracking-[0.22em] text-emerald-300/70">{`> years: ${job.date_range}`}</p>
             )}
 
-            <h1 className="mt-5 text-3xl font-bold text-primary-text md:text-4xl">{primaryRole}</h1>
-            {priorRoles.length > 0 && (
-              <p className="mt-2 text-sm text-primary-text/70">Previously: {priorRoles.join(' · ')}</p>
+            <h1 className="mt-5 text-3xl font-bold text-primary-text md:text-4xl">{job.primary_role}</h1>
+            {job.prior_roles.length > 0 && (
+              <p className="mt-2 text-sm text-primary-text/70">Previously: {job.prior_roles.join(' · ')}</p>
             )}
 
             {job.summary && (

@@ -5,8 +5,7 @@ import AdminShell from 'components/admin/AdminShell';
 import { getAdminPageProps } from 'app/services/admin/auth';
 import { extractApiErrorMessage } from 'app/helpers/response';
 import type { AdminCategoryOption, AdminProjectRecord } from 'app/services/admin/projects';
-import { adminProjectInclude, serializeAdminProject } from 'app/services/admin/projects';
-import { prisma } from 'prisma/adapter';
+import { getAdminProjectsPageData } from 'app/services/admin/projects';
 
 type ProjectsPageProps = {
   adminUser: string;
@@ -817,25 +816,5 @@ export default function AdminProjects({ adminUser, categories, projects: initial
 }
 
 export const getServerSideProps: GetServerSideProps<ProjectsPageProps> = async (context) => {
-  return getAdminPageProps(context, async () => {
-    const [categories, projects] = await Promise.all([
-      prisma.category.findMany({
-        orderBy: { title: 'asc' },
-        select: {
-          id: true,
-          title: true,
-          shortcode: true,
-        },
-      }),
-      prisma.project.findMany({
-        orderBy: { updated_at: 'desc' },
-        include: adminProjectInclude,
-      }),
-    ]);
-
-    return {
-      categories,
-      projects: projects.map((project) => serializeAdminProject(project)),
-    };
-  });
+  return getAdminPageProps(context, async () => getAdminProjectsPageData());
 };

@@ -1,7 +1,6 @@
 import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
-import { buildDateRange } from 'app/helpers/common';
 import type { Category } from 'app/models/categories';
 import type { Job } from 'app/models/jobs';
 import { getProjectsByShortcode, getCategoryByShortcode, getJobs } from 'app/repositories/projects';
@@ -30,36 +29,26 @@ export default function ExperiencePage({ category, projects, jobs }: Props) {
   const renderJobCards = (entries: Job[]) => (
     <div className="grid gap-8 md:grid-cols-2">
       {entries.map((entry) => {
-        const roleNames = entry.roles.map((role) => role.title);
-        const primaryEntryRole = entry.roles.find((role) => role.is_current)?.title ?? roleNames[0] ?? 'Role';
-        const summary = entry.roles.find((role) => role.is_current)?.short_summary
-          ?? entry.roles[0]?.short_summary
-          ?? entry.summary
-          ?? 'Additional details are available on this role page.';
-        const companyLabel = entry.company?.name ?? 'Company';
-        const roleDateRange = buildDateRange(entry.start_date, entry.end_date);
-        const roleHref = entry.shortcode ? `/experience/${entry.shortcode}` : '/experience';
-
         return (
           <Link
             key={entry.id}
-            href={roleHref}
+            href={entry.href}
             className="terminal-card block cursor-pointer p-6 transition-all duration-150 ease-out hover:scale-[1.01] hover:!border-emerald-300/50 hover:!shadow-[0_0_10px_rgba(74,222,128,0.1)]"
           >
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-primary-accentLight/75">{companyLabel}</p>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-primary-accentLight/75">{entry.display_company_label}</p>
                 <h3 className="mt-2 text-xl font-semibold text-primary-text transition-colors duration-150 hover:text-emerald-100">
-                  {primaryEntryRole}
+                  {entry.primary_role}
                 </h3>
               </div>
 
-              {roleDateRange && (
-                <span className="whitespace-nowrap rounded-full border border-primary-accent/25 px-3 py-1 text-xs text-primary-text/65">{roleDateRange}</span>
+              {entry.date_range && (
+                <span className="whitespace-nowrap rounded-full border border-primary-accent/25 px-3 py-1 text-xs text-primary-text/65">{entry.date_range}</span>
               )}
             </div>
 
-            <p className="text-sm leading-7 text-primary-text/75">{summary}</p>
+            <p className="text-sm leading-7 text-primary-text/75">{entry.display_summary}</p>
           </Link>
         );
       })}

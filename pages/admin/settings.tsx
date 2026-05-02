@@ -7,10 +7,9 @@ import { extractApiErrorMessage } from 'app/helpers/response';
 import {
   editableSiteSettingSections,
   editableSiteSettingKeys,
-  mergeSettingsWithDefaults,
   type SiteSettingField,
 } from 'app/services/settings';
-import { prisma } from 'prisma/adapter';
+import { getAdminSettingsPageData } from 'app/services/admin/settings';
 
 type AdminSettingsPageProps = {
   adminUser: string;
@@ -155,21 +154,5 @@ export default function AdminSettings({ adminUser, settings: initialSettings }: 
 }
 
 export const getServerSideProps: GetServerSideProps<AdminSettingsPageProps> = async (context) => {
-  return getAdminPageProps(context, async () => {
-    const settings = await prisma.settings.findMany({
-      where: {
-        key: {
-          in: editableSiteSettingKeys,
-        },
-      },
-      orderBy: [
-        { updated_at: 'desc' },
-        { id: 'desc' },
-      ],
-    });
-
-    return {
-      settings: mergeSettingsWithDefaults(settings),
-    };
-  });
+  return getAdminPageProps(context, async () => getAdminSettingsPageData());
 };

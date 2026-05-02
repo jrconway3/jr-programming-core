@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import type { GetServerSideProps } from "next";
-import type { HomePageProps, HomeProjectStatsEntry } from "app/models/home";
+import type { HomePageProps } from "app/models/home";
 import { useSettings } from "components/SettingsContext";
 import ProjectCard from "components/projects/ProjectCard";
 import { withProjectCardView } from "app/helpers/project-card";
@@ -207,8 +207,7 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
     getAllProjectStats(),
   ]);
 
-  const allProjects: HomeProjectStatsEntry[] = allProjectsRaw;
-  const metrics = transformHomePageMetrics(allProjects);
+  const metrics = transformHomePageMetrics(allProjectsRaw);
 
   return {
     props: {

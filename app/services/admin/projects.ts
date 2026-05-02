@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { prisma } from 'prisma/adapter';
 
 export type AdminCategoryOption = {
   id: number;
@@ -582,5 +583,30 @@ export function serializeAdminProject(project: AdminProjectWithRelations): Admin
       })),
     } : null,
     skillsCount: project._count.skills,
+  };
+}
+
+export async function getAdminProjectsPageData(): Promise<{
+  categories: AdminCategoryOption[];
+  projects: AdminProjectRecord[];
+}> {
+  const [categories, projects] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: { title: 'asc' },
+      select: {
+        id: true,
+        title: true,
+        shortcode: true,
+      },
+    }),
+    prisma.project.findMany({
+      orderBy: { updated_at: 'desc' },
+      include: adminProjectInclude,
+    }),
+  ]);
+
+  return {
+    categories,
+    projects: projects.map((project) => serializeAdminProject(project)),
   };
 }
