@@ -24,7 +24,7 @@ export default function Home({
         <title>JRProgramming</title>
       </Head>
       <main className="min-h-screen px-4 py-10 md:px-6 md:py-16">
-        <section className="mx-auto w-full max-w-5xl pb-8 pt-3 md:pt-4">
+        <section className="mx-auto w-full pb-8 pt-3 md:pt-4">
           {homeSettings.show_status_cta && (
             <div className={`mb-8 flex items-center gap-3 rounded-lg px-4 py-3 md:mb-9 ${homeSettings.home_status_state === "busy" ? "border border-amber-400/35 bg-amber-500/10" : "border border-emerald-400/35 bg-emerald-500/10"}`}>
               <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -45,85 +45,104 @@ export default function Home({
             </div>
           )}
 
-          <div className="terminal-card px-6 pb-8 pt-14 text-center md:px-10 md:pb-10 md:pt-16">
-            <p className="mb-4 text-xs uppercase tracking-[0.38em] text-primary-accentLight/60">
-              {homeSettings.home_banner_eyebrow}
-            </p>
-            <p className="mb-2 w-full pl-1 text-left text-xs uppercase tracking-[0.22em] text-emerald-300/55 md:pl-3">
-              {"> user: jrconway"}
-            </p>
-            <h1 className="mb-4 text-5xl font-extrabold gradient-text animate-gradient md:text-7xl">
-              {homeSettings.home_banner_title}
-            </h1>
-            <div className="mx-auto mb-6 h-[2px] w-64 bg-gradient-to-r from-transparent via-primary-accent to-transparent shadow-[0_0_10px_rgba(168,85,247,0.35)] md:w-72" aria-hidden="true" />
-            <p className="mx-auto mb-6 max-w-4xl text-[1.5rem] font-semibold leading-[1.42] text-primary-text md:text-[2.15rem] md:leading-[1.48]">
-              {homeSettings.home_banner_subtitle}
-            </p>
-            <div className="mx-auto mb-8 max-w-3xl space-y-2 text-sm leading-7 text-primary-text/72 md:text-lg">
-              <p>{homeSettings.home_banner_supporting_line1}</p>
-              <p>{homeSettings.home_banner_supporting_line2}</p>
-            </div>
-            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
-              <a
-                href={homeSettings.home_banner_cta_primary_href}
-                className="btn-cta-primary inline-block min-w-44 px-8 py-3 text-center font-semibold"
-              >
-                {homeSettings.home_banner_cta_primary_label}
-              </a>
-              <Link
-                href={homeSettings.home_banner_cta_secondary_href}
-                className="btn-cta-outline inline-block min-w-44 px-8 py-3 text-center font-semibold"
-              >
-                {homeSettings.home_banner_cta_secondary_label}
-              </Link>
-            </div>
-          </div>
-        </section>
+          <div className="terminal-card px-6 pb-8 pt-14 md:px-10 md:pb-10 md:pt-16">
+            <div className="flex flex-col gap-8 md:grid md:grid-cols-[1fr_340px] md:items-stretch">
+              {/* Left column: text + CTAs */}
+              <div>
+                <p className="mb-4 text-xs uppercase tracking-[0.38em] text-primary-accentLight/60">
+                  {homeSettings.home_banner_eyebrow}
+                </p>
+                <p className="mb-2 w-full pl-1 text-left text-xs uppercase tracking-[0.22em] text-emerald-300/55 md:pl-3">
+                  {"> user: jrconway"}
+                </p>
+                <h1 className="mb-4 text-5xl font-extrabold gradient-text animate-gradient md:text-7xl">
+                  {homeSettings.home_banner_title}
+                </h1>
+                <div className="mb-6 h-[2px] w-64 bg-gradient-to-r from-transparent via-primary-accent to-transparent shadow-[0_0_10px_rgba(168,85,247,0.35)] md:w-72" aria-hidden="true" />
+                <p className="mb-8 text-lg font-semibold leading-[1.55] text-primary-text md:text-xl">
+                  {homeSettings.home_banner_subtitle}
+                </p>
+                <div className="flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap">
+                  <a
+                    href={homeSettings.home_banner_cta_primary_href}
+                    className="btn-cta-primary inline-block min-w-44 px-8 py-3 text-center font-semibold"
+                  >
+                    {homeSettings.home_banner_cta_primary_label}
+                  </a>
+                  <Link
+                    href={homeSettings.home_banner_cta_secondary_href}
+                    className="btn-cta-outline inline-block min-w-44 px-8 py-3 text-center font-semibold"
+                  >
+                    {homeSettings.home_banner_cta_secondary_label}
+                  </Link>
+                </div>
+              </div>
 
-        <section className="mx-auto w-full max-w-5xl py-12">
-          <div className="terminal-card px-6 pb-8 pt-14 md:px-8">
-            <p className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">Services</p>
-            <h2 className="mt-3 text-3xl font-bold text-primary-accentLight md:text-4xl">What I Do</h2>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-primary-text/75 md:text-base">
-              I help teams reduce manual operations and ship reliable systems by focusing on practical backend architecture, integration work, and workflow automation.
-            </p>
-
-            <div className="mt-8 grid gap-4 md:grid-cols-2">
-              {[
-                {
-                  title: "API Development & Integration",
-                  body: "Design and connect API-driven systems so business tools share clean, reliable data.",
-                },
-                {
-                  title: "Backend Systems",
-                  body: "Build maintainable backend features for dashboards, CRM tools, and custom business software.",
-                },
-                {
-                  title: "Automation & Workflow Tools",
-                  body: "Replace repetitive manual tasks with dependable scripts, integrations, and automated processes.",
-                },
-                {
-                  title: "Database Design & Optimization",
-                  body: "Structure and optimize data models for faster queries, cleaner reporting, and easier scaling.",
-                },
-              ].map((service) => (
-                <article key={service.title} className="project-block-emphasis rounded-xl border border-primary-accent/20 bg-slate-950/45 p-5">
-                  <h3 className="flex items-center gap-2 text-lg font-semibold text-primary-text">
-                    <span className="inline-block h-2 w-2 rounded-full bg-emerald-300/85" aria-hidden="true" />
-                    {service.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-[1.95] text-primary-text/62">{service.body}</p>
-                </article>
-              ))}
+              {/* Right column: headshot placeholder */}
+              <div className="relative overflow-hidden rounded-xl border border-primary-accent/20 bg-slate-900/60 aspect-square md:aspect-auto flex-shrink-0">
+                {/* Scanline overlay */}
+                <div
+                  className="absolute inset-0 pointer-events-none z-10"
+                  style={{ backgroundImage: 'repeating-linear-gradient(rgba(168,85,247,0.08) 0px, rgba(168,85,247,0.08) 1px, transparent 1px, transparent 3px)' }}
+                  aria-hidden="true"
+                />
+                {/* Vignette */}
+                <div
+                  className="absolute inset-0 pointer-events-none z-10"
+                  style={{ backgroundImage: 'radial-gradient(ellipse at center, transparent 50%, rgba(15,23,42,0.5) 100%)' }}
+                  aria-hidden="true"
+                />
+                {/* Placeholder content — swap src for real headshot when available */}
+                <div className="flex flex-col items-center justify-center h-full gap-3 text-primary-text/20">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-20 h-20 opacity-30">
+                    <path fillRule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-primary-text/30">HEADSHOT</p>
+                </div>
+                <p className="absolute bottom-2 inset-x-0 text-center text-[9px] uppercase tracking-widest text-primary-text/20 z-20">
+                  FILTER: CRT
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-5xl py-12">
+        <section className="mx-auto w-full py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            {[
+              {
+                title: "API Development & Integration",
+                body: "Design and connect API-driven systems so business tools share clean, reliable data.",
+              },
+              {
+                title: "Backend Systems",
+                body: "Build maintainable backend features for dashboards, CRM tools, and custom business software.",
+              },
+              {
+                title: "Automation & Workflow Tools",
+                body: "Replace repetitive manual tasks with dependable scripts, integrations, and automated processes.",
+              },
+              {
+                title: "Database Design & Optimization",
+                body: "Structure and optimize data models for faster queries, cleaner reporting, and easier scaling.",
+              },
+            ].map((service) => (
+              <article key={service.title} className="project-block-emphasis rounded-xl border border-primary-accent/20 bg-slate-950/45 p-5">
+                <h3 className="flex items-center gap-2 text-base font-semibold text-primary-text">
+                  <span className="inline-block h-2 w-2 rounded-full bg-emerald-300/85" aria-hidden="true" />
+                  {service.title}
+                </h3>
+                <p className="mt-3 text-sm leading-[1.95] text-primary-text/62">{service.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto w-full py-12">
           <div className="terminal-card px-6 pb-8 pt-14 md:px-8">
             <p className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">Trust Signals</p>
             <h2 className="mt-3 text-3xl font-bold text-primary-accentLight md:text-4xl">Built Through Real Client Work</h2>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-primary-text/75 md:text-base">
+            <p className="mt-4 text-sm leading-7 text-primary-text/75 md:text-base">
               The portfolio is backed by long-term production work across CRM systems, dealer platforms, marketing tools, and integrations.
             </p>
 
@@ -148,7 +167,7 @@ export default function Home({
             </div>
 
             <div className="mt-8">
-              <article className="project-block-emphasis mx-auto max-w-[58rem] rounded-xl border border-primary-accent/20 bg-slate-950/45 px-7 py-6 md:px-8">
+              <article className="project-block-emphasis rounded-xl border border-primary-accent/20 bg-slate-950/45 px-7 py-6 md:px-8">
                 <h3 className="text-lg font-semibold text-primary-accentLight">Companies and Teams</h3>
                 <p className="mt-3 text-sm leading-7 text-primary-text/75">
                   Examples of organizations and teams I have delivered work for:
@@ -171,22 +190,25 @@ export default function Home({
           </div>
         </section>
 
-        <section id="projects" className="mx-auto w-full max-w-5xl py-12">
-          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">Portfolio</p>
-              <h2 className="mt-3 text-2xl font-bold text-primary-accentLight">Featured Case Studies</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-primary-text/75">
-                A few representative systems and implementations that show the kind of backend, automation, and business software work I handle.
-              </p>
-            </div>
+        <section id="projects" className="mx-auto w-full py-12">
+          <div className="terminal-card mb-8 px-6 pb-8 pt-14 md:px-8">
+            <p className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">Portfolio</p>
+            <h2 className="mt-3 text-3xl font-bold text-primary-accentLight md:text-4xl">Featured Case Studies</h2>
+            <p className="mt-4 text-sm leading-7 text-primary-text/75">
+              A few representative systems and implementations that show the kind of backend, automation, and business software work I handle.
+            </p>
           </div>
-          <div className="grid gap-x-8 gap-y-10 md:grid-cols-2">
+          <div className="flex flex-wrap justify-center gap-8">
             {featuredProjects.length === 0 && (
-              <div className="terminal-card px-6 py-8 text-primary-text/70">No featured case studies are available yet.</div>
+              <div className="terminal-card px-6 py-8 text-primary-text/70 w-full">No featured case studies are available yet.</div>
             )}
-            {featuredProjects.map((project) => <ProjectCard key={project.id} project={withProjectCardView(project, "project")} />)}
+            {featuredProjects.map((project) => (
+              <div key={project.id} className="w-full sm:w-[calc(50%-1rem)] xl:w-[calc(33.333%-1.5rem)]">
+                <ProjectCard project={withProjectCardView(project, "project")} />
+              </div>
+            ))}
           </div>
+
           <div className="mt-10 text-center">
             <Link
               href="/projects"
@@ -203,7 +225,7 @@ export default function Home({
 
 export const getServerSideProps: GetServerSideProps<HomePageProps> = async () => {
   const [featuredProjects, allProjectsRaw] = await Promise.all([
-    getFeaturedProjects(4),
+    getFeaturedProjects(3),
     getAllProjectStats(),
   ]);
 

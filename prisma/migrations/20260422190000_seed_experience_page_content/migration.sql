@@ -5,7 +5,7 @@ SET @now := NOW(3);
 INSERT INTO `jr_companies` (`name`, `shortcode`, `website`, `created_at`, `updated_at`)
 VALUES
   ('TrailerCentral', 'trailercentral', NULL, @now, @now),
-  ('oDesk', 'odesk', NULL, @now, @now),
+  ('Freelance', 'freelance', NULL, @now, @now),
   ('Ponticlaro', 'ponticlaro', NULL, @now, @now),
   ('Yazamo', 'yazamo', NULL, @now, @now),
   ('Kloutfire', 'kloutfire', NULL, @now, @now),
@@ -26,7 +26,7 @@ SET @trailercentral_company_id := (
 SET @odesk_company_id := (
   SELECT `id`
   FROM `jr_companies`
-  WHERE `shortcode` = 'odesk'
+  WHERE `shortcode` = 'freelance'
   LIMIT 1
 );
 
@@ -137,7 +137,7 @@ VALUES
     'odesk',
     @odesk_company_id,
     0,
-    'Umbrella record for early freelance and contract work not mapped to named company entries.',
+    'Handled a variety of freelance web development contracts and projects across multiple clients, with a focus on WordPress implementations.',
     '2011-04-01 00:00:00.000',
     '2016-03-01 00:00:00.000',
     60,

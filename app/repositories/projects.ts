@@ -50,8 +50,6 @@ const projectWithRelationsInclude = {
 
 const projectWithFullInclude = {
   ...projectWithRelationsInclude,
-  links: { orderBy: { priority: 'asc' } },
-  gallery: { orderBy: { priority: 'asc' } },
   skills: {
     include: { skill: true },
     orderBy: { priority: 'asc' },
@@ -66,6 +64,39 @@ const dateOrder = [
   { end_date: { sort: 'desc' as const, nulls: 'first' as const } },
   { start_date: 'asc' as const },
 ];
+
+async function fetchProjectGalleryBridges(id: number, take?: number) {
+  return prisma.galleryBridge.findMany({
+    where: { relation_type: 'project', relation_id: id },
+    include: { gallery: true },
+    orderBy: { priority: 'asc' },
+    ...(take ? { take } : {}),
+  });
+}
+
+async function fetchProjectLinkBridges(id: number) {
+  return prisma.linkBridge.findMany({
+    where: { relation_type: 'project', relation_id: id },
+    include: { link: true },
+    orderBy: { priority: 'asc' },
+  });
+}
+
+async function batchFetchGalleryBridges(ids: number[]) {
+  if (ids.length === 0) return new Map<number, Array<{ gallery: { id: number; title: string; image: string; priority: number } }>>();
+  const bridges = await prisma.galleryBridge.findMany({
+    where: { relation_type: 'project', relation_id: { in: ids } },
+    include: { gallery: true },
+    orderBy: { priority: 'asc' },
+  });
+  const byProject = new Map<number, typeof bridges>();
+  for (const b of bridges) {
+    const arr = byProject.get(b.relation_id) ?? [];
+    arr.push(b);
+    byProject.set(b.relation_id, arr);
+  }
+  return byProject;
+}
 
 async function mapJob(
   job: JobRow,
@@ -105,7 +136,11 @@ export async function getProjectsByShortcode(shortcode: string): Promise<Project
     include: projectWithRelationsInclude,
     orderBy: dateOrder,
   });
-  return transformProjects(rows);
+  const byProject = await batchFetchGalleryBridges(rows.map((r) => r.id));
+  return transformProjects(rows.map((r) => ({
+    ...r,
+    gallery: (byProject.get(r.id) ?? []).map((b) => b.gallery),
+  })));
 }
 
 export async function getFeaturedProjects(take = 4): Promise<Project[]> {
@@ -115,7 +150,11 @@ export async function getFeaturedProjects(take = 4): Promise<Project[]> {
     orderBy: dateOrder,
     take,
   });
-  return transformProjects(rows);
+  const byProject = await batchFetchGalleryBridges(rows.map((r) => r.id));
+  return transformProjects(rows.map((r) => ({
+    ...r,
+    gallery: (byProject.get(r.id) ?? []).map((b) => b.gallery),
+  })));
 }
 
 export async function getAllProjectStats(): Promise<HomeProjectStatsEntry[]> {
@@ -141,14 +180,46 @@ export async function getProjectById(id: number): Promise<ProjectDetail | null> 
     include: projectWithFullInclude,
   });
   if (!row) return null;
-  return transformProject(row);
+  const [galleryBridges, linkBridges] = await Promise.all([
+    fetchProjectGalleryBridges(id),
+    fetchProjectLinkBridges(id),
+  ]);
+  return transformProject({
+    ...row,
+    gallery: galleryBridges.map((b) => b.gallery),
+    links: linkBridges.map((b) => b.link),
+  });
 }
 
 export async function getCategoryByShortcode(shortcode: string): Promise<Category | null> {
   return prisma.category.findUnique({
     where: { shortcode },
-    select: { id: true, title: true, shortcode: true },
+    select: { id: true, title: true, shortcode: true, show_in_filter: true },
   });
+}
+
+export async function getFilterCategories(): Promise<Category[]> {
+  const rows = await prisma.category.findMany({
+    where: { show_in_filter: true },
+    select: { id: true, title: true, shortcode: true, show_in_filter: true },
+    orderBy: { title: 'asc' },
+  });
+  return rows;
+}
+
+export async function getAdjacentProjectsByCategory(
+  id: number,
+  categoryShortcode: string,
+): Promise<{ prev: { href: string; name: string } | null; next: { href: string; name: string } | null }> {
+  const rows = await prisma.project.findMany({
+    where: { categories: { some: { category: { shortcode: categoryShortcode } } } },
+    select: { id: true, name: true },
+    orderBy: dateOrder,
+  });
+  const idx = rows.findIndex((r) => r.id === id);
+  const toRef = (r: typeof rows[0] | undefined) =>
+    r ? { href: `/projects/${r.id}`, name: r.name } : null;
+  return { prev: toRef(rows[idx - 1]), next: toRef(rows[idx + 1]) };
 }
 
 export async function getJobs(): Promise<Job[]> {
@@ -240,7 +311,15 @@ export async function getExperienceProjectByShortcodes(
     return null;
   }
 
-  return transformProject(row);
+  const [galleryBridges, linkBridges] = await Promise.all([
+    fetchProjectGalleryBridges(row.id),
+    fetchProjectLinkBridges(row.id),
+  ]);
+  return transformProject({
+    ...row,
+    gallery: galleryBridges.map((b) => b.gallery),
+    links: linkBridges.map((b) => b.link),
+  });
 }
 
 export async function resolveJobIdForAssignment(

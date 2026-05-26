@@ -4,6 +4,7 @@ export interface Category {
   id: number;
   title: string;
   shortcode: string;
+  show_in_filter: boolean;
 }
 
 export function useCategory(shortcode: string | undefined) {

@@ -27,7 +27,7 @@ export default function ExperiencePage({ category, projects, jobs }: Props) {
   } = buildExperiencePageData({ projects, jobs });
 
   const renderJobCards = (entries: Job[]) => (
-    <div className="grid gap-8 md:grid-cols-2">
+    <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
       {entries.map((entry) => {
         return (
           <Link
@@ -62,10 +62,16 @@ export default function ExperiencePage({ category, projects, jobs }: Props) {
       </Head>
 
       <main className="min-h-screen px-4 py-12">
-        <section className="mx-auto w-full max-w-5xl space-y-10">
-          <div className="terminal-card px-6 pb-7 pt-12 md:px-8 md:pt-13">
-            <h1 className="text-4xl font-extrabold gradient-text animate-gradient md:text-5xl">{category.title}</h1>
-            <p className="mt-5 max-w-3xl text-sm leading-7 text-primary-text/78 md:text-base">
+        <section className="mx-auto w-full space-y-10">
+          <div className="terminal-card px-6 pb-8 pt-14 md:px-8">
+            <p className="mb-3 text-xs font-mono">
+              <span className="text-emerald-300/80">jrconway@portfolio</span>
+              <span className="text-violet-600/60">:~/experience</span>
+              <span className="text-primary-text/35"> $</span>
+            </p>
+            <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Work History</p>
+            <h1 className="mt-4 text-4xl font-extrabold gradient-text animate-gradient md:text-5xl">{category.title}</h1>
+            <p className="mt-5 text-sm leading-7 text-primary-text/78 md:text-base">
               A progression-focused view of ownership, growth, and the systems delivered over time.
             </p>
           </div>
@@ -98,9 +104,9 @@ export default function ExperiencePage({ category, projects, jobs }: Props) {
 
                     <section>
                       <h3 className="text-[11px] uppercase tracking-[0.24em] text-primary-accentLight">Key Systems</h3>
-                      <ul className="mt-5 space-y-9 text-sm leading-7 text-primary-text/80">
+                      <ul className="mt-5 grid gap-6 text-sm leading-7 text-primary-text/80 md:grid-cols-2 xl:grid-cols-3">
                         {keySystems.map((system) => (
-                          <li key={system.title} className="space-y-1">
+                          <li key={system.title} className="space-y-1 rounded-lg border border-primary-accent/15 bg-slate-950/40 p-4">
                             <Link
                               href={system.href ?? href}
                               className="group inline-flex cursor-pointer items-center gap-2 text-[1.03rem] font-bold text-primary-text underline decoration-primary-accent/25 underline-offset-4 transition-all hover:text-emerald-200 hover:decoration-emerald-300"
@@ -116,9 +122,12 @@ export default function ExperiencePage({ category, projects, jobs }: Props) {
 
                     <section className="border-t border-primary-accent/10 pt-4">
                       <h3 className="text-[11px] uppercase tracking-[0.24em] text-primary-accentLight">Impact</h3>
-                      <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-primary-text/80 marker:text-primary-accentLight/70">
+                      <ul className="mt-3 grid gap-3 text-sm leading-7 text-primary-text/80 md:grid-cols-2 xl:grid-cols-3">
                         {impactItems.map((impact) => (
-                          <li key={impact}>{impact}</li>
+                          <li key={impact} className="flex gap-2 rounded-lg border border-primary-accent/15 bg-slate-950/40 p-4">
+                            <span className="mt-0.5 flex-shrink-0 text-emerald-400">›</span>
+                            <span>{impact}</span>
+                          </li>
                         ))}
                       </ul>
                     </section>
