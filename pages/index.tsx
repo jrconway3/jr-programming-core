@@ -46,7 +46,7 @@ export default function Home({
           )}
 
           <div className="terminal-card px-6 pb-8 pt-14 md:px-10 md:pb-10 md:pt-16">
-            <div className="flex flex-col gap-8 md:grid md:grid-cols-[1fr_340px] md:items-stretch">
+            <div className="hero-grid flex flex-col gap-8 md:grid md:grid-cols-[1fr_340px] md:items-stretch">
               {/* Left column: text + CTAs */}
               <div>
                 <p className="mb-4 text-xs uppercase tracking-[0.38em] text-primary-accentLight/60">
@@ -78,63 +78,44 @@ export default function Home({
                 </div>
               </div>
 
-              {/* Right column: headshot placeholder */}
-              <div className="relative overflow-hidden rounded-xl border border-primary-accent/20 bg-slate-900/60 aspect-square md:aspect-auto flex-shrink-0">
-                {/* Scanline overlay */}
-                <div
-                  className="absolute inset-0 pointer-events-none z-10"
-                  style={{ backgroundImage: 'repeating-linear-gradient(rgba(168,85,247,0.08) 0px, rgba(168,85,247,0.08) 1px, transparent 1px, transparent 3px)' }}
-                  aria-hidden="true"
-                />
-                {/* Vignette */}
-                <div
-                  className="absolute inset-0 pointer-events-none z-10"
-                  style={{ backgroundImage: 'radial-gradient(ellipse at center, transparent 50%, rgba(15,23,42,0.5) 100%)' }}
-                  aria-hidden="true"
-                />
-                {/* Placeholder content — swap src for real headshot when available */}
-                <div className="flex flex-col items-center justify-center h-full gap-3 text-primary-text/20">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-20 h-20 opacity-30">
-                    <path fillRule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" clipRule="evenodd" />
-                  </svg>
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-primary-text/30">HEADSHOT</p>
-                </div>
-                <p className="absolute bottom-2 inset-x-0 text-center text-[9px] uppercase tracking-widest text-primary-text/20 z-20">
-                  FILTER: CRT
-                </p>
+              {/* Right column: portrait — CSS positions this absolute to the card */}
+              <div className="photo-container bg-slate-900/60">
+                <img src="/images/my-portrait.png" alt="David Conway Jr." />
               </div>
             </div>
           </div>
         </section>
 
         <section className="mx-auto w-full py-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            {[
-              {
-                title: "API Development & Integration",
-                body: "Design and connect API-driven systems so business tools share clean, reliable data.",
-              },
-              {
-                title: "Backend Systems",
-                body: "Build maintainable backend features for dashboards, CRM tools, and custom business software.",
-              },
-              {
-                title: "Automation & Workflow Tools",
-                body: "Replace repetitive manual tasks with dependable scripts, integrations, and automated processes.",
-              },
-              {
-                title: "Database Design & Optimization",
-                body: "Structure and optimize data models for faster queries, cleaner reporting, and easier scaling.",
-              },
-            ].map((service) => (
-              <article key={service.title} className="project-block-emphasis rounded-xl border border-primary-accent/20 bg-slate-950/45 p-5">
-                <h3 className="flex items-center gap-2 text-base font-semibold text-primary-text">
-                  <span className="inline-block h-2 w-2 rounded-full bg-emerald-300/85" aria-hidden="true" />
-                  {service.title}
-                </h3>
-                <p className="mt-3 text-sm leading-[1.95] text-primary-text/62">{service.body}</p>
-              </article>
-            ))}
+          <div className="terminal-card px-6 pb-8 pt-14 md:px-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              {[
+                {
+                  title: "API Development & Integration",
+                  body: "Design and connect API-driven systems so business tools share clean, reliable data.",
+                },
+                {
+                  title: "Backend Systems",
+                  body: "Build maintainable backend features for dashboards, CRM tools, and custom business software.",
+                },
+                {
+                  title: "Automation & Workflow Tools",
+                  body: "Replace repetitive manual tasks with dependable scripts, integrations, and automated processes.",
+                },
+                {
+                  title: "Database Design & Optimization",
+                  body: "Structure and optimize data models for faster queries, cleaner reporting, and easier scaling.",
+                },
+              ].map((service) => (
+                <article key={service.title} className="project-block-emphasis rounded-xl border border-primary-accent/20 bg-slate-950/45 p-5">
+                  <h3 className="flex items-center gap-2 text-base font-semibold text-primary-text">
+                    <span className="inline-block h-2 w-2 rounded-full bg-emerald-300/85" aria-hidden="true" />
+                    {service.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-[1.95] text-primary-text/62">{service.body}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 

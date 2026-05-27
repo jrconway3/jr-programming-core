@@ -8,21 +8,13 @@ SET @now := NOW(3);
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- 0a. Rename jr_projects_links → jr_links
-SET @sql := IF(
-  (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='jr_projects_links') > 0
-  AND (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='jr_links') = 0,
-  'RENAME TABLE `jr_projects_links` TO `jr_links`', 'SELECT 1');
-PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+RENAME TABLE `jr_projects_links` TO `jr_links`;
 
 -- 0b. Rename jr_projects_gallery → jr_gallery
-SET @sql := IF(
-  (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='jr_projects_gallery') > 0
-  AND (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='jr_gallery') = 0,
-  'RENAME TABLE `jr_projects_gallery` TO `jr_gallery`', 'SELECT 1');
-PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+RENAME TABLE `jr_projects_gallery` TO `jr_gallery`;
 
 -- 0c. Create jr_link_bridges
-CREATE TABLE IF NOT EXISTS `jr_link_bridges` (
+CREATE TABLE `jr_link_bridges` (
   `id`            INT           NOT NULL AUTO_INCREMENT,
   `relation_type` ENUM('project','company','job') NOT NULL,
   `relation_id`   INT           NOT NULL,
@@ -37,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `jr_link_bridges` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- 0d. Create jr_gallery_bridges
-CREATE TABLE IF NOT EXISTS `jr_gallery_bridges` (
+CREATE TABLE `jr_gallery_bridges` (
   `id`            INT           NOT NULL AUTO_INCREMENT,
   `relation_type` ENUM('project','company','job') NOT NULL,
   `relation_id`   INT           NOT NULL,
@@ -54,73 +46,40 @@ CREATE TABLE IF NOT EXISTS `jr_gallery_bridges` (
   CONSTRAINT `jr_gallery_bridges_link_fkey` FOREIGN KEY (`link_id`) REFERENCES `jr_links` (`id`) ON DELETE SET NULL
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- 0e. Backfill jr_link_bridges from jr_links.project_id (if column still exists)
-SET @col := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='jr_links' AND column_name='project_id');
-SET @sql := IF(@col > 0,
-  'INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`) SELECT ''project'', `project_id`, `id`, `priority`, `created_at`, `updated_at` FROM `jr_links` WHERE `project_id` IS NOT NULL',
-  'SELECT 1');
-PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+-- 0e. Backfill jr_link_bridges from jr_links.project_id
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', `project_id`, `id`, `priority`, `created_at`, `updated_at`
+FROM `jr_links` WHERE `project_id` IS NOT NULL;
 
 -- 0f. Drop old compound unique index from jr_links (was on project_id, url)
-SET @idx := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name='jr_links' AND index_name='jr_projects_links_project_url_key');
-SET @sql := IF(@idx > 0, 'ALTER TABLE `jr_links` DROP INDEX `jr_projects_links_project_url_key`', 'SELECT 1');
-PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+ALTER TABLE `jr_links` DROP INDEX `jr_projects_links_project_url_key`;
 
 -- 0g. Drop project_id FK + column from jr_links
-SET @fk  := (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS WHERE table_schema=DATABASE() AND table_name='jr_links' AND constraint_name='jr_projects_links_project_id_fkey' AND constraint_type='FOREIGN KEY');
-SET @col := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='jr_links' AND column_name='project_id');
-SET @sql := IF(@fk > 0 AND @col > 0,
-  'ALTER TABLE `jr_links` DROP FOREIGN KEY `jr_projects_links_project_id_fkey`, DROP COLUMN `project_id`',
-  IF(@col > 0, 'ALTER TABLE `jr_links` DROP COLUMN `project_id`', 'SELECT 1'));
-PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+ALTER TABLE `jr_links`
+  DROP FOREIGN KEY `jr_projects_links_project_id_fkey`,
+  DROP COLUMN `project_id`;
 
--- 0h. Add UNIQUE on url(255) to jr_links
-SET @idx := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name='jr_links' AND index_name='jr_links_url_key');
-SET @sql := IF(@idx = 0, 'ALTER TABLE `jr_links` ADD UNIQUE INDEX `jr_links_url_key` (`url`(191))', 'SELECT 1');
-PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+-- 0h. Add UNIQUE on url(191) to jr_links
+ALTER TABLE `jr_links` ADD UNIQUE INDEX `jr_links_url_key` (`url`(191));
 
--- 0i. Backfill jr_gallery_bridges from jr_gallery.project_id (if column still exists)
-SET @col := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='jr_gallery' AND column_name='project_id');
-SET @sql := IF(@col > 0,
-  'INSERT IGNORE INTO `jr_gallery_bridges` (`relation_type`, `relation_id`, `gallery_id`, `priority`, `created_at`, `updated_at`) SELECT ''project'', `project_id`, `id`, `priority`, `created_at`, `updated_at` FROM `jr_gallery` WHERE `project_id` IS NOT NULL',
-  'SELECT 1');
-PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+-- 0i. Backfill jr_gallery_bridges from jr_gallery.project_id
+INSERT IGNORE INTO `jr_gallery_bridges` (`relation_type`, `relation_id`, `gallery_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', `project_id`, `id`, `priority`, `created_at`, `updated_at`
+FROM `jr_gallery` WHERE `project_id` IS NOT NULL;
 
 -- 0j. Drop link_id FK + column from jr_gallery
-SET @fk  := (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS WHERE table_schema=DATABASE() AND table_name='jr_gallery' AND constraint_name='jr_projects_gallery_link_id_fkey' AND constraint_type='FOREIGN KEY');
-SET @col := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='jr_gallery' AND column_name='link_id');
-SET @sql := IF(@fk > 0 AND @col > 0,
-  'ALTER TABLE `jr_gallery` DROP FOREIGN KEY `jr_projects_gallery_link_id_fkey`, DROP COLUMN `link_id`',
-  IF(@col > 0, 'ALTER TABLE `jr_gallery` DROP COLUMN `link_id`', 'SELECT 1'));
-PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+ALTER TABLE `jr_gallery`
+  DROP FOREIGN KEY `jr_projects_gallery_link_id_fkey`,
+  DROP COLUMN `link_id`;
 
 -- 0k. Drop project_id FK + column from jr_gallery
-SET @fk  := (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS WHERE table_schema=DATABASE() AND table_name='jr_gallery' AND constraint_name='jr_projects_gallery_project_id_fkey' AND constraint_type='FOREIGN KEY');
-SET @col := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='jr_gallery' AND column_name='project_id');
-SET @idx := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name='jr_gallery' AND index_name='jr_projects_gallery_project_image_key');
-SET @sql := IF(
-  @col = 0,
-  'SELECT 1',
-  IF(
-    @fk > 0,
-    IF(
-      @idx > 0,
-      'ALTER TABLE `jr_gallery` DROP FOREIGN KEY `jr_projects_gallery_project_id_fkey`, DROP INDEX `jr_projects_gallery_project_image_key`, DROP COLUMN `project_id`',
-      'ALTER TABLE `jr_gallery` DROP FOREIGN KEY `jr_projects_gallery_project_id_fkey`, DROP COLUMN `project_id`'
-    ),
-    IF(
-      @idx > 0,
-      'ALTER TABLE `jr_gallery` DROP INDEX `jr_projects_gallery_project_image_key`, DROP COLUMN `project_id`',
-      'ALTER TABLE `jr_gallery` DROP COLUMN `project_id`'
-    )
-  )
-);
-PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+ALTER TABLE `jr_gallery`
+  DROP FOREIGN KEY `jr_projects_gallery_project_id_fkey`,
+  DROP INDEX `jr_projects_gallery_project_image_key`,
+  DROP COLUMN `project_id`;
 
 -- 0l. Add UNIQUE on image(191) to jr_gallery
-SET @idx := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name='jr_gallery' AND index_name='jr_gallery_image_key');
-SET @sql := IF(@idx = 0, 'ALTER TABLE `jr_gallery` ADD UNIQUE INDEX `jr_gallery_image_key` (`image`(191))', 'SELECT 1');
-PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+ALTER TABLE `jr_gallery` ADD UNIQUE INDEX `jr_gallery_image_key` (`image`(191));
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3. Company websites (displayed on the Experience / job detail pages)
@@ -129,7 +88,7 @@ PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
 -- TrailerCentral rebranded to DealerSpike (Dec 2025)
 UPDATE `jr_companies` SET `website` = 'https://www.dealerspike.com/trailer-website-marketing-provider/', `updated_at` = @now WHERE `shortcode` = 'trailercentral';
 UPDATE `jr_companies` SET `website` = 'https://www.ponticlaro.net/',                                     `updated_at` = @now WHERE `shortcode` = 'ponticlaro';
-UPDATE `jr_companies` SET `website` = 'https://www.upwork.com/',                                         `updated_at` = @now WHERE `shortcode` = 'freelance'; -- oDesk became Upwork 2015
+UPDATE `jr_companies` SET `website` = 'https://www.upwork.com/',                                         `updated_at` = @now WHERE `shortcode` = 'odesk'; -- oDesk became Upwork 2015
 
 -- Archived (wildcard URL — pick a snapshot from the calendar)
 UPDATE `jr_companies` SET `website` = 'https://web.archive.org/web/*/https://yazamo.com/',       `updated_at` = @now WHERE `shortcode` = 'yazamo';
@@ -558,3 +517,52 @@ SELECT 'company', @c_kloutfire, `id`, 1, @now, @now FROM `jr_links` WHERE `url` 
 -- kloutfire-website project also links to the Yazamo domain (same URL row, new bridge)
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
 SELECT 'project', @p_kloutfire_site, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://yazamo.com/' AND @p_kloutfire_site IS NOT NULL LIMIT 1;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 7. Replace oDesk job with Freelance
+--    The 20260422190000 migration seeded an 'odesk' job as an umbrella for
+--    early freelance work. A proper 'Freelance' company + job replace it here.
+--    Roles, impacts, and project relations are moved before the oDesk job is
+--    removed. The oDesk company row stays in jr_companies for reference.
+-- ─────────────────────────────────────────────────────────────────────────────
+
+SET @odesk_job_id := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'odesk' LIMIT 1);
+
+INSERT INTO `jr_companies` (`name`, `shortcode`, `website`, `created_at`, `updated_at`)
+VALUES ('Freelance', 'freelance', NULL, @now, @now)
+ON DUPLICATE KEY UPDATE `updated_at` = @now;
+
+SET @c_freelance := (SELECT `id` FROM `jr_companies` WHERE `shortcode` = 'freelance' LIMIT 1);
+
+INSERT INTO `jr_jobs` (`shortcode`, `company_id`, `is_primary_tier`, `summary`, `start_date`, `end_date`, `priority`, `created_at`, `updated_at`)
+VALUES (
+  'freelance',
+  @c_freelance,
+  0,
+  'Handled a variety of freelance web development contracts and projects across multiple clients, primarily through other companies or job boards like oDesk and Freelancer, with a focus on WordPress implementations.',
+  '2011-04-01 00:00:00.000',
+  '2016-03-01 00:00:00.000',
+  60,
+  @now,
+  @now
+)
+ON DUPLICATE KEY UPDATE
+  `company_id` = VALUES(`company_id`),
+  `summary` = VALUES(`summary`),
+  `updated_at` = @now;
+
+SET @freelance_job_id := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'freelance' LIMIT 1);
+
+UPDATE `jr_job_roles`
+  SET `job_id` = @freelance_job_id
+  WHERE `job_id` = @odesk_job_id AND @freelance_job_id IS NOT NULL AND @odesk_job_id IS NOT NULL;
+
+UPDATE `jr_job_impacts`
+  SET `job_id` = @freelance_job_id
+  WHERE `job_id` = @odesk_job_id AND @freelance_job_id IS NOT NULL AND @odesk_job_id IS NOT NULL;
+
+UPDATE `jr_job_project_relations`
+  SET `job_id` = @freelance_job_id
+  WHERE `job_id` = @odesk_job_id AND @freelance_job_id IS NOT NULL AND @odesk_job_id IS NOT NULL;
+
+DELETE FROM `jr_jobs` WHERE `id` = @odesk_job_id AND @odesk_job_id IS NOT NULL;

@@ -194,15 +194,15 @@ export async function getProjectById(id: number): Promise<ProjectDetail | null> 
 export async function getCategoryByShortcode(shortcode: string): Promise<Category | null> {
   return prisma.category.findUnique({
     where: { shortcode },
-    select: { id: true, title: true, shortcode: true, show_in_filter: true },
+    select: { id: true, title: true, shortcode: true, priority: true, show_in_filter: true },
   });
 }
 
 export async function getFilterCategories(): Promise<Category[]> {
   const rows = await prisma.category.findMany({
     where: { show_in_filter: true },
-    select: { id: true, title: true, shortcode: true, show_in_filter: true },
-    orderBy: { title: 'asc' },
+    select: { id: true, title: true, shortcode: true, priority: true, show_in_filter: true },
+    orderBy: [{ priority: 'asc' }, { title: 'asc' }],
   });
   return rows;
 }
@@ -217,6 +217,7 @@ export async function getAdjacentProjectsByCategory(
     orderBy: dateOrder,
   });
   const idx = rows.findIndex((r) => r.id === id);
+  if (idx < 0) return { prev: null, next: null };
   const toRef = (r: typeof rows[0] | undefined) =>
     r ? { href: `/projects/${r.id}`, name: r.name } : null;
   return { prev: toRef(rows[idx - 1]), next: toRef(rows[idx + 1]) };

@@ -32,7 +32,7 @@ export default function About() {
       <Head>
         <title>About | JRProgramming</title>
       </Head>
-      <main className="min-h-screen px-4 py-12 md:px-6">
+      <main className="px-4 py-12 md:px-6">
         <section className="w-full mx-auto space-y-6">
 
           {/* Main terminal card */}
@@ -94,8 +94,8 @@ export default function About() {
             </h1>
 
             {/* Two-column: bio left, photo right */}
-            <div className="flex flex-col gap-8 md:grid md:grid-cols-[1fr_220px] md:items-start mb-0">
-              <div className="space-y-4 text-sm leading-7 text-primary-text/85">
+            <div className="flex flex-col xl:flex-row gap-8 items-start mb-0">
+              <div className="min-w-0 flex-1 space-y-4 text-sm leading-7 text-primary-text/85">
                 <p>
                   {"I'm a self-taught web developer with over 20 years of hands-on experience — starting with personal projects and eventually building production systems for real businesses. For nearly a decade I was the lead developer at TrailerCentral, where I owned and rebuilt core CRM infrastructure, automation pipelines, Twilio-based call tracking, and Chrome extension tooling from the ground up."}
                 </p>
@@ -104,19 +104,14 @@ export default function About() {
                 </p>
               </div>
 
-              {/* Photo placeholder — drop /images/headshot.jpg to replace */}
-              <div className="relative overflow-hidden rounded-lg bg-slate-900/60 border border-primary-accent/20 aspect-square flex-shrink-0">
-                <div
-                  className="absolute inset-0 pointer-events-none z-10"
-                  style={{ backgroundImage: 'repeating-linear-gradient(rgba(168,85,247,0.08) 0px, rgba(168,85,247,0.08) 1px, transparent 1px, transparent 3px)' }}
-                  aria-hidden="true"
+              {/* Portrait */}
+              <div className="portrait-container bg-slate-900/60">
+                <img
+                  src="/images/my-portrait.png"
+                  alt="David Conway Jr."
+                  className="w-full h-full object-cover"
+                  style={{ filter: 'grayscale(15%) contrast(1.05) brightness(0.92)' }}
                 />
-                <div className="flex flex-col items-center justify-center h-full gap-2 text-primary-text/20 z-0 relative">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-16 h-16 opacity-25">
-                    <path fillRule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" clipRule="evenodd" />
-                  </svg>
-                  <p className="text-[9px] uppercase tracking-widest">PROFILE_PHOTO.JPG</p>
-                </div>
               </div>
             </div>
 

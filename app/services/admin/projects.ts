@@ -145,12 +145,6 @@ export const adminProjectInclude = Prisma.validator<Prisma.ProjectInclude>()({
       },
     },
   },
-  links: {
-    orderBy: { priority: 'asc' },
-  },
-  gallery: {
-    orderBy: { priority: 'asc' },
-  },
   categories: {
     include: {
       category: true,
@@ -166,6 +160,14 @@ export const adminProjectInclude = Prisma.validator<Prisma.ProjectInclude>()({
 
 type AdminProjectWithRelations = Prisma.ProjectGetPayload<{
   include: typeof adminProjectInclude;
+}>;
+
+type AdminProjectLinkBridge = Prisma.LinkBridgeGetPayload<{
+  include: { link: true };
+}>;
+
+type AdminProjectGalleryBridge = Prisma.GalleryBridgeGetPayload<{
+  include: { gallery: true };
 }>;
 
 type NormalizationResult =
@@ -491,7 +493,11 @@ export function normalizeProjectPayload(body: unknown): NormalizationResult {
   };
 }
 
-export function serializeAdminProject(project: AdminProjectWithRelations): AdminProjectRecord {
+export function serializeAdminProject(
+  project: AdminProjectWithRelations,
+  linkBridges: AdminProjectLinkBridge[],
+  galleryBridges: AdminProjectGalleryBridge[],
+): AdminProjectRecord {
   const projectExtras = project as unknown as {
     shortcode?: string | null;
     job?: Array<{
@@ -536,17 +542,17 @@ export function serializeAdminProject(project: AdminProjectWithRelations): Admin
     end_date: project.end_date ? project.end_date.toISOString() : null,
     created_at: project.created_at.toISOString(),
     updated_at: project.updated_at.toISOString(),
-    links: project.links.map((link) => ({
-      id: link.id,
-      website: link.website,
-      url: link.url,
-      priority: link.priority,
+    links: linkBridges.map((bridge) => ({
+      id: bridge.link.id,
+      website: bridge.link.website,
+      url: bridge.link.url,
+      priority: bridge.priority,
     })),
-    gallery: project.gallery.map((item) => ({
-      id: item.id,
-      title: item.title,
-      image: item.image,
-      priority: item.priority,
+    gallery: galleryBridges.map((bridge) => ({
+      id: bridge.gallery.id,
+      title: bridge.gallery.title,
+      image: bridge.gallery.image,
+      priority: bridge.priority,
     })),
     categories: project.categories.map((categoryEntry) => ({
       category_id: categoryEntry.category_id,
@@ -605,8 +611,51 @@ export async function getAdminProjectsPageData(): Promise<{
     }),
   ]);
 
+  const projectIds = projects.map((project) => project.id);
+
+  const [linkBridges, galleryBridges] = await Promise.all([
+    prisma.linkBridge.findMany({
+      where: {
+        relation_type: 'project',
+        relation_id: { in: projectIds },
+      },
+      include: {
+        link: true,
+      },
+      orderBy: { priority: 'asc' },
+    }),
+    prisma.galleryBridge.findMany({
+      where: {
+        relation_type: 'project',
+        relation_id: { in: projectIds },
+      },
+      include: {
+        gallery: true,
+      },
+      orderBy: { priority: 'asc' },
+    }),
+  ]);
+
+  const linkBridgeByProject = new Map<number, AdminProjectLinkBridge[]>();
+  for (const bridge of linkBridges) {
+    const current = linkBridgeByProject.get(bridge.relation_id) ?? [];
+    current.push(bridge);
+    linkBridgeByProject.set(bridge.relation_id, current);
+  }
+
+  const galleryBridgeByProject = new Map<number, AdminProjectGalleryBridge[]>();
+  for (const bridge of galleryBridges) {
+    const current = galleryBridgeByProject.get(bridge.relation_id) ?? [];
+    current.push(bridge);
+    galleryBridgeByProject.set(bridge.relation_id, current);
+  }
+
   return {
     categories,
-    projects: projects.map((project) => serializeAdminProject(project)),
+    projects: projects.map((project) => serializeAdminProject(
+      project,
+      linkBridgeByProject.get(project.id) ?? [],
+      galleryBridgeByProject.get(project.id) ?? [],
+    )),
   };
 }

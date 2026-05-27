@@ -135,7 +135,7 @@ model Link {
   bridges    LinkBridge[]
   gallery    GalleryBridge[]
 
-  @@unique([url(255)])
+  @@unique([url(length: 191)])
   @@map("jr_links")
 }
 
@@ -148,7 +148,7 @@ model Gallery {
   updated_at DateTime        @default(now())
   bridges    GalleryBridge[]
 
-  @@unique([image(191)])
+  @@unique([image(length: 191)])
   @@map("jr_gallery")
 }
 
@@ -229,6 +229,7 @@ model Category {
   id             Int               @id @default(autoincrement())
   title          String
   shortcode      String            @unique
+  priority       Int               @default(0)
   show_in_filter Boolean           @default(false)
   created_at     DateTime          @default(now())
   updated_at     DateTime          @default(now())

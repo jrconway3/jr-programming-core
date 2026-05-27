@@ -80,7 +80,7 @@ CREATE TABLE `jr_job_impacts` (
 
 -- Extend projects table with shortcode and job relation
 ALTER TABLE `jr_projects`
-  ADD COLUMN `shortcode` VARCHAR(191) NULL AFTER `name`;
+  ADD COLUMN `shortcode` VARCHAR(191) NULL;
 
 CREATE UNIQUE INDEX `jr_projects_shortcode_key` ON `jr_projects`(`shortcode`);
 

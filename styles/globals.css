@@ -135,12 +135,6 @@ footer .copyright {
   display: none;
 }
 
-@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-.cursor-blink { animation: blink 1.1s step-end infinite; }
-
-.terminal-prose ul { list-style: none; padding-left: 0; }
-.terminal-prose ul li::before { content: "> "; color: #4ade80; }
-
 /* Shared hover styles for project blocks and CTA buttons */
 .project-block-interactive {
   cursor: pointer;
@@ -241,6 +235,271 @@ footer .copyright {
 }
 .cursor-blink {
   animation: blink 1.1s step-end infinite;
+}
+
+/* ── About page portrait ─────────────────────────────────────────────────── */
+
+/* Base (< 1280px) — 240px square, sits below bio text in column layout */
+.portrait-container {
+  position: relative;
+  overflow: hidden;
+  width: 240px;
+  height: 240px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  margin: 0;
+}
+
+.portrait-container img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 5%;
+  filter: grayscale(0.15) contrast(1.05) brightness(0.92);
+  position: relative;
+  z-index: 0;
+}
+
+.portrait-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  background:
+    linear-gradient(to right,
+      rgba(24, 30, 52, 1) 0%,
+      rgba(24, 30, 52, 0.85) 8%,
+      rgba(24, 30, 52, 0.4) 16%,
+      rgba(24, 30, 52, 0) 28%
+    ),
+    linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)),
+    linear-gradient(rgba(109, 40, 217, 0.12), rgba(109, 40, 217, 0.12)),
+    repeating-linear-gradient(
+      rgba(168, 85, 247, 0.1) 0px,
+      rgba(168, 85, 247, 0.1) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+}
+
+/* < 1280px — portrait centered below bio, 50% wide, 300px tall, symmetric mask */
+@media (max-width: 1279px) {
+  .portrait-container {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    width: 50%;
+    height: 300px;
+    aspect-ratio: unset;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 16px auto 0 auto;
+    display: block;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+  }
+
+  .portrait-container img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 10%;
+    transform: scale(1.1);
+    transform-origin: top center;
+    filter: grayscale(0.15) contrast(1.05) brightness(0.92);
+    z-index: 0;
+  }
+
+  .portrait-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    background:
+      linear-gradient(rgba(15, 23, 42, 0.2), rgba(15, 23, 42, 0.2)),
+      linear-gradient(rgba(109, 40, 217, 0.1), rgba(109, 40, 217, 0.1)),
+      repeating-linear-gradient(
+        rgba(168, 85, 247, 0.1) 0px,
+        rgba(168, 85, 247, 0.1) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+  }
+
+  .flex.gap-8.items-start {
+    flex-direction: column;
+    padding-right: 0;
+  }
+}
+
+/* xl (1280px–1536px) — 240px square inline in flex row beside bio */
+/* No absolute positioning — just constrained right column */
+
+/* 2xl (1536px+) — portrait absolutely positioned alongside bio */
+/* top: 287px aligns to About Me h1; bottom: 52px stops above Available bar.
+   These values are tied to card padding + terminal shell block height. */
+@media (min-width: 1536px) {
+  .terminal-card:has(.portrait-container) {
+    position: relative;
+    overflow: hidden;
+    padding-right: 0;
+  }
+
+  .portrait-container {
+    position: absolute;
+    top: 287px;
+    right: 0;
+    bottom: 52px;
+    width: auto;
+    height: auto;
+    border-radius: 8px 0 0 8px;
+  }
+
+  .portrait-container img {
+    width: auto;
+    height: 100%;
+    object-fit: unset;
+    object-position: unset;
+    transform: scale(1.2);
+    transform-origin: top center;
+  }
+
+  .portrait-container::after {
+    background:
+      linear-gradient(to right,
+        rgba(24, 30, 52, 1) 0%,
+        rgba(24, 30, 52, 0.85) 8%,
+        rgba(24, 30, 52, 0.4) 16%,
+        rgba(24, 30, 52, 0) 28%
+      ),
+      linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)),
+      linear-gradient(rgba(109, 40, 217, 0.12), rgba(109, 40, 217, 0.12)),
+      repeating-linear-gradient(
+        rgba(168, 85, 247, 0.1) 0px,
+        rgba(168, 85, 247, 0.1) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+  }
+
+  /* Terminal shell block — restore right spacing stripped from card padding-right: 0 */
+  .mb-6.rounded-lg.border.border-primary-accent\/20 {
+    margin-right: 2rem;
+  }
+
+  /* Bio text — right padding prevents overlap with absolute portrait */
+  .flex.gap-8.items-start {
+    padding-right: 320px;
+  }
+
+  /* Available bar — sits above portrait z-index */
+  .-mx-6 {
+    position: relative;
+    z-index: 20;
+  }
+}
+
+/* 3xl (2560px+) — ultrawide, portrait fills full card height */
+@media (min-width: 2560px) {
+  .portrait-container {
+    top: 0;
+    bottom: 0;
+    width: auto;
+    height: 100%;
+    border-radius: 0;
+    border-top-right-radius: 11px;
+    border-bottom-right-radius: 11px;
+  }
+
+  .portrait-container img {
+    transform: none;
+    object-fit: unset;
+    object-position: 50% 0%;
+  }
+
+  .mb-6.rounded-lg.border.border-primary-accent\/20 { max-width: 75%; }
+  .gradient-text.animate-gradient { max-width: 75%; }
+  .flex.gap-8.items-start {
+    max-width: 75%;
+    padding-right: 0;
+  }
+
+  .-mx-6 {
+    max-width: none;
+    width: auto;
+    margin-left: -2rem;
+    margin-right: -2rem;
+  }
+}
+
+/* Hero card — strip right padding when photo is present */
+.terminal-card:has(.photo-container) {
+  padding-right: 0;
+}
+
+/* Hero grid — zero gap so photo column bleeds flush */
+.hero-grid {
+  gap: 0;
+  column-gap: 2rem;
+}
+
+/* Hero photo — absolutely positioned to terminal card right edge */
+.photo-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 340px;
+  margin: 0;
+  aspect-ratio: unset;
+  border-radius: 0;
+  border-top-right-radius: 11px;
+  border-bottom-right-radius: 11px;
+  overflow: hidden;
+}
+
+/* Image fills container, anchored to top */
+.photo-container img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 5%;
+  transform: scale(1.5) translateY(-5%);
+  transform-origin: top center;
+  filter: grayscale(0.15) contrast(1.05) brightness(0.92);
+  z-index: 0;
+}
+
+/* Overlay — card-colour left-fade + purple tint + scanlines */
+.photo-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  background:
+    linear-gradient(to right,
+      rgba(24, 30, 52, 1) 0%,
+      rgba(24, 30, 52, 0.85) 8%,
+      rgba(24, 30, 52, 0.4) 16%,
+      rgba(24, 30, 52, 0) 28%
+    ),
+    linear-gradient(rgba(15, 23, 42, 0.25), rgba(15, 23, 42, 0.25)),
+    linear-gradient(rgba(109, 40, 217, 0.12), rgba(109, 40, 217, 0.12)),
+    repeating-linear-gradient(
+      rgba(168, 85, 247, 0.1) 0px,
+      rgba(168, 85, 247, 0.1) 1px,
+      transparent 1px,
+      transparent 3px
+    );
 }
 
 .terminal-prose ul {
