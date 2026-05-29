@@ -171,12 +171,12 @@ WHERE `shortcode` = 'trailercentral' AND `end_date` IS NULL;
 
 -- Add TrailerCentral hero image via gallery bridge.
 INSERT IGNORE INTO `jr_gallery` (`title`, `image`, `priority`, `created_at`, `updated_at`)
-VALUES ('TrailerCentral', 'images/experience/trailercentral.png', 0, NOW(3), NOW(3));
+VALUES ('TrailerCentral', '/images/experience/trailercentral.png', 0, NOW(3), NOW(3));
 
 INSERT IGNORE INTO `jr_gallery_bridges` (`relation_type`, `relation_id`, `gallery_id`, `priority`, `created_at`, `updated_at`)
 SELECT 'job', j.`id`, g.`id`, 0, NOW(3), NOW(3)
 FROM `jr_jobs` j, `jr_gallery` g
-WHERE j.`shortcode` = 'trailercentral' AND g.`image` = 'images/experience/trailercentral.png';
+WHERE j.`shortcode` = 'trailercentral' AND g.`image` = '/images/experience/trailercentral.png';
 
 -- Remove incorrectly assigned gallery images for TC Facebook Marketplace Autoposter.
 DELETE gb FROM `jr_gallery_bridges` gb
