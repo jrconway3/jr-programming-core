@@ -25,7 +25,7 @@ export function buildExperiencePageData({ projects, jobs }: ExperiencePageDataIn
     .sort(sortJobsByPriority);
 
   const earlierJobs = jobs
-    .filter((job) => !job.is_primary_tier)
+    .filter((job) => !job.is_primary_tier && job.shortcode !== 'freight-access' && job.shortcode !== 'freelance')
     .sort(sortJobsByPriority);
 
   const featuredJob = primaryJobs[0] ?? jobs[0] ?? null;
@@ -81,6 +81,7 @@ export function buildExperiencePageData({ projects, jobs }: ExperiencePageDataIn
       href: featuredJob?.shortcode && entry.shortcode
         ? `/experience/${featuredJob.shortcode}/${entry.shortcode}`
         : `/projects/${entry.id}`,
+      date_range: buildDateRange(entry.start_date, entry.end_date),
     }));
 
   const impactItems = (featuredJob?.impacts ?? [])
@@ -100,5 +101,6 @@ export function buildExperiencePageData({ projects, jobs }: ExperiencePageDataIn
     keySystems,
     impactItems,
     href,
+    featuredImage: featuredJob?.gallery?.[0]?.image ?? null,
   };
 }

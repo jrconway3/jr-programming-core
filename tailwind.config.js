@@ -22,6 +22,9 @@ export default {
           muted: "#64748b"
         }
       },
+      screens: {
+        '3xl': '2560px',
+      },
       fontFamily: {
         text: ['"Commodore 64"', 'Inter', 'ui-sans-serif', 'system-ui'],
         headers: ['"Commodore 64 Angled"', 'Inter', 'ui-sans-serif', 'system-ui'],

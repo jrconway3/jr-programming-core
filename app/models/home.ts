@@ -13,7 +13,6 @@ export type HomePageMetrics = {
   yearsExperience: number;
   totalProjectsDelivered: number;
   automationFocusedProjects: number;
-  portfolioProjects: number;
   displayedCompanies: string[];
 };
 
@@ -22,6 +21,5 @@ export type HomePageProps = {
   yearsExperience: number;
   totalProjectsDelivered: number;
   automationFocusedProjects: number;
-  portfolioProjects: number;
   displayedCompanies: string[];
 };

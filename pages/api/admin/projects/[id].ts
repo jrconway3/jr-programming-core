@@ -72,21 +72,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
           },
         });
 
-        await tx.projectGallery.deleteMany({
-          where: { project_id: id },
+        await tx.galleryBridge.deleteMany({
+          where: {
+            relation_type: 'project',
+            relation_id: id,
+          },
         });
 
         await tx.projectCategory.deleteMany({
           where: { project_id: id },
         });
 
-        await tx.projectLink.deleteMany({
-          where: { project_id: id },
+        await tx.linkBridge.deleteMany({
+          where: {
+            relation_type: 'project',
+            relation_id: id,
+          },
         });
 
         await tx.jobProjectRelation.deleteMany({
           where: { project_id: id },
         });
+
+        if (data.categories.length > 0) {
+          await tx.projectCategory.createMany({
+            data: data.categories.map((category) => ({
+              project_id: id,
+              category_id: category.category_id,
+              priority: category.priority,
+            })),
+          });
+        }
 
         const resolvedJobId = await resolveJobIdForAssignment(tx, data.job_assignment);
 
@@ -101,28 +117,97 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
           });
         }
 
-        return tx.project.update({
+        const seenLinkIds = new Set<number>();
+        for (const link of data.links) {
+          const savedLink = await tx.link.upsert({
+            where: { url: link.url },
+            update: {
+              website: link.website,
+              priority: link.priority,
+              updated_at: new Date(),
+            },
+            create: {
+              website: link.website,
+              url: link.url,
+              priority: link.priority,
+            },
+          });
+
+          if (seenLinkIds.has(savedLink.id)) {
+            continue;
+          }
+
+          seenLinkIds.add(savedLink.id);
+
+          await tx.linkBridge.create({
+            data: {
+              relation_type: 'project',
+              relation_id: id,
+              link_id: savedLink.id,
+              priority: link.priority,
+            },
+          });
+        }
+
+        const seenGalleryIds = new Set<number>();
+        for (const item of data.gallery) {
+          const savedGallery = await tx.gallery.upsert({
+            where: { image: item.image },
+            update: {
+              title: item.title,
+              priority: item.priority,
+              updated_at: new Date(),
+            },
+            create: {
+              title: item.title,
+              image: item.image,
+              priority: item.priority,
+            },
+          });
+
+          if (seenGalleryIds.has(savedGallery.id)) {
+            continue;
+          }
+
+          seenGalleryIds.add(savedGallery.id);
+
+          await tx.galleryBridge.create({
+            data: {
+              relation_type: 'project',
+              relation_id: id,
+              gallery_id: savedGallery.id,
+              link_id: null,
+              priority: item.priority,
+            },
+          });
+        }
+
+        const projectWithRelations = await tx.project.findUnique({
           where: { id },
-          data: {
-            links: {
-              create: data.links,
-            },
-            gallery: {
-              create: data.gallery.map((item) => ({
-                ...item,
-                link_id: null,
-              })),
-            },
-            categories: {
-              create: data.categories,
-            },
-            updated_at: new Date(),
-          },
           include: adminProjectInclude,
         });
+
+        if (!projectWithRelations) {
+          throw new Error('Updated project could not be reloaded.');
+        }
+
+        const [linkBridges, galleryBridges] = await Promise.all([
+          tx.linkBridge.findMany({
+            where: { relation_type: 'project', relation_id: id },
+            include: { link: true },
+            orderBy: { priority: 'asc' },
+          }),
+          tx.galleryBridge.findMany({
+            where: { relation_type: 'project', relation_id: id },
+            include: { gallery: true },
+            orderBy: { priority: 'asc' },
+          }),
+        ]);
+
+        return serializeAdminProject(projectWithRelations, linkBridges, galleryBridges);
       });
 
-      return sendApiSuccess(res, 200, { project: serializeAdminProject(project) });
+      return sendApiSuccess(res, 200, { project });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
         return sendApiError(res, 404, 'Project not found.');
@@ -140,8 +225,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   if (req.method === 'DELETE') {
     try {
       await prisma.$transaction(async (tx) => {
-        await tx.projectGallery.deleteMany({
-          where: { project_id: id },
+        await tx.galleryBridge.deleteMany({
+          where: {
+            relation_type: 'project',
+            relation_id: id,
+          },
         });
 
         await tx.projectCategory.deleteMany({
@@ -152,8 +240,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
           where: { project_id: id },
         });
 
-        await tx.projectLink.deleteMany({
-          where: { project_id: id },
+        await tx.linkBridge.deleteMany({
+          where: {
+            relation_type: 'project',
+            relation_id: id,
+          },
         });
 
         await tx.project.delete({

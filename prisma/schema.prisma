@@ -31,24 +31,23 @@ model Project {
   shortcode  String?              @unique
   job        JobProjectRelation[]
   categories ProjectCategory[]
-  gallery    ProjectGallery[]
-  links      ProjectLink[]
   skills     ProjectSkill[]
 
   @@map("jr_projects")
 }
 
 model Company {
-  id         Int      @id @default(autoincrement())
-  name       String   @unique
-  shortcode  String?  @unique
+  id         Int           @id @default(autoincrement())
+  name       String        @unique
+  shortcode  String?       @unique
   website    String?
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
+  created_at DateTime      @default(now())
+  updated_at DateTime      @default(now())
   jobs       Job[]
 
   @@map("jr_companies")
 }
+
 
 model Job {
   id                Int                  @id @default(autoincrement())
@@ -120,36 +119,70 @@ model JobProjectRelation {
   @@map("jr_job_project_relations")
 }
 
-model ProjectLink {
-  id         Int              @id @default(autoincrement())
-  project_id Int
-  website    String
-  url        String
-  priority   Int              @default(0)
-  created_at DateTime         @default(now())
-  updated_at DateTime         @default(now())
-  gallery    ProjectGallery[]
-  project    Project          @relation(fields: [project_id], references: [id])
-
-  @@index([project_id], map: "jr_projects_links_project_id_fkey")
-  @@map("jr_projects_links")
+enum RelationType {
+  project
+  company
+  job
 }
 
-model ProjectGallery {
-  id         Int          @id @default(autoincrement())
-  project_id Int
+model Link {
+  id         Int             @id @default(autoincrement())
+  website    String
+  url        String
+  priority   Int             @default(0)
+  created_at DateTime        @default(now())
+  updated_at DateTime        @default(now())
+  bridges    LinkBridge[]
+  gallery    GalleryBridge[]
+
+  @@unique([url(length: 191)])
+  @@map("jr_links")
+}
+
+model Gallery {
+  id         Int             @id @default(autoincrement())
   title      String
   image      String
-  priority   Int          @default(0)
-  created_at DateTime     @default(now())
-  updated_at DateTime     @default(now())
-  link_id    Int?
-  link       ProjectLink? @relation(fields: [link_id], references: [id])
-  project    Project      @relation(fields: [project_id], references: [id])
+  priority   Int             @default(0)
+  created_at DateTime        @default(now())
+  updated_at DateTime        @default(now())
+  bridges    GalleryBridge[]
 
-  @@index([link_id], map: "jr_projects_gallery_link_id_fkey")
-  @@index([project_id], map: "jr_projects_gallery_project_id_fkey")
-  @@map("jr_projects_gallery")
+  @@unique([image(length: 191)])
+  @@map("jr_gallery")
+}
+
+model LinkBridge {
+  id            Int          @id @default(autoincrement())
+  relation_type RelationType
+  relation_id   Int
+  link_id       Int
+  priority      Int          @default(0)
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @default(now())
+  link          Link         @relation(fields: [link_id], references: [id], onDelete: Cascade)
+
+  @@unique([relation_type, relation_id, link_id])
+  @@index([relation_type, relation_id])
+  @@map("jr_link_bridges")
+}
+
+model GalleryBridge {
+  id            Int          @id @default(autoincrement())
+  relation_type RelationType
+  relation_id   Int
+  gallery_id    Int
+  link_id       Int?
+  priority      Int          @default(0)
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @default(now())
+  gallery       Gallery      @relation(fields: [gallery_id], references: [id], onDelete: Cascade)
+  link          Link?        @relation(fields: [link_id], references: [id], onDelete: SetNull)
+
+  @@unique([relation_type, relation_id, gallery_id])
+  @@index([relation_type, relation_id])
+  @@index([link_id])
+  @@map("jr_gallery_bridges")
 }
 
 model ProjectSkill {
@@ -181,24 +214,28 @@ model ProjectCategory {
 }
 
 model Skill {
-  id         Int            @id @default(autoincrement())
-  name       String
-  desc       String
-  rating     Int            @default(5) @db.TinyInt
-  created_at DateTime       @default(now())
-  updated_at DateTime       @default(now())
-  projects   ProjectSkill[]
+  id            Int            @id @default(autoincrement())
+  name          String
+  desc          String
+  rating        Int            @default(5) @db.TinyInt
+  about_section String?        @db.VarChar(20)
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @default(now())
+  projects      ProjectSkill[]
 
+  @@unique([name(length: 100)])
   @@map("jr_skills")
 }
 
 model Category {
-  id         Int               @id @default(autoincrement())
-  title      String
-  shortcode  String            @unique
-  created_at DateTime          @default(now())
-  updated_at DateTime          @default(now())
-  projects   ProjectCategory[]
+  id             Int               @id @default(autoincrement())
+  title          String
+  shortcode      String            @unique
+  priority       Int               @default(0)
+  show_in_filter Boolean           @default(false)
+  created_at     DateTime          @default(now())
+  updated_at     DateTime          @default(now())
+  projects       ProjectCategory[]
 
   @@map("jr_cats")
 }

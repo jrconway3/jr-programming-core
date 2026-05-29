@@ -4,7 +4,7 @@ import { ApiEnvelope } from 'app/helpers/response';
 
 export function transformProject(project: ProjectTransformerInput): Project {
   const relation = project.job?.[0] ?? null;
-  const href = `/projects/${project.id}`;
+  const href = `/projects/${project.shortcode ?? project.id}`;
   const jobHref = relation?.job.shortcode && project.shortcode
     ? `/experience/${relation.job.shortcode}/${project.shortcode}`
     : href;
@@ -32,7 +32,7 @@ export function transformProject(project: ProjectTransformerInput): Project {
     created_at: toIsoRequired(project.created_at),
     updated_at: toIsoRequired(project.updated_at),
     skills,
-    preview_skills: skills.slice(0, 4),
+    preview_skills: skills.slice(0, 5),
     categories: project.categories.map(({ priority, category }) => ({
       id: category.id,
       priority,

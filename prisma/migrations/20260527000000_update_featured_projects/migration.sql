@@ -1,0 +1,257 @@
+-- Delete legacy "job-as-project" placeholder entries (predated the Jobs table).
+DELETE FROM `jr_projects_cats` WHERE `project_id` IN (
+  SELECT `id` FROM `jr_projects` WHERE `name` IN (
+    'Web Developer at Ponticlaro',
+    'Web Developer at Lead Optimize',
+    'Web Developer at Appster',
+    'Web Developer at Millennium Marketing Solutions LLC',
+    'Web Developer at KloutFire',
+    'Web Development Freelancer at SeoStrong',
+    'Web Developer at Yazamo',
+    'Web Development Freelancer at Dominate Net',
+    'Software Engineer III at TrailerCentral',
+    'Lead Developer at TrailerCentral',
+    'Web Programmer at TrailerCentral',
+    'Web Application Developer at Freight Access, Inc.'
+  )
+);
+DELETE FROM `jr_projects_skills` WHERE `project_id` IN (
+  SELECT `id` FROM `jr_projects` WHERE `name` IN (
+    'Web Developer at Ponticlaro',
+    'Web Developer at Lead Optimize',
+    'Web Developer at Appster',
+    'Web Developer at Millennium Marketing Solutions LLC',
+    'Web Developer at KloutFire',
+    'Web Development Freelancer at SeoStrong',
+    'Web Developer at Yazamo',
+    'Web Development Freelancer at Dominate Net',
+    'Software Engineer III at TrailerCentral',
+    'Lead Developer at TrailerCentral',
+    'Web Programmer at TrailerCentral',
+    'Web Application Developer at Freight Access, Inc.'
+  )
+);
+DELETE FROM `jr_projects` WHERE `name` IN (
+  'Web Developer at Ponticlaro',
+  'Web Developer at Lead Optimize',
+  'Web Developer at Appster',
+  'Web Developer at Millennium Marketing Solutions LLC',
+  'Web Developer at KloutFire',
+  'Web Development Freelancer at SeoStrong',
+  'Web Developer at Yazamo',
+  'Web Development Freelancer at Dominate Net',
+  'Software Engineer III at TrailerCentral',
+  'Lead Developer at TrailerCentral',
+  'Web Programmer at TrailerCentral',
+  'Web Application Developer at Freight Access, Inc.'
+);
+
+-- Delete the redundant 2019 server-side Facebook Marketplace entry.
+-- The 2016 Chrome extension entry (facebook-marketplace) is kept and its description updated below.
+DELETE FROM `jr_projects_cats` WHERE `project_id` IN (
+  SELECT `id` FROM `jr_projects` WHERE `name` = 'TrailerCentral Facebook Marketplace Server Integration'
+);
+DELETE FROM `jr_projects_skills` WHERE `project_id` IN (
+  SELECT `id` FROM `jr_projects` WHERE `name` = 'TrailerCentral Facebook Marketplace Server Integration'
+);
+DELETE FROM `jr_projects` WHERE `name` = 'TrailerCentral Facebook Marketplace Server Integration';
+
+-- Replace featured projects on the homepage.
+-- Clears all existing featured-projects assignments and inserts the three
+-- chosen projects in display order.
+
+SET @cat := (SELECT `id` FROM `jr_cats` WHERE `shortcode` = 'featured-projects' LIMIT 1);
+
+DELETE FROM `jr_projects_cats` WHERE `category_id` = @cat;
+
+INSERT IGNORE INTO `jr_projects_cats` (`project_id`, `category_id`, `priority`, `created_at`, `updated_at`)
+SELECT p.`id`, @cat, 0, NOW(3), NOW(3) FROM `jr_projects` p
+WHERE p.`shortcode` = 'twilio-call-tracking' AND @cat IS NOT NULL LIMIT 1;
+
+INSERT IGNORE INTO `jr_projects_cats` (`project_id`, `category_id`, `priority`, `created_at`, `updated_at`)
+SELECT p.`id`, @cat, 1, NOW(3), NOW(3) FROM `jr_projects` p
+WHERE p.`shortcode` = 'craigslist-autoposter' AND @cat IS NOT NULL LIMIT 1;
+
+INSERT IGNORE INTO `jr_projects_cats` (`project_id`, `category_id`, `priority`, `created_at`, `updated_at`)
+SELECT p.`id`, @cat, 2, NOW(3), NOW(3) FROM `jr_projects` p
+WHERE p.`shortcode` = 'crm-email-text' AND @cat IS NOT NULL LIMIT 1;
+
+-- Professional experience start year (used for "X+ years" stat on homepage).
+INSERT INTO `jr_settings` (`key`, `value`, `created_at`, `updated_at`)
+VALUES ('home/stats/experience_start_year', '2011', NOW(3), NOW(3))
+ON DUPLICATE KEY UPDATE `value` = '2011', `updated_at` = NOW(3);
+
+-- Fix project names: remove "TrailerCentral " company prefix and clean up parentheses.
+UPDATE `jr_projects` SET `name` = 'TrailerTrader 2016',               `updated_at` = NOW(3) WHERE `shortcode` = 'trailertrader-2016';
+UPDATE `jr_projects` SET `name` = 'Craigslist Autoposter',            `updated_at` = NOW(3) WHERE `shortcode` = 'craigslist-autoposter';
+UPDATE `jr_projects` SET `name` = 'HTW Autoposter',                   `updated_at` = NOW(3) WHERE `shortcode` = 'horse-trailer-world';
+UPDATE `jr_projects` SET `name` = 'KSL Feed',                         `updated_at` = NOW(3) WHERE `shortcode` = 'ksl-feed';
+UPDATE `jr_projects` SET `name` = 'Facebook Marketplace Autoposter',  `updated_at` = NOW(3) WHERE `shortcode` = 'facebook-marketplace';
+UPDATE `jr_projects` SET `name` = 'Custom Inventory Image Overlays',  `updated_at` = NOW(3) WHERE `shortcode` = 'image-overlays';
+UPDATE `jr_projects` SET `name` = 'Responsive Websites in Foundation', `updated_at` = NOW(3) WHERE `shortcode` = 'dealer-websites';
+UPDATE `jr_projects` SET `name` = 'Elastic Search for Inventory',     `updated_at` = NOW(3) WHERE `shortcode` = 'elasticsearch';
+UPDATE `jr_projects` SET `name` = 'CRM Zend Framework',               `updated_at` = NOW(3) WHERE `shortcode` = 'crm-legacy';
+UPDATE `jr_projects` SET `name` = 'CRM Nuxt Dashboard',               `updated_at` = NOW(3) WHERE `shortcode` = 'crm-system';
+UPDATE `jr_projects` SET `name` = 'Email & Text Marketing for CRM',   `updated_at` = NOW(3) WHERE `shortcode` = 'crm-email-text';
+UPDATE `jr_projects` SET `name` = 'TruckPaper Autoposter',            `updated_at` = NOW(3) WHERE `shortcode` = 'truckpaper-autoposter';
+UPDATE `jr_projects` SET `name` = 'LotVantage Facebook Feed',         `updated_at` = NOW(3) WHERE `shortcode` = 'lotvantage-facebook';
+UPDATE `jr_projects` SET `name` = 'Craigslist Auto Scheduler',        `updated_at` = NOW(3) WHERE `name` = 'TrailerCentral Craigslist Scheduler (Chrome Extension)';
+UPDATE `jr_projects` SET `name` = 'Huffman Trailers',                 `updated_at` = NOW(3) WHERE `shortcode` = 'huffman-trailers';
+UPDATE `jr_projects` SET `name` = 'The Hitchman, Inc.',               `updated_at` = NOW(3) WHERE `shortcode` = 'hitchman-inc';
+
+-- Fix project positions.
+-- Match by both shortcode and name to handle any environment where shortcode assignment may have run order issues.
+UPDATE `jr_projects` SET `position` = 'Personal Project', `updated_at` = NOW(3)
+WHERE `shortcode` IN ('ulpc-spritesheet-generator', 'lex-talionis-engine', 'jrprogramming')
+   OR `name` IN ('Universal LPC Spritesheet Character Generator', 'Universal Spritesheet Character Generator', 'Lex Talionis Engine', 'JR Programming');
+
+-- Remove personal projects from job relations — the 20260422190000 oDesk catch-all sweep incorrectly
+-- linked these to the oDesk/Freelance job. Personal projects should not appear under any employer.
+DELETE FROM `jr_job_project_relations`
+WHERE `project_id` IN (
+  SELECT `id` FROM `jr_projects`
+  WHERE `shortcode` IN ('ulpc-spritesheet-generator', 'lex-talionis-engine', 'jrprogramming')
+     OR `name` IN ('Universal LPC Spritesheet Character Generator', 'Universal Spritesheet Character Generator', 'Lex Talionis Engine', 'JR Programming')
+);
+
+-- Fix project roles and company names.
+UPDATE `jr_projects` SET `role` = 'Chrome Extension Developer', `updated_at` = NOW(3)
+WHERE `shortcode` = 'facebook-marketplace';
+
+-- Merge the deleted 2019 server-side attempt description into the Chrome extension entry.
+UPDATE `jr_projects` SET
+  `extended` = 'The Facebook Marketplace autoposter was approached in multiple phases. The initial version was a Chrome extension built like the Craigslist and HTW autoposters, with scheduler support intended to minimize manual dealer effort. A later server-side iteration proved more challenging — triggering image uploads and managing dealer account logins could not be reliably automated, and despite bringing in a contractor to help, the login verification problem remained unsolved. Both approaches were eventually dropped; Facebook later shut down third-party dealer posting to Marketplace entirely, and we transitioned to a feed-based approach through LotVantage instead.',
+  `updated_at` = NOW(3)
+WHERE `shortcode` = 'facebook-marketplace';
+
+UPDATE `jr_projects` SET
+  `extended` = 'Built a production call tracking and routing system using Twilio APIs and Laravel. Implemented real-time call forwarding, lead attribution, and webhook-based event processing. Designed queue-driven backend architecture for call state handling, logging, and reliable event processing. System supports multi-source lead attribution and integrates into CRM workflows for accurate reporting and operational visibility.',
+  `updated_at` = NOW(3)
+WHERE `shortcode` = 'twilio-call-tracking';
+
+UPDATE `jr_projects` SET `position` = 'TrailerCentral', `updated_at` = NOW(3)
+WHERE `shortcode` IN ('trailertrader-2016', 'factory-vantage', 'lotvantage-facebook');
+
+-- Add two new TC key systems (Twilio SMS and Gmail OAuth) to the existing four.
+SET @tc_job := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'trailercentral' LIMIT 1);
+
+INSERT IGNORE INTO `jr_job_project_relations` (`job_id`, `project_id`, `relation_type`, `priority`, `created_at`, `updated_at`)
+SELECT @tc_job, p.`id`, 'key_system', 4, NOW(3), NOW(3) FROM `jr_projects` p
+WHERE p.`shortcode` = 'twilio-sms-system' AND @tc_job IS NOT NULL LIMIT 1;
+
+INSERT IGNORE INTO `jr_job_project_relations` (`job_id`, `project_id`, `relation_type`, `priority`, `created_at`, `updated_at`)
+SELECT @tc_job, p.`id`, 'key_system', 5, NOW(3), NOW(3) FROM `jr_projects` p
+WHERE p.`shortcode` = 'gmail-oauth-integration' AND @tc_job IS NOT NULL LIMIT 1;
+
+INSERT IGNORE INTO `jr_job_project_relations` (`job_id`, `project_id`, `relation_type`, `priority`, `created_at`, `updated_at`)
+SELECT @tc_job, p.`id`, 'key_system', 6, NOW(3), NOW(3) FROM `jr_projects` p
+WHERE p.`shortcode` = 'crm-system' AND @tc_job IS NOT NULL LIMIT 1;
+
+INSERT IGNORE INTO `jr_job_project_relations` (`job_id`, `project_id`, `relation_type`, `priority`, `created_at`, `updated_at`)
+SELECT @tc_job, p.`id`, 'key_system', 7, NOW(3), NOW(3) FROM `jr_projects` p
+WHERE p.`shortcode` = 'image-overlays' AND @tc_job IS NOT NULL LIMIT 1;
+
+-- Link all TrailerCentral portfolio projects to the TC job as 'project' relations.
+-- INSERT IGNORE skips projects already inserted as key systems above or in earlier migrations.
+INSERT IGNORE INTO `jr_job_project_relations` (`job_id`, `project_id`, `relation_type`, `priority`, `created_at`, `updated_at`)
+SELECT @tc_job, p.`id`, 'project', p.`id`, NOW(3), NOW(3)
+FROM `jr_projects` p
+WHERE p.`position` = 'TrailerCentral'
+  AND p.`shortcode` IS NOT NULL
+  AND @tc_job IS NOT NULL;
+
+-- Set end date to Jan 2026 for all TC projects and the TC job showing as "Present".
+UPDATE `jr_projects`
+SET `end_date` = '2026-01-01 00:00:00.000', `updated_at` = NOW(3)
+WHERE `position` = 'TrailerCentral' AND `end_date` IS NULL;
+
+UPDATE `jr_jobs`
+SET `end_date` = '2026-01-01 00:00:00.000', `updated_at` = NOW(3)
+WHERE `shortcode` = 'trailercentral' AND `end_date` IS NULL;
+
+-- Add TrailerCentral hero image via gallery bridge.
+INSERT IGNORE INTO `jr_gallery` (`title`, `image`, `priority`, `created_at`, `updated_at`)
+VALUES ('TrailerCentral', '/images/experience/trailercentral.png', 0, NOW(3), NOW(3));
+
+INSERT IGNORE INTO `jr_gallery_bridges` (`relation_type`, `relation_id`, `gallery_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'job', j.`id`, g.`id`, 0, NOW(3), NOW(3)
+FROM `jr_jobs` j, `jr_gallery` g
+WHERE j.`shortcode` = 'trailercentral' AND g.`image` = '/images/experience/trailercentral.png';
+
+-- Remove incorrectly assigned gallery images for TC Facebook Marketplace Autoposter.
+DELETE gb FROM `jr_gallery_bridges` gb
+INNER JOIN `jr_projects` p ON p.`id` = gb.`relation_id`
+WHERE gb.`relation_type` = 'project' AND p.`shortcode` = 'facebook-marketplace';
+
+-- Reassign projects to correct employer jobs.
+-- The text-based catch-all in 20260422190000 assigned these to oDesk; override here by shortcode.
+SET @_kloutfire_job := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'kloutfire' LIMIT 1);
+SET @_seo_strong_job := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'seo-strong' LIMIT 1);
+
+SET @_yazamo_job := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'yazamo' LIMIT 1);
+
+DELETE r FROM `jr_job_project_relations` r
+INNER JOIN `jr_projects` p ON p.`id` = r.`project_id`
+WHERE p.`shortcode` IN ('raffle-consulting', 'mangat-plastic-surgery', 'tansavatdi-plastic-surgery', 'center-for-partially-sighted', 'biodental-veneers', 'genius-network', '25kgroup-magazine');
+
+INSERT IGNORE INTO `jr_job_project_relations` (`job_id`, `project_id`, `relation_type`, `priority`, `created_at`, `updated_at`)
+SELECT @_kloutfire_job, p.`id`, 'project', p.`id`, NOW(3), NOW(3)
+FROM `jr_projects` p
+WHERE p.`shortcode` IN ('raffle-consulting', 'mangat-plastic-surgery', 'tansavatdi-plastic-surgery', 'center-for-partially-sighted')
+  AND @_kloutfire_job IS NOT NULL;
+
+INSERT IGNORE INTO `jr_job_project_relations` (`job_id`, `project_id`, `relation_type`, `priority`, `created_at`, `updated_at`)
+SELECT @_seo_strong_job, p.`id`, 'project', p.`id`, NOW(3), NOW(3)
+FROM `jr_projects` p
+WHERE p.`shortcode` = 'biodental-veneers'
+  AND @_seo_strong_job IS NOT NULL;
+
+INSERT IGNORE INTO `jr_job_project_relations` (`job_id`, `project_id`, `relation_type`, `priority`, `created_at`, `updated_at`)
+SELECT @_yazamo_job, p.`id`, 'project', p.`id`, NOW(3), NOW(3)
+FROM `jr_projects` p
+WHERE p.`shortcode` IN ('genius-network', '25kgroup-magazine')
+  AND @_yazamo_job IS NOT NULL;
+
+-- Update Ponticlaro job summary.
+UPDATE `jr_jobs` SET
+  `summary` = 'Worked on complex WordPress website builds for high-profile clients under NDA. Projects involved custom theme development, custom plugin integration, and advanced custom post type implementations using hook-based registration. Packages and tooling included Bebop — a custom WordPress utility script used for managing content relationships and post type configuration. Sites were large multi-page builds with structured content architecture. Client identities and specific project details are confidential per NDA.',
+  `updated_at` = NOW(3)
+WHERE `shortcode` = 'ponticlaro';
+
+-- Replace impact bullets. jr_job_impacts is seeded by copying role short_summary in 20260422190000,
+-- so it must be updated directly here — updating jr_job_roles alone has no effect on it.
+SET @tc  := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'trailercentral' LIMIT 1);
+SET @pon := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'ponticlaro' LIMIT 1);
+SET @yaz := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'yazamo' LIMIT 1);
+SET @kl  := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'kloutfire' LIMIT 1);
+SET @seo := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'seo-strong' LIMIT 1);
+SET @fa  := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'freight-access' LIMIT 1);
+
+DELETE FROM `jr_job_impacts` WHERE `job_id` = @tc;
+INSERT INTO `jr_job_impacts` (`job_id`, `description`, `priority`, `created_at`, `updated_at`) VALUES
+  (@tc, 'Architected and delivered Twilio call tracking and SMS delivery systems, restoring critical dealer lead communication workflows.', 0, NOW(3), NOW(3)),
+  (@tc, 'Reduced dealer team manual workload through Craigslist autoposter, CRM automation, and Facebook Marketplace syndication tooling.', 1, NOW(3), NOW(3)),
+  (@tc, 'Built foundational CRM modules, dealer website components, and inventory feed integrations across the TrailerCentral platform.', 2, NOW(3), NOW(3));
+
+DELETE FROM `jr_job_impacts` WHERE `job_id` = @pon;
+INSERT INTO `jr_job_impacts` (`job_id`, `description`, `priority`, `created_at`, `updated_at`) VALUES
+  (@pon, 'Delivered complex multi-page WordPress builds for notable high-profile clients, implementing custom theme systems, plugin tooling, and structured content architectures under NDA.', 0, NOW(3), NOW(3));
+
+DELETE FROM `jr_job_impacts` WHERE `job_id` = @yaz;
+INSERT INTO `jr_job_impacts` (`job_id`, `description`, `priority`, `created_at`, `updated_at`) VALUES
+  (@yaz, 'Built and shipped marketing-focused landing pages for high-value campaigns including Abundance and Joe Polish.', 0, NOW(3), NOW(3)),
+  (@yaz, 'Implemented conversion-oriented page designs serving entrepreneurial and business development audiences.', 1, NOW(3), NOW(3));
+
+DELETE FROM `jr_job_impacts` WHERE `job_id` = @kl;
+INSERT INTO `jr_job_impacts` (`job_id`, `description`, `priority`, `created_at`, `updated_at`) VALUES
+  (@kl, 'Developed and launched WordPress websites for multiple client brands across medical, consulting, and professional services sectors.', 0, NOW(3), NOW(3)),
+  (@kl, 'Delivered full WordPress builds from PSD designs to production across healthcare and charitable organisation clients.', 1, NOW(3), NOW(3));
+
+DELETE FROM `jr_job_impacts` WHERE `job_id` = @seo;
+INSERT INTO `jr_job_impacts` (`job_id`, `description`, `priority`, `created_at`, `updated_at`) VALUES
+  (@seo, 'Delivered PSD-to-WordPress builds for local service clients across roofing, dental, and home improvement sectors.', 0, NOW(3), NOW(3)),
+  (@seo, 'Produced SEO-ready WordPress implementations to spec, from design handoff through to live deployment.', 1, NOW(3), NOW(3));
+
+DELETE FROM `jr_job_impacts` WHERE `job_id` = @fa;
+INSERT INTO `jr_job_impacts` (`job_id`, `description`, `priority`, `created_at`, `updated_at`) VALUES
+  (@fa, 'Built custom web application workflows and backend tooling for an early-stage logistics platform.', 0, NOW(3), NOW(3));

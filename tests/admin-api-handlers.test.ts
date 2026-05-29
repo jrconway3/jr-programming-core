@@ -69,14 +69,24 @@ const {
     projectCategory: {
       deleteMany: vi.fn(),
     },
-    projectGallery: {
-      deleteMany: vi.fn(),
-    },
-    projectLink: {
-      deleteMany: vi.fn(),
-    },
     projectSkill: {
       deleteMany: vi.fn(),
+    },
+    link: {
+      upsert: vi.fn(),
+    },
+    linkBridge: {
+      create: vi.fn(),
+      deleteMany: vi.fn(),
+      findMany: vi.fn(),
+    },
+    gallery: {
+      upsert: vi.fn(),
+    },
+    galleryBridge: {
+      create: vi.fn(),
+      deleteMany: vi.fn(),
+      findMany: vi.fn(),
     },
     $transaction: vi.fn(),
   },
@@ -717,10 +727,10 @@ describe('admin API handlers', () => {
 
     await projectsByIdHandler(req as never, res as never);
 
-    expect(prismaMock.projectGallery.deleteMany).toHaveBeenCalledWith({ where: { project_id: 41 } });
+    expect(prismaMock.galleryBridge.deleteMany).toHaveBeenCalledWith({ where: { relation_type: 'project', relation_id: 41 } });
     expect(prismaMock.projectCategory.deleteMany).toHaveBeenCalledWith({ where: { project_id: 41 } });
     expect(prismaMock.projectSkill.deleteMany).toHaveBeenCalledWith({ where: { project_id: 41 } });
-    expect(prismaMock.projectLink.deleteMany).toHaveBeenCalledWith({ where: { project_id: 41 } });
+    expect(prismaMock.linkBridge.deleteMany).toHaveBeenCalledWith({ where: { relation_type: 'project', relation_id: 41 } });
     expect(prismaMock.project.delete).toHaveBeenCalledWith({ where: { id: 41 } });
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({ ok: true, data: { success: true } });

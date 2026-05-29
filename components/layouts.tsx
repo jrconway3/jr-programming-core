@@ -24,14 +24,14 @@ export default function Layout({ children }: Props) {
       </Head>
       <div className="flex flex-col min-h-screen bg-background text-text">
         <header className="w-full py-4 px-6 glass border-b border-accent/30 neon-glow">
-          <nav className="flex justify-between items-center max-w-5xl mx-auto">
+          <nav className="flex justify-between items-center">
             <Link href="/" className="text-2xl font-headers font-bold hover:text-primary-accentLight neon-text">
               &lt;<span className="flip-vertically">?</span>RProgramming
             </Link>
             <div className="space-x-6">
               <Link href="/" className="hover:text-primary-accentLight transition neon-text">Home</Link>
               <Link href="/experience" className="hover:text-primary-accentLight transition neon-text">Experience</Link>
-              <Link href="/projects" className="hover:text-primary-accentLight transition neon-text">Projects</Link>
+              <Link href="/projects" className="hover:text-primary-accentLight transition neon-text">Portfolio</Link>
               <Link href="/about" className="hover:text-primary-accentLight transition neon-text">About</Link>
               <Link href="/blog" className="hidden hover:text-primary-accentLight transition neon-text">Blog</Link>
               <Link href="/contact" className="hover:text-primary-accentLight transition neon-text">Contact</Link>
@@ -45,7 +45,12 @@ export default function Layout({ children }: Props) {
           <div className="text-primary-text/70">
             <p><span className="copyright">&copy;</span> {footerYear} {footerName}, {footerRights}</p>
             <p>{footerBuilt}</p>
-            <p>Free Font "{footerFontName}" by <a href={footerFontUrl} className="underline" target="_blank" rel="noopener noreferrer">{footerFontAuthor}</a></p>
+            <p>Free Font &ldquo;{footerFontName}&rdquo; by <a href={footerFontUrl} className="underline" target="_blank" rel="noopener noreferrer">{footerFontAuthor}</a></p>
+            <p className="mt-1 space-x-3">
+              <a href="https://github.com/jrconway3" className="underline hover:text-primary-accentLight" target="_blank" rel="noopener noreferrer">github.com/jrconway3</a>
+              <span className="text-primary-text/30">&middot;</span>
+              <a href="https://linkedin.com/in/jrconway" className="underline hover:text-primary-accentLight" target="_blank" rel="noopener noreferrer">linkedin.com/in/jrconway</a>
+            </p>
           </div>
         </footer>
       </div>

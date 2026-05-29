@@ -8,7 +8,6 @@ UPDATE `jr_cats` SET `shortcode` = 'experience', `title` = 'Experience' WHERE `t
 
 -- AlterTable: make shortcode unique and remove the temporary default
 ALTER TABLE `jr_cats` ADD UNIQUE INDEX `jr_cats_shortcode_key` (`shortcode`);
-ALTER TABLE `jr_cats` ALTER COLUMN `shortcode` DROP DEFAULT;
 
 -- Assign Featured Projects category to selected projects
 INSERT INTO `jr_projects_cats` (`project_id`, `category_id`, `priority`, `created_at`, `updated_at`)
@@ -18,7 +17,7 @@ JOIN `jr_cats` c ON c.shortcode = 'featured-projects'
 WHERE p.name IN (
   'Software Engineer III at TrailerCentral',
   'Lex Talionis Engine',
-  'Universal Spritesheet Character Generator',
+  'Universal LPC Spritesheet Character Generator',
   'Sands Investment Group',
   'TrailerCentral Craigslist Autoposter'
 )

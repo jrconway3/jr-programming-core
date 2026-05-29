@@ -1,6 +1,6 @@
 import { GetServerSideProps } from "next";
 import type { ProjectDetail } from "app/models/projects";
-import { getProjectById } from "app/repositories/projects";
+import { getProjectById, getProjectByShortcode } from "app/repositories/projects";
 import { ProjectDetailView } from "components/projects/ProjectDetailView";
 
 interface Props {
@@ -12,10 +12,12 @@ export default function ProjectPage({ project }: Props) {
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
-  const id = parseInt(context.params?.id as string, 10);
-  if (isNaN(id)) return { notFound: true };
+  const slug = context.params?.shortcode as string;
+  const numericId = parseInt(slug, 10);
 
-  const project = await getProjectById(id);
+  const project = isNaN(numericId)
+    ? await getProjectByShortcode(slug)
+    : await getProjectById(numericId);
 
   if (!project) return { notFound: true };
 
