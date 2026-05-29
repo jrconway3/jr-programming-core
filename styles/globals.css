@@ -449,19 +449,27 @@ footer .copyright {
   column-gap: 2rem;
 }
 
-/* Hero photo — absolutely positioned to terminal card right edge */
+/* Hero photo — in flow on mobile, absolutely positioned at md+ */
 .photo-container {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 340px;
-  margin: 0;
-  aspect-ratio: unset;
-  border-radius: 0;
-  border-top-right-radius: 11px;
-  border-bottom-right-radius: 11px;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 11px;
   overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .photo-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 340px;
+    aspect-ratio: unset;
+    border-radius: 0;
+    border-top-right-radius: 11px;
+    border-bottom-right-radius: 11px;
+  }
 }
 
 /* Image fills container, anchored to top */

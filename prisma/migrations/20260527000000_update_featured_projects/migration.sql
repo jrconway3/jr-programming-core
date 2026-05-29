@@ -47,7 +47,7 @@ DELETE FROM `jr_projects` WHERE `name` IN (
 );
 
 -- Delete the redundant 2019 server-side Facebook Marketplace entry.
--- The 2016 Chrome extension entry (tc-facebook-marketplace) is kept and its description updated below.
+-- The 2016 Chrome extension entry (facebook-marketplace) is kept and its description updated below.
 DELETE FROM `jr_projects_cats` WHERE `project_id` IN (
   SELECT `id` FROM `jr_projects` WHERE `name` = 'TrailerCentral Facebook Marketplace Server Integration'
 );
@@ -86,7 +86,7 @@ UPDATE `jr_projects` SET `name` = 'TrailerTrader 2016',               `updated_a
 UPDATE `jr_projects` SET `name` = 'Craigslist Autoposter',            `updated_at` = NOW(3) WHERE `shortcode` = 'craigslist-autoposter';
 UPDATE `jr_projects` SET `name` = 'HTW Autoposter',                   `updated_at` = NOW(3) WHERE `shortcode` = 'horse-trailer-world';
 UPDATE `jr_projects` SET `name` = 'KSL Feed',                         `updated_at` = NOW(3) WHERE `shortcode` = 'ksl-feed';
-UPDATE `jr_projects` SET `name` = 'Facebook Marketplace Autoposter',  `updated_at` = NOW(3) WHERE `shortcode` = 'tc-facebook-marketplace';
+UPDATE `jr_projects` SET `name` = 'Facebook Marketplace Autoposter',  `updated_at` = NOW(3) WHERE `shortcode` = 'facebook-marketplace';
 UPDATE `jr_projects` SET `name` = 'Custom Inventory Image Overlays',  `updated_at` = NOW(3) WHERE `shortcode` = 'image-overlays';
 UPDATE `jr_projects` SET `name` = 'Responsive Websites in Foundation', `updated_at` = NOW(3) WHERE `shortcode` = 'dealer-websites';
 UPDATE `jr_projects` SET `name` = 'Elastic Search for Inventory',     `updated_at` = NOW(3) WHERE `shortcode` = 'elasticsearch';
@@ -116,13 +116,13 @@ WHERE `project_id` IN (
 
 -- Fix project roles and company names.
 UPDATE `jr_projects` SET `role` = 'Chrome Extension Developer', `updated_at` = NOW(3)
-WHERE `shortcode` = 'tc-facebook-marketplace';
+WHERE `shortcode` = 'facebook-marketplace';
 
 -- Merge the deleted 2019 server-side attempt description into the Chrome extension entry.
 UPDATE `jr_projects` SET
   `extended` = 'The Facebook Marketplace autoposter was approached in multiple phases. The initial version was a Chrome extension built like the Craigslist and HTW autoposters, with scheduler support intended to minimize manual dealer effort. A later server-side iteration proved more challenging — triggering image uploads and managing dealer account logins could not be reliably automated, and despite bringing in a contractor to help, the login verification problem remained unsolved. Both approaches were eventually dropped; Facebook later shut down third-party dealer posting to Marketplace entirely, and we transitioned to a feed-based approach through LotVantage instead.',
   `updated_at` = NOW(3)
-WHERE `shortcode` = 'tc-facebook-marketplace';
+WHERE `shortcode` = 'facebook-marketplace';
 
 UPDATE `jr_projects` SET
   `extended` = 'Built a production call tracking and routing system using Twilio APIs and Laravel. Implemented real-time call forwarding, lead attribution, and webhook-based event processing. Designed queue-driven backend architecture for call state handling, logging, and reliable event processing. System supports multi-source lead attribution and integrates into CRM workflows for accurate reporting and operational visibility.',
@@ -172,7 +172,7 @@ WHERE `shortcode` = 'trailercentral' AND `end_date` IS NULL;
 -- Remove incorrectly assigned gallery images for TC Facebook Marketplace Autoposter.
 DELETE gb FROM `jr_gallery_bridges` gb
 INNER JOIN `jr_projects` p ON p.`id` = gb.`relation_id`
-WHERE gb.`relation_type` = 'project' AND p.`shortcode` = 'tc-facebook-marketplace';
+WHERE gb.`relation_type` = 'project' AND p.`shortcode` = 'facebook-marketplace';
 
 -- Reassign projects to correct employer jobs.
 -- The text-based catch-all in 20260422190000 assigned these to oDesk; override here by shortcode.

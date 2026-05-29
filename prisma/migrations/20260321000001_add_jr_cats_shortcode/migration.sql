@@ -1,5 +1,5 @@
 -- AlterTable
-ALTER TABLE `jr_cats` ADD COLUMN `shortcode` VARCHAR(191) NOT NULL AFTER `title`;
+ALTER TABLE `jr_cats` ADD COLUMN `shortcode` VARCHAR(191) NOT NULL DEFAULT '' AFTER `title`;
 
 -- Backfill shortcodes for seeded categories
 UPDATE `jr_cats` SET `shortcode` = 'featured-projects' WHERE `title` = 'Featured Projects';
