@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import type { Project } from "app/models/projects";
@@ -34,6 +34,10 @@ export default function ProjectCategoryPage({
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<number | null>(null);
   const [skillFilter, setSkillFilter] = useState<string | null>(initialSkillFilter ?? null);
+
+  useEffect(() => {
+    setSkillFilter(initialSkillFilter ?? null);
+  }, [initialSkillFilter]);
 
   const pageTitle = titleOverride ?? initialCategory.title;
   const pageDescription = descriptionOverride ?? "Browse the work collected in this section.";
