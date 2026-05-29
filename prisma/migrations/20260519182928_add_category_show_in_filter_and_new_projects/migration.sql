@@ -163,7 +163,7 @@ UPDATE `jr_projects` SET `shortcode` = 'crm-legacy',                `updated_at`
 UPDATE `jr_projects` SET `shortcode` = 'crm-email-text',            `updated_at` = @now WHERE `name` = 'TrailerCentral CRM Email & Text Marketing';
 UPDATE `jr_projects` SET `shortcode` = 'truckpaper-autoposter',     `updated_at` = @now WHERE `name` = 'TrailerCentral TruckPaper Autoposter Integration';
 UPDATE `jr_projects` SET `shortcode` = 'lotvantage-facebook',       `updated_at` = @now WHERE `name` = 'TrailerCentral LotVantage Facebook Feed';
-UPDATE `jr_projects` SET `shortcode` = 'ulpc-spritesheet-generator', `name` = 'Universal LPC Spritesheet Character Generator', `updated_at` = @now WHERE `name` = 'Universal Spritesheet Character Generator';
+UPDATE `jr_projects` SET `shortcode` = 'ulpc-spritesheet-generator', `name` = 'Universal LPC Spritesheet Character Generator', `updated_at` = @now WHERE `name` IN ('Universal Spritesheet Character Generator', 'Universal LPC Spritesheet Character Generator');
 UPDATE `jr_projects` SET `shortcode` = 'lex-talionis-engine',          `updated_at` = @now WHERE `name` = 'Lex Talionis Engine';
 UPDATE `jr_projects` SET `shortcode` = 'horse-trailer-world',       `updated_at` = @now WHERE `name` = 'TrailerCentral Horse Trailer World Autoposter';
 UPDATE `jr_projects` SET `shortcode` = 'craigslist-scheduler',     `updated_at` = @now WHERE `name` = 'TrailerCentral Craigslist Scheduler (Chrome Extension)';
