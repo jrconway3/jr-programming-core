@@ -17,7 +17,7 @@ export default function ProjectCard({ project }: Props) {
       {/* Stretched link — covers entire card */}
       <Link
         href={project.card.href}
-        className="absolute inset-0 rounded-[inherit] z-0"
+        className="absolute inset-0 rounded-[inherit] z-[1]"
         aria-label={project.name}
       />
 

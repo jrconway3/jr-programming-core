@@ -399,7 +399,7 @@ footer .copyright {
   }
 
   /* Available bar — sits above portrait z-index */
-  .-mx-6 {
+  .terminal-card:has(.portrait-container) > .-mx-6 {
     position: relative;
     z-index: 20;
   }
@@ -423,14 +423,14 @@ footer .copyright {
     object-position: 50% 0%;
   }
 
-  .mb-6.rounded-lg.border.border-primary-accent\/20 { max-width: 75%; }
-  .gradient-text.animate-gradient { max-width: 75%; }
-  .flex.gap-8.items-start {
+  .terminal-card:has(.portrait-container) .mb-6.rounded-lg.border.border-primary-accent\/20 { max-width: 75%; }
+  .terminal-card:has(.portrait-container) .gradient-text.animate-gradient { max-width: 75%; }
+  .terminal-card:has(.portrait-container) .flex.gap-8.items-start {
     max-width: 75%;
     padding-right: 0;
   }
 
-  .-mx-6 {
+  .terminal-card:has(.portrait-container) > .-mx-6 {
     max-width: none;
     width: auto;
     margin-left: -2rem;
