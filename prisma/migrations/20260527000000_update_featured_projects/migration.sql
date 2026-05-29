@@ -173,3 +173,38 @@ WHERE `shortcode` = 'trailercentral' AND `end_date` IS NULL;
 DELETE gb FROM `jr_gallery_bridges` gb
 INNER JOIN `jr_projects` p ON p.`id` = gb.`relation_id`
 WHERE gb.`relation_type` = 'project' AND p.`shortcode` = 'tc-facebook-marketplace';
+
+-- Reassign projects to correct employer jobs.
+-- The text-based catch-all in 20260422190000 assigned these to oDesk; override here by shortcode.
+SET @_kloutfire_job := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'kloutfire' LIMIT 1);
+SET @_seo_strong_job := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'seo-strong' LIMIT 1);
+
+SET @_yazamo_job := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'yazamo' LIMIT 1);
+
+DELETE r FROM `jr_job_project_relations` r
+INNER JOIN `jr_projects` p ON p.`id` = r.`project_id`
+WHERE p.`shortcode` IN ('raffle-consulting', 'mangat-plastic-surgery', 'tansavatdi-plastic-surgery', 'center-for-partially-sighted', 'biodental-veneers', 'genius-network', '25kgroup-magazine');
+
+INSERT IGNORE INTO `jr_job_project_relations` (`job_id`, `project_id`, `relation_type`, `priority`, `created_at`, `updated_at`)
+SELECT @_kloutfire_job, p.`id`, 'project', p.`id`, NOW(3), NOW(3)
+FROM `jr_projects` p
+WHERE p.`shortcode` IN ('raffle-consulting', 'mangat-plastic-surgery', 'tansavatdi-plastic-surgery', 'center-for-partially-sighted')
+  AND @_kloutfire_job IS NOT NULL;
+
+INSERT IGNORE INTO `jr_job_project_relations` (`job_id`, `project_id`, `relation_type`, `priority`, `created_at`, `updated_at`)
+SELECT @_seo_strong_job, p.`id`, 'project', p.`id`, NOW(3), NOW(3)
+FROM `jr_projects` p
+WHERE p.`shortcode` = 'biodental-veneers'
+  AND @_seo_strong_job IS NOT NULL;
+
+INSERT IGNORE INTO `jr_job_project_relations` (`job_id`, `project_id`, `relation_type`, `priority`, `created_at`, `updated_at`)
+SELECT @_yazamo_job, p.`id`, 'project', p.`id`, NOW(3), NOW(3)
+FROM `jr_projects` p
+WHERE p.`shortcode` IN ('genius-network', '25kgroup-magazine')
+  AND @_yazamo_job IS NOT NULL;
+
+-- Update Ponticlaro job summary.
+UPDATE `jr_jobs` SET
+  `summary` = 'Worked on complex WordPress website builds for high-profile clients under NDA. Projects involved custom theme development, custom plugin integration, and advanced custom post type implementations using hook-based registration. Packages and tooling included Bebop — a custom WordPress utility script used for managing content relationships and post type configuration. Sites were large multi-page builds with structured content architecture. Client identities and specific project details are confidential per NDA.',
+  `updated_at` = NOW(3)
+WHERE `shortcode` = 'ponticlaro';
