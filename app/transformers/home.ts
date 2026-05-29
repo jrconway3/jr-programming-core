@@ -13,9 +13,6 @@ export function transformHomePageMetrics(allProjects: HomeProjectStatsEntry[], e
   );
 
   const totalProjectsDelivered = allProjects.length;
-  const portfolioProjects = allProjects.filter((project) => (
-    (project.categories ?? []).some((entry) => ["projects", "featured-projects"].includes(entry.category.shortcode))
-  )).length;
 
   const automationFocusedProjects = allProjects.filter((project) => {
     const searchable = `${project.name} ${project.short} ${project.role ?? ""}`.toLowerCase();
@@ -26,7 +23,6 @@ export function transformHomePageMetrics(allProjects: HomeProjectStatsEntry[], e
     yearsExperience,
     totalProjectsDelivered,
     automationFocusedProjects,
-    portfolioProjects,
     displayedCompanies: uniqueCompanies.slice(0, 6),
   };
 }

@@ -14,7 +14,6 @@ export default function Home({
   yearsExperience,
   totalProjectsDelivered,
   automationFocusedProjects,
-  portfolioProjects,
   displayedCompanies,
 }: HomePageProps) {
   const { homeSettings } = useSettings();
@@ -166,7 +165,6 @@ export default function Home({
                   ))}
                 </div>
 
-                <p className="mt-4 text-sm text-primary-text/65">{portfolioProjects} portfolio entries currently published.</p>
               </article>
             </div>
           </div>

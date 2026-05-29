@@ -208,3 +208,28 @@ UPDATE `jr_jobs` SET
   `summary` = 'Worked on complex WordPress website builds for high-profile clients under NDA. Projects involved custom theme development, custom plugin integration, and advanced custom post type implementations using hook-based registration. Packages and tooling included Bebop — a custom WordPress utility script used for managing content relationships and post type configuration. Sites were large multi-page builds with structured content architecture. Client identities and specific project details are confidential per NDA.',
   `updated_at` = NOW(3)
 WHERE `shortcode` = 'ponticlaro';
+
+-- Update job role short_summary (impact bullets) with meaningful descriptions.
+UPDATE `jr_job_roles` SET `short_summary` = 'Architected and delivered Twilio call tracking and SMS delivery systems, restoring critical dealer lead communication workflows.', `updated_at` = NOW(3)
+WHERE `title` = 'Systems Engineer III' AND `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'trailercentral' LIMIT 1);
+
+UPDATE `jr_job_roles` SET `short_summary` = 'Reduced dealer team manual workload through Craigslist autoposter, CRM automation, and Facebook Marketplace syndication tooling.', `updated_at` = NOW(3)
+WHERE `title` = 'Lead Developer' AND `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'trailercentral' LIMIT 1);
+
+UPDATE `jr_job_roles` SET `short_summary` = 'Built foundational CRM modules, dealer website components, and inventory feed integrations across the TrailerCentral platform.', `updated_at` = NOW(3)
+WHERE `title` = 'Web Programmer' AND `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'trailercentral' LIMIT 1);
+
+UPDATE `jr_job_roles` SET `short_summary` = 'Delivered complex multi-page WordPress builds for notable high-profile clients, implementing custom theme systems, plugin tooling, and structured content architectures under NDA.', `updated_at` = NOW(3)
+WHERE `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'ponticlaro' LIMIT 1);
+
+UPDATE `jr_job_roles` SET `short_summary` = 'Built and shipped marketing-focused landing pages for high-value campaigns including Abundance and Joe Polish, serving entrepreneurial and business development audiences.', `updated_at` = NOW(3)
+WHERE `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'yazamo' LIMIT 1);
+
+UPDATE `jr_job_roles` SET `short_summary` = 'Developed and launched WordPress websites for multiple client brands across medical, consulting, professional services, and charitable organisation sectors.', `updated_at` = NOW(3)
+WHERE `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'kloutfire' LIMIT 1);
+
+UPDATE `jr_job_roles` SET `short_summary` = 'Delivered SEO-ready PSD-to-WordPress builds for local service clients across roofing, dental, and home improvement sectors.', `updated_at` = NOW(3)
+WHERE `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'seo-strong' LIMIT 1);
+
+UPDATE `jr_job_roles` SET `short_summary` = 'Built custom web application workflows and backend tooling for an early-stage logistics platform.', `updated_at` = NOW(3)
+WHERE `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'freight-access' LIMIT 1);
