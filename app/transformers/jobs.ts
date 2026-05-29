@@ -32,6 +32,7 @@ export function transformJob(job: JobTransformerInput): Job {
     start_date: startDate,
     end_date: endDate,
     priority: job.priority,
+    gallery: job.gallery,
     company: job.company ? {
       id: job.company.id,
       name: job.company.name,

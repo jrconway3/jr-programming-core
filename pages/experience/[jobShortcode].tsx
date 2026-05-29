@@ -1,6 +1,7 @@
 import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
+import { toSecureAssetUrl } from 'app/helpers/common';
 import { withProjectCardView } from 'app/helpers/project-card';
 import type { Job } from 'app/models/jobs';
 import { getJobByShortcode } from 'app/repositories/projects';
@@ -12,7 +13,6 @@ type Props = {
 
 export default function ExperienceJobPage({ job }: Props) {
   const companyName = job.company?.name || 'Experience';
-  const companyShortcode = job.company?.shortcode ?? null;
   const allProjectsLabel = 'Other';
 
   return (
@@ -32,18 +32,12 @@ export default function ExperienceJobPage({ job }: Props) {
           </nav>
 
           <div className="terminal-card px-6 pb-8 pt-12 md:px-8">
-            {companyShortcode && (
+            {job.gallery[0] && (
               <div className="-mt-12 -mx-6 md:-mx-8 mb-6 relative aspect-video overflow-hidden rounded-t-[9px] bg-slate-900">
                 <img
-                  src={`/images/experience/${companyShortcode}.png`}
+                  src={toSecureAssetUrl(job.gallery[0].image)}
                   alt={companyName}
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const container = e.currentTarget.parentElement as HTMLElement;
-                    container.style.display = 'none';
-                    const card = container.parentElement as HTMLElement;
-                    if (card) card.style.paddingTop = '3.5rem';
-                  }}
                 />
                 <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(rgba(168,85,247,0.06) 0px, rgba(168,85,247,0.06) 1px, transparent 1px, transparent 3px)' }} />
               </div>

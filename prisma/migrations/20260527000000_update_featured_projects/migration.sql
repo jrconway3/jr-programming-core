@@ -169,6 +169,15 @@ UPDATE `jr_jobs`
 SET `end_date` = '2026-01-01 00:00:00.000', `updated_at` = NOW(3)
 WHERE `shortcode` = 'trailercentral' AND `end_date` IS NULL;
 
+-- Add TrailerCentral hero image via gallery bridge.
+INSERT IGNORE INTO `jr_gallery` (`title`, `image`, `priority`, `created_at`, `updated_at`)
+VALUES ('TrailerCentral', 'images/experience/trailercentral.png', 0, NOW(3), NOW(3));
+
+INSERT IGNORE INTO `jr_gallery_bridges` (`relation_type`, `relation_id`, `gallery_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'job', j.`id`, g.`id`, 0, NOW(3), NOW(3)
+FROM `jr_jobs` j, `jr_gallery` g
+WHERE j.`shortcode` = 'trailercentral' AND g.`image` = 'images/experience/trailercentral.png';
+
 -- Remove incorrectly assigned gallery images for TC Facebook Marketplace Autoposter.
 DELETE gb FROM `jr_gallery_bridges` gb
 INNER JOIN `jr_projects` p ON p.`id` = gb.`relation_id`
@@ -209,27 +218,40 @@ UPDATE `jr_jobs` SET
   `updated_at` = NOW(3)
 WHERE `shortcode` = 'ponticlaro';
 
--- Update job role short_summary (impact bullets) with meaningful descriptions.
-UPDATE `jr_job_roles` SET `short_summary` = 'Architected and delivered Twilio call tracking and SMS delivery systems, restoring critical dealer lead communication workflows.', `updated_at` = NOW(3)
-WHERE `title` = 'Systems Engineer III' AND `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'trailercentral' LIMIT 1);
+-- Replace impact bullets. jr_job_impacts is seeded by copying role short_summary in 20260422190000,
+-- so it must be updated directly here — updating jr_job_roles alone has no effect on it.
+SET @tc  := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'trailercentral' LIMIT 1);
+SET @pon := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'ponticlaro' LIMIT 1);
+SET @yaz := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'yazamo' LIMIT 1);
+SET @kl  := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'kloutfire' LIMIT 1);
+SET @seo := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'seo-strong' LIMIT 1);
+SET @fa  := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'freight-access' LIMIT 1);
 
-UPDATE `jr_job_roles` SET `short_summary` = 'Reduced dealer team manual workload through Craigslist autoposter, CRM automation, and Facebook Marketplace syndication tooling.', `updated_at` = NOW(3)
-WHERE `title` = 'Lead Developer' AND `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'trailercentral' LIMIT 1);
+DELETE FROM `jr_job_impacts` WHERE `job_id` = @tc;
+INSERT INTO `jr_job_impacts` (`job_id`, `description`, `priority`, `created_at`, `updated_at`) VALUES
+  (@tc, 'Architected and delivered Twilio call tracking and SMS delivery systems, restoring critical dealer lead communication workflows.', 0, NOW(3), NOW(3)),
+  (@tc, 'Reduced dealer team manual workload through Craigslist autoposter, CRM automation, and Facebook Marketplace syndication tooling.', 1, NOW(3), NOW(3)),
+  (@tc, 'Built foundational CRM modules, dealer website components, and inventory feed integrations across the TrailerCentral platform.', 2, NOW(3), NOW(3));
 
-UPDATE `jr_job_roles` SET `short_summary` = 'Built foundational CRM modules, dealer website components, and inventory feed integrations across the TrailerCentral platform.', `updated_at` = NOW(3)
-WHERE `title` = 'Web Programmer' AND `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'trailercentral' LIMIT 1);
+DELETE FROM `jr_job_impacts` WHERE `job_id` = @pon;
+INSERT INTO `jr_job_impacts` (`job_id`, `description`, `priority`, `created_at`, `updated_at`) VALUES
+  (@pon, 'Delivered complex multi-page WordPress builds for notable high-profile clients, implementing custom theme systems, plugin tooling, and structured content architectures under NDA.', 0, NOW(3), NOW(3));
 
-UPDATE `jr_job_roles` SET `short_summary` = 'Delivered complex multi-page WordPress builds for notable high-profile clients, implementing custom theme systems, plugin tooling, and structured content architectures under NDA.', `updated_at` = NOW(3)
-WHERE `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'ponticlaro' LIMIT 1);
+DELETE FROM `jr_job_impacts` WHERE `job_id` = @yaz;
+INSERT INTO `jr_job_impacts` (`job_id`, `description`, `priority`, `created_at`, `updated_at`) VALUES
+  (@yaz, 'Built and shipped marketing-focused landing pages for high-value campaigns including Abundance and Joe Polish.', 0, NOW(3), NOW(3)),
+  (@yaz, 'Implemented conversion-oriented page designs serving entrepreneurial and business development audiences.', 1, NOW(3), NOW(3));
 
-UPDATE `jr_job_roles` SET `short_summary` = 'Built and shipped marketing-focused landing pages for high-value campaigns including Abundance and Joe Polish, serving entrepreneurial and business development audiences.', `updated_at` = NOW(3)
-WHERE `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'yazamo' LIMIT 1);
+DELETE FROM `jr_job_impacts` WHERE `job_id` = @kl;
+INSERT INTO `jr_job_impacts` (`job_id`, `description`, `priority`, `created_at`, `updated_at`) VALUES
+  (@kl, 'Developed and launched WordPress websites for multiple client brands across medical, consulting, and professional services sectors.', 0, NOW(3), NOW(3)),
+  (@kl, 'Delivered full WordPress builds from PSD designs to production across healthcare and charitable organisation clients.', 1, NOW(3), NOW(3));
 
-UPDATE `jr_job_roles` SET `short_summary` = 'Developed and launched WordPress websites for multiple client brands across medical, consulting, professional services, and charitable organisation sectors.', `updated_at` = NOW(3)
-WHERE `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'kloutfire' LIMIT 1);
+DELETE FROM `jr_job_impacts` WHERE `job_id` = @seo;
+INSERT INTO `jr_job_impacts` (`job_id`, `description`, `priority`, `created_at`, `updated_at`) VALUES
+  (@seo, 'Delivered PSD-to-WordPress builds for local service clients across roofing, dental, and home improvement sectors.', 0, NOW(3), NOW(3)),
+  (@seo, 'Produced SEO-ready WordPress implementations to spec, from design handoff through to live deployment.', 1, NOW(3), NOW(3));
 
-UPDATE `jr_job_roles` SET `short_summary` = 'Delivered SEO-ready PSD-to-WordPress builds for local service clients across roofing, dental, and home improvement sectors.', `updated_at` = NOW(3)
-WHERE `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'seo-strong' LIMIT 1);
-
-UPDATE `jr_job_roles` SET `short_summary` = 'Built custom web application workflows and backend tooling for an early-stage logistics platform.', `updated_at` = NOW(3)
-WHERE `job_id` = (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'freight-access' LIMIT 1);
+DELETE FROM `jr_job_impacts` WHERE `job_id` = @fa;
+INSERT INTO `jr_job_impacts` (`job_id`, `description`, `priority`, `created_at`, `updated_at`) VALUES
+  (@fa, 'Built custom web application workflows and backend tooling for an early-stage logistics platform.', 0, NOW(3), NOW(3));

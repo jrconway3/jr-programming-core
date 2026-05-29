@@ -8,6 +8,7 @@ export type Job = {
   start_date: string | null;
   end_date: string | null;
   priority: number;
+  gallery: Array<{ id: number; title: string; image: string }>;
   company: {
     id: number;
     name: string;
@@ -48,6 +49,7 @@ export type JobTransformerInput = {
   start_date: Date | string | null;
   end_date: Date | string | null;
   priority: number;
+  gallery: Array<{ id: number; title: string; image: string }>;
   company: {
     id: number;
     name: string;
@@ -94,7 +96,7 @@ export type ExperiencePageData = {
   }>;
   impactItems: string[];
   href: string;
-  featuredCompanyShortcode: string | null;
+  featuredImage: string | null;
 };
 
 export type JobRow = {

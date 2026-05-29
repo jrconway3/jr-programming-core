@@ -101,6 +101,6 @@ export function buildExperiencePageData({ projects, jobs }: ExperiencePageDataIn
     keySystems,
     impactItems,
     href,
-    featuredCompanyShortcode: featuredJob?.company?.shortcode ?? null,
+    featuredImage: featuredJob?.gallery?.[0]?.image ?? null,
   };
 }

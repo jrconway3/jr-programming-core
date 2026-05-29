@@ -1,6 +1,7 @@
 import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
+import { toSecureAssetUrl } from 'app/helpers/common';
 import type { Category } from 'app/models/categories';
 import type { Job } from 'app/models/jobs';
 import { getProjectsByShortcode, getCategoryByShortcode, getJobs } from 'app/repositories/projects';
@@ -24,7 +25,7 @@ export default function ExperiencePage({ category, projects, jobs }: Props) {
     keySystems,
     impactItems,
     href,
-    featuredCompanyShortcode,
+    featuredImage,
   } = buildExperiencePageData({ projects, jobs });
 
   const renderJobCards = (entries: Job[]) => (
@@ -78,13 +79,12 @@ export default function ExperiencePage({ category, projects, jobs }: Props) {
           </div>
 
           <div className="terminal-card px-6 pb-7 pt-12 md:px-8 md:pt-13">
-            {featuredCompanyShortcode && (
+            {featuredImage && (
               <div className="-mt-12 -mx-6 md:-mx-8 mb-6 relative aspect-video overflow-hidden rounded-t-[9px] bg-slate-900">
                 <img
-                  src={`/images/experience/${featuredCompanyShortcode}.png`}
+                  src={toSecureAssetUrl(featuredImage)}
                   alt={featuredOrgLabel}
                   className="w-full h-full object-cover"
-                  onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }}
                 />
                 <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(rgba(168,85,247,0.06) 0px, rgba(168,85,247,0.06) 1px, transparent 1px, transparent 3px)' }} />
               </div>

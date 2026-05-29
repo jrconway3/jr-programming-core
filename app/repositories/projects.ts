@@ -127,9 +127,14 @@ async function mapJob(
 
   const allProjectRows = [...keySystemRelations, ...nonKeySystemRelations].map((r) => r.project);
   const allIds = allProjectRows.map((p) => p.id);
-  const [galleryByProject, linksByProject] = await Promise.all([
+  const [galleryByProject, linksByProject, jobGalleryBridges] = await Promise.all([
     batchFetchGalleryBridges(allIds),
     batchFetchLinkBridges(allIds),
+    prisma.galleryBridge.findMany({
+      where: { relation_type: 'job', relation_id: job.id },
+      include: { gallery: true },
+      orderBy: { priority: 'asc' },
+    }),
   ]);
 
   const withBridges = (rows: typeof allProjectRows) =>
@@ -152,6 +157,7 @@ async function mapJob(
     start_date: job.start_date,
     end_date: job.end_date,
     priority: job.priority,
+    gallery: jobGalleryBridges.map((b) => b.gallery),
     company: job.company,
     roles: job.roles,
     impacts: job.impacts,
