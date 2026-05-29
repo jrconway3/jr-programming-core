@@ -1,24 +1,6 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(gh pr *)",
-      "Bash(git checkout *)",
-      "Bash(Remove-Item \"e:\\\\code\\\\websites\\\\jrprogramming\\\\pages\\\\projects\\\\[id].tsx\")",
-      "Bash(rm \"e:/code/websites/jrprogramming/pages/projects/[id].tsx\")",
-      "Bash(powershell -Command \"Get-Item 'C:\\\\Users\\\\JaidynReiman\\\\.claude\\\\projects\\\\e--code-websites-jrprogramming\\\\6241819f-4c0a-4e85-87f8-1aa4a7f35275.jsonl' | Select-Object Length,LastWriteTime\")",
-      "Bash(powershell -Command \"Select-String -Path 'C:\\\\Users\\\\JaidynReiman\\\\.claude\\\\projects\\\\e--code-websites-jrprogramming\\\\6241819f-4c0a-4e85-87f8-1aa4a7f35275.jsonl' -Pattern 'craigslist-autoposter.*PHP|twilio-call.*PHP|preview.*full list' | Select-Object -First 3 LineNumber\")",
-      "Bash(powershell -Command ' *)",
-      "Bash(powershell -Command \"Select-String -Path 'e:\\\\code\\\\websites\\\\jrprogramming\\\\prisma\\\\migrations\\\\20260208194817_create_jr_skills_categories_tables\\\\migration.sql' -Pattern 'INSERT' | Select-Object -First 30 Line\")",
-      "Bash(powershell -Command \"Select-String -Path 'e:\\\\code\\\\websites\\\\jrprogramming\\\\prisma\\\\migrations\\\\20260422190000_seed_experience_page_content\\\\migration.sql' -Pattern 'jr_skills|skill' | Select-Object -First 20 Line\")",
-      "Bash(powershell -Command \"Select-String -Path 'e:\\\\code\\\\websites\\\\jrprogramming\\\\prisma\\\\migrations\\\\20260519182928_add_category_show_in_filter_and_new_projects\\\\migration.sql' -Pattern 'jr_skills|INSERT.*skill' | Select-Object -First 20 Line\")",
-      "Bash(New-Item -ItemType Directory -Force \"e:\\\\code\\\\websites\\\\jrprogramming\\\\prisma\\\\migrations\\\\20260528000000_seed_project_skills\")",
-      "Bash(Out-Null)",
-      "Bash(Write-Output \"done\")",
-      "Bash(Sort-Object Name)",
-      "Bash(Select-Object -Last 5 Name)"
-    ],
-    "additionalDirectories": [
-      "e:\\code\\websites\\jrprogramming\\pages\\projects"
-    ]
+    "allow": [],
+    "additionalDirectories": []
   }
 }
