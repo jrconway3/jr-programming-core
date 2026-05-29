@@ -24,6 +24,7 @@ export const siteSettingDefaults: Record<string, string> = {
   'home/banner/cta/primary/href': '#projects',
   'home/banner/cta/secondary/label': 'Hire Me',
   'home/banner/cta/secondary/href': '/contact',
+  'home/stats/experience_start_year': '2011',
   'home/status/enabled': 'true',
   'home/status/state': 'available',
   'home/status/label': 'Status: Available',

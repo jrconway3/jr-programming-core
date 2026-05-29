@@ -1,33 +1,7 @@
 import type { HomePageMetrics, HomeProjectStatsEntry } from "app/models/home";
 
-function toYear(value?: string | null): number | null {
-  if (!value) {
-    return null;
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return null;
-  }
-
-  return date.getUTCFullYear();
-}
-
-function calculateYearsExperience(startYears: number[]): number {
-  if (startYears.length === 0) {
-    return 10;
-  }
-
-  const earliestYear = Math.min(...startYears);
-  const currentYear = new Date().getUTCFullYear();
-  return Math.max(1, currentYear - earliestYear + 1);
-}
-
-export function transformHomePageMetrics(allProjects: HomeProjectStatsEntry[]): HomePageMetrics {
-  const startYears = allProjects
-    .map((project) => toYear(project.start_date))
-    .filter((year): year is number => year !== null);
+export function transformHomePageMetrics(allProjects: HomeProjectStatsEntry[], experienceStartYear: number): HomePageMetrics {
+  const yearsExperience = Math.max(1, new Date().getUTCFullYear() - experienceStartYear);
 
   const uniqueCompanies = Array.from(
     new Set(
@@ -49,7 +23,7 @@ export function transformHomePageMetrics(allProjects: HomeProjectStatsEntry[]): 
   }).length;
 
   return {
-    yearsExperience: calculateYearsExperience(startYears),
+    yearsExperience,
     totalProjectsDelivered,
     automationFocusedProjects,
     portfolioProjects,

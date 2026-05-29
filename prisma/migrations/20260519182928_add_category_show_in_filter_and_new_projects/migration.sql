@@ -71,7 +71,7 @@ VALUES
   ),
   (
     'TrailerCentral CRM System',
-    'tc-crm-system',
+    'crm-system',
     'Migrated and rebuilt a legacy CRM into a scalable Laravel + Vue/Nuxt system supporting lead management, workflow automation, and Twilio-based communication pipelines.',
     'Full-Stack Developer',
     'TrailerCentral',
@@ -87,7 +87,7 @@ VALUES
     'Webmaster',
     'Freelancer',
     NULL,
-    '2026-05-01 00:00:00.000',
+    '2026-05-14 00:00:00.000',
     @now,
     @now
   )
@@ -100,11 +100,25 @@ ON DUPLICATE KEY UPDATE
   `updated_at` = @now;
 
 -- ─────────────────────────────────────────────────────
+-- Remove lightweight key-system placeholder entries created in 20260422190000.
+-- jr_projects_cats and jr_projects_skills lack ON DELETE CASCADE, so clear them first.
+-- jr_job_project_relations has ON DELETE CASCADE and handles itself.
+-- ─────────────────────────────────────────────────────
+
+DELETE FROM `jr_projects_cats` WHERE `project_id` IN (
+  SELECT `id` FROM `jr_projects` WHERE `shortcode` IN ('craigslist-autoposter', 'email-system-stabilization', 'crm-automation')
+);
+DELETE FROM `jr_projects_skills` WHERE `project_id` IN (
+  SELECT `id` FROM `jr_projects` WHERE `shortcode` IN ('craigslist-autoposter', 'email-system-stabilization', 'crm-automation')
+);
+DELETE FROM `jr_projects` WHERE `shortcode` IN ('craigslist-autoposter', 'email-system-stabilization', 'crm-automation');
+
+-- ─────────────────────────────────────────────────────
 -- Assign shortcodes to projects that don't have them yet.
 -- Matched by name so this is safe across environments with different IDs.
 -- ─────────────────────────────────────────────────────
 
-UPDATE `jr_projects` SET `shortcode` = 'jrprogramming',                `updated_at` = @now WHERE `name` = 'JR Programming';
+UPDATE `jr_projects` SET `shortcode` = 'jrprogramming', `start_date` = '2026-03-01 00:00:00.000', `updated_at` = @now WHERE `name` = 'JR Programming';
 UPDATE `jr_projects` SET `shortcode` = 'sandsig',                      `updated_at` = @now WHERE `name` = 'Sands Investment Group';
 UPDATE `jr_projects` SET `shortcode` = 'real-chords',                  `updated_at` = @now WHERE `name` = 'Real Chords Website';
 UPDATE `jr_projects` SET `shortcode` = 'millennium-marketing-denver',  `updated_at` = @now WHERE `name` = 'Millennium Marketing Denver Updates';
@@ -129,23 +143,35 @@ UPDATE `jr_projects` SET `shortcode` = 'pete-mamos',                   `updated_
 UPDATE `jr_projects` SET `shortcode` = 'home-solution-properties',     `updated_at` = @now WHERE `name` = 'Home Solution Properties';
 UPDATE `jr_projects` SET `shortcode` = 'equilibrio-nicaragua',         `updated_at` = @now WHERE `name` = 'Equilibrio Nicaragua';
 UPDATE `jr_projects` SET `shortcode` = 'freight-access-crm',           `updated_at` = @now WHERE `name` = 'Freight Access CRM';
-UPDATE `jr_projects` SET `shortcode` = 'tc-craigslist-autoposter',     `updated_at` = @now WHERE `name` = 'TrailerCentral Craigslist Autoposter';
+UPDATE `jr_projects` SET `shortcode` = 'craigslist-autoposter',        `updated_at` = @now WHERE `name` = 'TrailerCentral Craigslist Autoposter';
 UPDATE `jr_projects` SET `shortcode` = 'trailertrader-2016',           `updated_at` = @now WHERE `name` = 'TrailerTrader (2016 Version)';
-UPDATE `jr_projects` SET `shortcode` = 'tc-ksl-feed',                  `updated_at` = @now WHERE `name` = 'TrailerCentral KSL Feed';
-UPDATE `jr_projects` SET `shortcode` = 'tc-image-overlays',            `updated_at` = @now WHERE `name` = 'TrailerCentral Custom Inventory Image Overlays';
-UPDATE `jr_projects` SET `shortcode` = 'tc-dealer-websites',           `updated_at` = @now WHERE `name` = 'TrailerCentral Dealer Websites Responsive Mode';
-UPDATE `jr_projects` SET `shortcode` = 'tc-elasticsearch',             `updated_at` = @now WHERE `name` = 'Elastic Search for TrailerCentral Dealer Websites Inventory';
+UPDATE `jr_projects` SET `shortcode` = 'ksl-feed',                  `updated_at` = @now WHERE `name` = 'TrailerCentral KSL Feed';
+UPDATE `jr_projects` SET `shortcode` = 'image-overlays',            `updated_at` = @now WHERE `name` = 'TrailerCentral Custom Inventory Image Overlays';
+UPDATE `jr_projects` SET `shortcode` = 'dealer-websites',           `updated_at` = @now WHERE `name` = 'TrailerCentral Dealer Websites Responsive Mode';
+UPDATE `jr_projects` SET `shortcode` = 'elasticsearch',             `updated_at` = @now WHERE `name` = 'Elastic Search for TrailerCentral Dealer Websites Inventory';
 UPDATE `jr_projects` SET `shortcode` = 'factory-vantage',              `updated_at` = @now WHERE `name` = 'Factory Vantage';
 UPDATE `jr_projects` SET `shortcode` = 'huffman-trailers',             `updated_at` = @now WHERE `name` = 'Huffman Trailers Website for TrailerCentral';
 UPDATE `jr_projects` SET `shortcode` = 'hitchman-inc',                 `updated_at` = @now WHERE `name` = 'The Hitchman, Inc. Website for TrailerCentral';
-UPDATE `jr_projects` SET `shortcode` = 'tc-crm-legacy',                `updated_at` = @now WHERE `name` = 'TrailerCentral CRM (Zend)';
-UPDATE `jr_projects` SET `shortcode` = 'tc-crm-email-text',            `updated_at` = @now WHERE `name` = 'TrailerCentral CRM Email & Text Marketing';
-UPDATE `jr_projects` SET `shortcode` = 'tc-truckpaper-autoposter',     `updated_at` = @now WHERE `name` = 'TrailerCentral TruckPaper Autoposter Integration';
-UPDATE `jr_projects` SET `shortcode` = 'tc-lotvantage-facebook',       `updated_at` = @now WHERE `name` = 'TrailerCentral LotVantage Facebook Feed';
-UPDATE `jr_projects` SET `shortcode` = 'ulpc-spritesheet-generator',   `updated_at` = @now WHERE `name` = 'Universal LPC Spritesheet Character Generator';
+UPDATE `jr_projects` SET `shortcode` = 'crm-legacy',                `updated_at` = @now WHERE `name` = 'TrailerCentral CRM (Zend)';
+UPDATE `jr_projects` SET `shortcode` = 'crm-email-text',            `updated_at` = @now WHERE `name` = 'TrailerCentral CRM Email & Text Marketing';
+UPDATE `jr_projects` SET `shortcode` = 'truckpaper-autoposter',     `updated_at` = @now WHERE `name` = 'TrailerCentral TruckPaper Autoposter Integration';
+UPDATE `jr_projects` SET `shortcode` = 'lotvantage-facebook',       `updated_at` = @now WHERE `name` = 'TrailerCentral LotVantage Facebook Feed';
+UPDATE `jr_projects` SET `shortcode` = 'ulpc-spritesheet-generator', `name` = 'Universal LPC Spritesheet Character Generator', `updated_at` = @now WHERE `name` = 'Universal Spritesheet Character Generator';
 UPDATE `jr_projects` SET `shortcode` = 'lex-talionis-engine',          `updated_at` = @now WHERE `name` = 'Lex Talionis Engine';
-UPDATE `jr_projects` SET `shortcode` = 'tc-horse-trailer-world',       `updated_at` = @now WHERE `name` = 'TrailerCentral Horse Trailer World Autoposter';
-UPDATE `jr_projects` SET `shortcode` = 'tc-facebook-marketplace',      `updated_at` = @now WHERE `name` = 'TrailerCentral Facebook Marketplace Autoposter';
+UPDATE `jr_projects` SET `shortcode` = 'horse-trailer-world',       `updated_at` = @now WHERE `name` = 'TrailerCentral Horse Trailer World Autoposter';
+UPDATE `jr_projects` SET `shortcode` = 'craigslist-scheduler',     `updated_at` = @now WHERE `name` = 'TrailerCentral Craigslist Scheduler (Chrome Extension)';
+UPDATE `jr_projects` SET `shortcode` = 'camera-mobile-app',        `updated_at` = @now WHERE `name` = 'TrailerCentral Camera Mobile App';
+UPDATE `jr_projects` SET `shortcode` = 'classifieds-websites',     `updated_at` = @now WHERE `name` = 'TrailerCentral Classifieds Websites';
+-- Rename the 2019 server-side attempt before assigning the shortcode, so only the 2016 Chrome extension row matches.
+UPDATE `jr_projects` SET `name` = 'TrailerCentral Facebook Marketplace Server Integration', `updated_at` = @now
+WHERE `name` = 'TrailerCentral Facebook Marketplace Autoposter' ORDER BY `id` DESC LIMIT 1;
+UPDATE `jr_projects` SET `shortcode` = 'facebook-marketplace',      `updated_at` = @now WHERE `name` = 'TrailerCentral Facebook Marketplace Autoposter';
+
+-- Re-add craigslist autoposter as a TC key system (now pointing to the full portfolio project).
+SET @_tc_job := (SELECT `id` FROM `jr_jobs` WHERE `shortcode` = 'trailercentral' LIMIT 1);
+INSERT IGNORE INTO `jr_job_project_relations` (`job_id`, `project_id`, `relation_type`, `priority`, `created_at`, `updated_at`)
+SELECT @_tc_job, p.`id`, 'key_system', 1, @now, @now FROM `jr_projects` p
+WHERE p.`shortcode` = 'craigslist-autoposter' AND @_tc_job IS NOT NULL LIMIT 1;
 
 -- ─────────────────────────────────────────────────────
 -- Filter categories
@@ -198,10 +224,10 @@ INSERT INTO `jr_projects_cats` (`project_id`, `category_id`, `priority`, `create
 SELECT p.`id`, @cat_chrome, p.`id`, @now, @now
 FROM `jr_projects` p
 WHERE p.`shortcode` IN (
-  'tc-craigslist-autoposter',
-  'tc-horse-trailer-world',
-  'tc-facebook-marketplace',
-  'tc-truckpaper-autoposter'
+  'craigslist-autoposter',
+  'horse-trailer-world',
+  'facebook-marketplace',
+  'truckpaper-autoposter'
 )
 AND @cat_chrome IS NOT NULL
 ON DUPLICATE KEY UPDATE `updated_at` = @now;
@@ -262,15 +288,15 @@ WHERE p.`shortcode` IN (
   'my-choice-energy',
   'home-solution-properties',
   'freight-access-crm',
-  'tc-ksl-feed',
-  'tc-image-overlays',
-  'tc-elasticsearch',
+  'ksl-feed',
+  'image-overlays',
+  'elasticsearch',
   'factory-vantage',
-  'tc-crm-legacy',
-  'tc-crm-system',
-  'tc-crm-email-text',
-  'tc-truckpaper-autoposter',
-  'tc-lotvantage-facebook',
+  'crm-legacy',
+  'crm-system',
+  'crm-email-text',
+  'truckpaper-autoposter',
+  'lotvantage-facebook',
   'twilio-call-tracking',
   'crm-automation',
   'email-system-stabilization',
@@ -308,7 +334,7 @@ WHERE p.`shortcode` IN (
   'pete-mamos',
   'equilibrio-nicaragua',
   'trailertrader-2016',
-  'tc-dealer-websites',
+  'dealer-websites',
   'huffman-trailers',
   'hitchman-inc',
   'jaidynreiman-net',

@@ -105,7 +105,7 @@ export default function Contact() {
       </Head>
 
       <main className="min-h-screen px-4 py-12 md:px-6">
-        <div className="mx-auto grid w-full gap-8 lg:grid-cols-[1.05fr_1.2fr] lg:items-start">
+        <div className="mx-auto grid w-full gap-8 lg:grid-cols-[1.05fr_1.2fr]">
           <section className="flex flex-col gap-6 h-full">
             <div className="terminal-card px-6 pb-8 pt-14 md:px-8">
               <p className="mb-3 text-xs font-mono">
@@ -122,7 +122,7 @@ export default function Contact() {
               </p>
             </div>
 
-            <div className="grid flex-1 gap-6 md:grid-cols-2 content-start">
+            <div className="grid flex-1 gap-6 md:grid-cols-2">
               <article className="terminal-card p-5">
                 <h2 className="mb-3 text-lg font-semibold text-primary-accentLight">What to include</h2>
                 <p className="text-xs leading-6 text-primary-text/80 md:text-sm">
@@ -138,7 +138,7 @@ export default function Contact() {
               </article>
             </div>
 
-            <article className="terminal-card p-5">
+            <article className="terminal-card flex-1 p-5">
               <h2 className="mb-3 text-lg font-semibold text-primary-accentLight">Reach me directly</h2>
               <div className="space-y-2 text-xs font-mono leading-6 text-primary-text/80">
                 <p>
@@ -148,9 +148,9 @@ export default function Contact() {
                   </a>
                 </p>
                 <p>
-                  <span className="text-emerald-400">&gt; BLOG:</span>{" "}
-                  <a href="https://blog.jrconway.net" className="hover:text-primary-accentLight underline" target="_blank" rel="noopener noreferrer">
-                    blog.jrconway.net
+                  <span className="text-emerald-400">&gt; LINKEDIN:</span>{" "}
+                  <a href="https://linkedin.com/in/jrconway" className="hover:text-primary-accentLight underline" target="_blank" rel="noopener noreferrer">
+                    linkedin.com/in/jrconway
                   </a>
                 </p>
               </div>

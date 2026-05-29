@@ -1,4 +1,7 @@
+import type { GetServerSideProps } from 'next';
 import Head from "next/head";
+import Link from "next/link";
+import { getAboutSkills } from 'app/repositories/projects';
 
 const BADGE: Record<string, string> = {
   ACTIVE: "border-emerald-400/50 bg-emerald-500/10 text-emerald-300",
@@ -18,6 +21,17 @@ function Tag({ label, color = TAG_PURPLE }: { label: string; color?: string }) {
   );
 }
 
+function TagLink({ label, color = TAG_PURPLE }: { label: string; color?: string }) {
+  return (
+    <Link
+      href={`/projects?filter=${encodeURIComponent(label)}`}
+      className={`rounded-full border px-3 py-1 text-[11px] uppercase tracking-[0.18em] transition hover:brightness-125 ${color}`}
+    >
+      {label}
+    </Link>
+  );
+}
+
 function StatusBadge({ status }: { status: string }) {
   return (
     <span className={`rounded border px-2 py-0.5 text-[10px] uppercase tracking-widest whitespace-nowrap flex-shrink-0 ${BADGE[status] ?? BADGE["PLANNED"]}`}>
@@ -26,7 +40,17 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-export default function About() {
+type SkillEntry = { id: number; name: string };
+
+type Props = {
+  skills: {
+    primary: SkillEntry[];
+    secondary: SkillEntry[];
+    learning: SkillEntry[];
+  };
+};
+
+export default function About({ skills }: Props) {
   return (
     <>
       <Head>
@@ -131,22 +155,22 @@ export default function About() {
             <div className="terminal-card px-6 pb-8 pt-14 md:px-8">
               <p className="text-xs uppercase tracking-[0.35em] text-primary-accentLight mb-3">Primary Stack</p>
               <div className="flex flex-wrap gap-2">
-                {['PHP', 'Laravel', 'JavaScript', 'MySQL', 'REST APIs', 'Next.js', 'Tailwind', 'Nuxt.js', 'WordPress'].map((t) => (
-                  <Tag key={t} label={t} color={TAG_PURPLE} />
+                {skills.primary.map((s) => (
+                  <TagLink key={s.id} label={s.name} color={TAG_PURPLE} />
                 ))}
               </div>
 
               <p className="mt-6 text-xs uppercase tracking-[0.35em] text-teal-400/80 mb-3">Also Worked With</p>
               <div className="flex flex-wrap gap-2">
-                {['Python', 'Java (Android)', 'Ruby / Rails', 'C++', 'Zend', 'CodeIgniter', 'Prisma', 'React'].map((t) => (
-                  <Tag key={t} label={t} color={TAG_TEAL} />
+                {skills.secondary.map((s) => (
+                  <TagLink key={s.id} label={s.name} color={TAG_TEAL} />
                 ))}
               </div>
 
               <p className="mt-6 text-xs uppercase tracking-[0.35em] text-emerald-400/80 mb-3">Currently Learning</p>
               <div className="flex flex-wrap gap-2">
-                {['Spring Boot', 'React', 'JPA / Hibernate'].map((t) => (
-                  <Tag key={t} label={t} color={TAG_GREEN} />
+                {skills.learning.map((s) => (
+                  <TagLink key={s.id} label={s.name} color={TAG_GREEN} />
                 ))}
               </div>
             </div>
@@ -204,3 +228,8 @@ export default function About() {
     </>
   );
 }
+
+export const getServerSideProps: GetServerSideProps<Props> = async () => {
+  const skills = await getAboutSkills();
+  return { props: { skills } };
+};

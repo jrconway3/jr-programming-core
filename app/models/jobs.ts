@@ -90,9 +90,11 @@ export type ExperiencePageData = {
     title: string;
     description: string;
     href: string;
+    date_range: string | null;
   }>;
   impactItems: string[];
   href: string;
+  featuredCompanyShortcode: string | null;
 };
 
 export type JobRow = {

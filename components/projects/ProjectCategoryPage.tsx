@@ -16,6 +16,7 @@ interface Props {
   filterCategories?: Category[];
   initialCategory: Category;
   initialProjects: Project[];
+  initialSkillFilter?: string;
 }
 
 export default function ProjectCategoryPage({
@@ -28,9 +29,11 @@ export default function ProjectCategoryPage({
   filterCategories = [],
   initialCategory,
   initialProjects,
+  initialSkillFilter,
 }: Props) {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<number | null>(null);
+  const [skillFilter, setSkillFilter] = useState<string | null>(initialSkillFilter ?? null);
 
   const pageTitle = titleOverride ?? initialCategory.title;
   const pageDescription = descriptionOverride ?? "Browse the work collected in this section.";
@@ -48,7 +51,11 @@ export default function ProjectCategoryPage({
       activeFilter === null ||
       p.categories.some((c) => c.id === activeFilter);
 
-    return matchesSearch && matchesFilter;
+    const matchesSkill =
+      !skillFilter ||
+      p.skills.some((s) => s.name.toLowerCase() === skillFilter.toLowerCase());
+
+    return matchesSearch && matchesFilter && matchesSkill;
   });
 
   const sorted = [
@@ -93,6 +100,18 @@ export default function ProjectCategoryPage({
               >
                 Clear
               </button>
+            )}
+            {skillFilter && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-400/30 bg-emerald-500/10 text-emerald-300 text-xs">
+                <span>Skill: {skillFilter}</span>
+                <button
+                  onClick={() => setSkillFilter(null)}
+                  className="ml-1 text-emerald-300/60 hover:text-emerald-300 transition leading-none"
+                  aria-label="Clear skill filter"
+                >
+                  ×
+                </button>
+              </div>
             )}
             <button
               onClick={() => setActiveFilter(null)}

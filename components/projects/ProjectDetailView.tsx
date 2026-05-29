@@ -3,29 +3,22 @@ import Link from "next/link";
 import { buildDateRange, toSecureAssetUrl } from "app/helpers/common";
 import { ProjectDetail } from "app/models/projects";
 
-interface AdjacentProject {
-  href: string;
-  name: string;
-}
-
 interface Props {
   project: ProjectDetail;
-  prevProject?: AdjacentProject | null;
-  nextProject?: AdjacentProject | null;
 }
 
-export function ProjectDetailView({ project, prevProject, nextProject }: Props) {
-  const isExperienceEntry = project.categories.some((categoryEntry) => categoryEntry.shortcode === 'experience');
+export function ProjectDetailView({ project }: Props) {
+  const isExperienceEntry = project.categories.some((c) => c.shortcode === 'experience');
   const dateRange = buildDateRange(project.start_date, project.end_date);
   const parentJob = project.job ?? null;
   const parentJobHref = parentJob?.shortcode ? `/experience/${parentJob.shortcode}` : null;
   const clientSlug = parentJob?.company?.shortcode
     ?? project.position?.toLowerCase().replace(/\s+/g, '-')
     ?? 'projects';
-  const screenshotImage = project.gallery[0]?.image ? toSecureAssetUrl(project.gallery[0].image) : null;
-  const snapshotFallbackLabel = project.categories.find(
-    (c) => !['projects', 'featured-projects', 'experience'].includes(c.shortcode)
-  )?.title ?? project.categories[0]?.title ?? 'PROJECT';
+
+  const gallery = project.gallery ?? [];
+  const primaryImage = gallery[0]?.image ? toSecureAssetUrl(gallery[0].image) : null;
+  const hasMultiple = gallery.length > 1;
 
   return (
     <>
@@ -35,6 +28,8 @@ export function ProjectDetailView({ project, prevProject, nextProject }: Props) 
       </Head>
       <main className="min-h-screen px-4 py-12">
         <section className="w-full mx-auto">
+
+          {/* Breadcrumb */}
           <nav className="mb-4 text-sm text-primary-text/65">
             <Link href="/" className="hover:text-primary-accentLight">Home</Link>
             <span className="px-2 text-primary-text/40">/</span>
@@ -57,171 +52,153 @@ export function ProjectDetailView({ project, prevProject, nextProject }: Props) 
             jrconway@portfolio:~/projects/{clientSlug} $
           </p>
 
-          <div className="terminal-card mb-8 px-6 pb-0 pt-14 md:px-8">
-            <div className="mt-4 flex flex-wrap justify-between items-start gap-2 mb-2">
-              <h1 className="text-4xl md:text-5xl font-extrabold gradient-text animate-gradient">
-                {project.name}
-              </h1>
-              {dateRange && (
-                <span className="rounded-full border border-primary-accent/25 px-3 py-1 text-sm text-primary-text/65 whitespace-nowrap">{dateRange}</span>
-              )}
-            </div>
-            {project.role && (
-              <p className="text-lg text-primary-accentLight font-medium">{project.role}</p>
-            )}
-            {project.position && (
-              <p className="mt-1 text-sm text-primary-text/70">{project.position}</p>
-            )}
+          {/* Two-column header card */}
+          <div className="terminal-card mb-6 px-6 pb-8 pt-14 md:px-8">
+            <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[3fr_2fr] lg:items-start">
 
-            {/* 16:9 screenshot slot — bleeds to card sides/bottom */}
-            <div className="mt-6 -mx-6 md:-mx-8 relative aspect-video overflow-hidden rounded-b-xl bg-slate-900/80 flex items-center justify-center">
-              {screenshotImage ? (
-                <img
-                  src={screenshotImage}
-                  alt={`${project.name} screenshot`}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-5xl font-headers text-primary-text/10 uppercase tracking-widest">
-                  {snapshotFallbackLabel}
-                </span>
-              )}
-              {/* Scanline overlay */}
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{ backgroundImage: 'repeating-linear-gradient(rgba(168,85,247,0.06) 0px, rgba(168,85,247,0.06) 1px, transparent 1px, transparent 3px)' }}
-                aria-hidden="true"
-              />
-              <p className="absolute bottom-2 right-3 text-[10px] text-primary-text/35 uppercase tracking-widest">
-                screenshot.png
-              </p>
-            </div>
-          </div>
-
-          <div className="terminal-card project-block-emphasis p-6 mb-6">
-            <p className="text-xs uppercase tracking-[0.35em] text-primary-accentLight mb-2">What It Does</p>
-            <p className="text-text leading-relaxed">{project.short}</p>
-          </div>
-
-          {/* Consolidated Project Snapshot */}
-          <div className="terminal-card project-block-emphasis p-6 mb-6">
-            <p className="text-xs uppercase tracking-[0.35em] text-primary-accentLight mb-4">Project Snapshot</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-sm">
+              {/* Left: main narrative */}
               <div>
-                <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight">Built For</p>
-                <p className="mt-1 text-primary-text/80">{project.position || 'Client project'}</p>
-              </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight">Focus</p>
-                <p className="mt-1 text-primary-text/80">{project.role || 'Custom software development'}</p>
-              </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight">Timeline</p>
-                <p className="mt-1 text-primary-text/80">{dateRange || 'Not specified'}</p>
-              </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight">Categories</p>
-                <div className="mt-1 flex flex-wrap gap-2">
-                  {project.categories.length > 0 ? project.categories.map((categoryEntry) => (
-                    <Link
-                      key={categoryEntry.id}
-                      href={`/${categoryEntry.shortcode}`}
-                      className="rounded-full border border-accent/20 px-3 py-1 text-xs text-primary-text/70 transition hover:border-accent hover:text-accent"
-                    >
-                      {categoryEntry.title}
-                    </Link>
-                  )) : (
-                    <span className="text-sm text-primary-text/60">Uncategorized</span>
+                <h1 className="text-4xl md:text-5xl font-extrabold gradient-text animate-gradient mb-3">
+                  {project.name}
+                </h1>
+                {(project.role || project.position) && (
+                  <p className="text-lg text-primary-accentLight font-medium mb-3">
+                    {project.role}
+                    {project.role && project.position ? " — " : ""}
+                    {project.position}
+                  </p>
+                )}
+                {dateRange && (
+                  <p className="mb-4 text-sm text-primary-text/60">{dateRange}</p>
+                )}
+                <div className="mt-2">
+                  {project.extended ? (
+                    <div
+                      className="prose prose-invert terminal-prose max-w-none text-text leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: project.extended }}
+                    />
+                  ) : (
+                    <p className="text-text leading-relaxed">{project.short}</p>
                   )}
                 </div>
               </div>
-            </div>
 
-            {project.skills.length > 0 && (
-              <div className="mt-5 pt-4 border-t border-primary-accent/20">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight mb-2">Tech Stack</p>
-                <div className="flex flex-wrap gap-2">
-                  {project.skills.map((s) => (
-                    <span
-                      key={s.id}
-                      className="px-3 py-1 rounded-full text-sm glass border border-accent/20 text-primary-accentLight"
-                      title={s.desc}
-                    >
-                      {s.name}
-                    </span>
-                  ))}
-                </div>
+              {/* Right: snapshot sidebar */}
+              <div className="rounded-lg border border-primary-accent/20 bg-slate-950/50 p-5 space-y-5 text-sm">
+                {project.categories.some((c) => c.shortcode !== 'featured-projects') && (
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight mb-2">Categories</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {project.categories.filter((c) => c.shortcode !== 'featured-projects').map((c) => (
+                        <Link
+                          key={c.id}
+                          href={`/${c.shortcode}`}
+                          className="rounded-full border border-accent/20 px-3 py-1 text-xs text-primary-text/70 transition hover:border-accent hover:text-accent"
+                        >
+                          {c.title}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {project.skills.length > 0 && (
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight mb-2">Skills</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {project.skills.map((s) => (
+                        <Link
+                          key={s.id}
+                          href={`/projects?filter=${encodeURIComponent(s.name)}`}
+                          className="px-3 py-1 rounded-full text-xs border border-accent/20 text-primary-accentLight hover:border-accent hover:text-accent transition"
+                          title={s.desc ?? undefined}
+                        >
+                          {s.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {project.links.length > 0 && (
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-primary-accentLight mb-2">Links</p>
+                    <div className="space-y-2">
+                      {project.links.map((link) => (
+                        <a
+                          key={link.id}
+                          href={toSecureAssetUrl(link.url)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-xs text-primary-accentLight hover:text-emerald-300 underline underline-offset-2 transition"
+                        >
+                          ↗ {link.website}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
-          {project.extended && (
-            <div className="terminal-card project-block-emphasis p-6 mb-6">
-              <p className="text-xs uppercase tracking-[0.35em] text-primary-accentLight mb-3">What I Built</p>
-              <div
-                className="prose prose-invert terminal-prose max-w-none text-text leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: project.extended }}
-              />
-            </div>
-          )}
-
-          {project.links.length > 0 && (
-            <div className="terminal-card project-block-emphasis p-6 mb-6">
-              <p className="text-xs uppercase tracking-[0.35em] text-primary-accentLight mb-3">Proof & Links</p>
-              <div className="flex flex-wrap gap-3">
-                {project.links.map((link) => (
-                  <a
-                    key={link.id}
-                    href={toSecureAssetUrl(link.url)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-cta-outline inline-block px-5 py-2 text-sm font-medium"
-                  >
-                    {link.website}
-                  </a>
-                ))}
+          {/* Primary image — single image only */}
+          {primaryImage && !hasMultiple && (
+            <div className="terminal-card project-block-emphasis mb-6 overflow-hidden p-0">
+              <div className="relative bg-slate-900/80">
+                <img
+                  src={primaryImage}
+                  alt={`${project.name} screenshot`}
+                  className="w-full h-auto"
+                />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{ backgroundImage: 'repeating-linear-gradient(rgba(168,85,247,0.06) 0px, rgba(168,85,247,0.06) 1px, transparent 1px, transparent 3px)' }}
+                  aria-hidden="true"
+                />
+                {gallery[0]?.title && (
+                  <p className="absolute bottom-0 inset-x-0 px-4 py-2 text-xs text-primary-text/50 bg-black/40">
+                    {gallery[0].title}
+                  </p>
+                )}
               </div>
             </div>
           )}
 
-          {project.gallery.length > 0 && (
+          {/* Gallery — masonry columns, multiple images */}
+          {hasMultiple && (
             <div className="terminal-card project-block-emphasis p-6 mb-6">
-              <p className="text-xs uppercase tracking-[0.35em] text-primary-accentLight mb-3">Gallery</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {project.gallery.map((item) => (
-                  <figure key={item.id} className="rounded-lg overflow-hidden border border-accent/20">
-                    <img
-                      src={toSecureAssetUrl(item.image)}
-                      alt={item.title}
-                      className="w-full object-cover"
-                      loading="lazy"
-                    />
+              <p className="text-xs uppercase tracking-[0.35em] text-primary-accentLight mb-4">Gallery</p>
+              <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
+                {gallery.map((item) => (
+                  <div key={item.id} className="break-inside-avoid mb-4">
+                    <div className="relative overflow-hidden rounded-lg bg-slate-900">
+                      <img
+                        src={toSecureAssetUrl(item.image)}
+                        alt={item.title || `${project.name} screenshot`}
+                        className="w-full h-auto"
+                        loading="lazy"
+                      />
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{ backgroundImage: 'repeating-linear-gradient(rgba(168,85,247,0.05) 0px, rgba(168,85,247,0.05) 1px, transparent 1px, transparent 3px)' }}
+                        aria-hidden="true"
+                      />
+                    </div>
                     {item.title && (
-                      <figcaption className="px-3 py-2 text-xs text-muted bg-black/30">
-                        {item.title}
-                      </figcaption>
+                      <p className="mt-1 text-xs text-primary-text/45">{item.title}</p>
                     )}
-                  </figure>
+                  </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Prev / Next / Back navigation */}
-          <div className="mt-10 flex items-center justify-between text-sm">
-            {prevProject ? (
-              <Link href={prevProject.href} className="text-primary-accentLight/80 hover:text-primary-accentLight transition">
-                ← Previous project
-              </Link>
-            ) : <span />}
+          {/* Back to Portfolio */}
+          <div className="mt-10 text-center">
             <Link href="/projects" className="text-primary-accentLight/80 hover:text-primary-accentLight transition">
               ← Back to Portfolio
             </Link>
-            {nextProject ? (
-              <Link href={nextProject.href} className="text-primary-accentLight/80 hover:text-primary-accentLight transition">
-                Next project →
-              </Link>
-            ) : <span />}
           </div>
 
         </section>

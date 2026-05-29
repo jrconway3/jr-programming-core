@@ -98,6 +98,22 @@ async function batchFetchGalleryBridges(ids: number[]) {
   return byProject;
 }
 
+async function batchFetchLinkBridges(ids: number[]) {
+  if (ids.length === 0) return new Map<number, Array<{ link: { id: number; website: string; url: string; priority: number } }>>();
+  const bridges = await prisma.linkBridge.findMany({
+    where: { relation_type: 'project', relation_id: { in: ids } },
+    include: { link: true },
+    orderBy: { priority: 'asc' },
+  });
+  const byProject = new Map<number, typeof bridges>();
+  for (const b of bridges) {
+    const arr = byProject.get(b.relation_id) ?? [];
+    arr.push(b);
+    byProject.set(b.relation_id, arr);
+  }
+  return byProject;
+}
+
 async function mapJob(
   job: JobRow,
 ): Promise<Job> {
@@ -109,9 +125,23 @@ async function mapJob(
     .filter((relation) => relation.relation_type !== 'key_system')
     .sort((left, right) => left.priority - right.priority);
 
-  const keySystems = transformProjects(keySystemRelations.map((relation) => relation.project));
+  const allProjectRows = [...keySystemRelations, ...nonKeySystemRelations].map((r) => r.project);
+  const allIds = allProjectRows.map((p) => p.id);
+  const [galleryByProject, linksByProject] = await Promise.all([
+    batchFetchGalleryBridges(allIds),
+    batchFetchLinkBridges(allIds),
+  ]);
+
+  const withBridges = (rows: typeof allProjectRows) =>
+    rows.map((p) => ({
+      ...p,
+      gallery: (galleryByProject.get(p.id) ?? []).map((b) => b.gallery),
+      links: (linksByProject.get(p.id) ?? []).map((b) => b.link),
+    }));
+
+  const keySystems = transformProjects(withBridges(keySystemRelations.map((r) => r.project)));
   const keySystemIds = new Set(keySystems.map((project) => project.id));
-  const moreProjects = transformProjects(nonKeySystemRelations.map((relation) => relation.project))
+  const moreProjects = transformProjects(withBridges(nonKeySystemRelations.map((r) => r.project)))
     .filter((project) => !keySystemIds.has(project.id));
 
   return JSON.parse(JSON.stringify(transformJob({
@@ -130,16 +160,38 @@ async function mapJob(
   }))) as Job;
 }
 
+export async function getAllProjects(): Promise<Project[]> {
+  const rows = await prisma.project.findMany({
+    include: projectWithRelationsInclude,
+    orderBy: dateOrder,
+  });
+  const ids = rows.map((r) => r.id);
+  const [galleryByProject, linksByProject] = await Promise.all([
+    batchFetchGalleryBridges(ids),
+    batchFetchLinkBridges(ids),
+  ]);
+  return transformProjects(rows.map((r) => ({
+    ...r,
+    gallery: (galleryByProject.get(r.id) ?? []).map((b) => b.gallery),
+    links: (linksByProject.get(r.id) ?? []).map((b) => b.link),
+  })));
+}
+
 export async function getProjectsByShortcode(shortcode: string): Promise<Project[]> {
   const rows = await prisma.project.findMany({
     where: { categories: { some: { category: { shortcode } } } },
     include: projectWithRelationsInclude,
     orderBy: dateOrder,
   });
-  const byProject = await batchFetchGalleryBridges(rows.map((r) => r.id));
+  const ids = rows.map((r) => r.id);
+  const [galleryByProject, linksByProject] = await Promise.all([
+    batchFetchGalleryBridges(ids),
+    batchFetchLinkBridges(ids),
+  ]);
   return transformProjects(rows.map((r) => ({
     ...r,
-    gallery: (byProject.get(r.id) ?? []).map((b) => b.gallery),
+    gallery: (galleryByProject.get(r.id) ?? []).map((b) => b.gallery),
+    links: (linksByProject.get(r.id) ?? []).map((b) => b.link),
   })));
 }
 
@@ -150,10 +202,15 @@ export async function getFeaturedProjects(take = 4): Promise<Project[]> {
     orderBy: dateOrder,
     take,
   });
-  const byProject = await batchFetchGalleryBridges(rows.map((r) => r.id));
+  const ids = rows.map((r) => r.id);
+  const [galleryByProject, linksByProject] = await Promise.all([
+    batchFetchGalleryBridges(ids),
+    batchFetchLinkBridges(ids),
+  ]);
   return transformProjects(rows.map((r) => ({
     ...r,
-    gallery: (byProject.get(r.id) ?? []).map((b) => b.gallery),
+    gallery: (galleryByProject.get(r.id) ?? []).map((b) => b.gallery),
+    links: (linksByProject.get(r.id) ?? []).map((b) => b.link),
   })));
 }
 
@@ -191,6 +248,23 @@ export async function getProjectById(id: number): Promise<ProjectDetail | null> 
   });
 }
 
+export async function getProjectByShortcode(shortcode: string): Promise<ProjectDetail | null> {
+  const row = await prisma.project.findUnique({
+    where: { shortcode },
+    include: projectWithFullInclude,
+  });
+  if (!row) return null;
+  const [galleryBridges, linkBridges] = await Promise.all([
+    fetchProjectGalleryBridges(row.id),
+    fetchProjectLinkBridges(row.id),
+  ]);
+  return transformProject({
+    ...row,
+    gallery: galleryBridges.map((b) => b.gallery),
+    links: linkBridges.map((b) => b.link),
+  });
+}
+
 export async function getCategoryByShortcode(shortcode: string): Promise<Category | null> {
   return prisma.category.findUnique({
     where: { shortcode },
@@ -213,13 +287,13 @@ export async function getAdjacentProjectsByCategory(
 ): Promise<{ prev: { href: string; name: string } | null; next: { href: string; name: string } | null }> {
   const rows = await prisma.project.findMany({
     where: { categories: { some: { category: { shortcode: categoryShortcode } } } },
-    select: { id: true, name: true },
+    select: { id: true, name: true, shortcode: true },
     orderBy: dateOrder,
   });
   const idx = rows.findIndex((r) => r.id === id);
   if (idx < 0) return { prev: null, next: null };
   const toRef = (r: typeof rows[0] | undefined) =>
-    r ? { href: `/projects/${r.id}`, name: r.name } : null;
+    r ? { href: `/projects/${r.shortcode ?? r.id}`, name: r.name } : null;
   return { prev: toRef(rows[idx - 1]), next: toRef(rows[idx + 1]) };
 }
 
@@ -321,6 +395,33 @@ export async function getExperienceProjectByShortcodes(
     gallery: galleryBridges.map((b) => b.gallery),
     links: linkBridges.map((b) => b.link),
   });
+}
+
+export async function getAboutSkills(): Promise<{
+  primary: Array<{ id: number; name: string }>;
+  secondary: Array<{ id: number; name: string }>;
+  learning: Array<{ id: number; name: string }>;
+}> {
+  const rows = await prisma.$queryRaw<Array<{ id: number; name: string; about_section: string }>>`
+    SELECT id, name, about_section FROM jr_skills
+    WHERE about_section IS NOT NULL
+    ORDER BY rating DESC, name ASC
+  `;
+  const result: Record<string, Array<{ id: number; name: string }>> = {
+    primary: [],
+    secondary: [],
+    learning: [],
+  };
+  for (const row of rows) {
+    if (result[row.about_section]) {
+      result[row.about_section].push({ id: row.id, name: row.name });
+    }
+  }
+  return result as {
+    primary: Array<{ id: number; name: string }>;
+    secondary: Array<{ id: number; name: string }>;
+    learning: Array<{ id: number; name: string }>;
+  };
 }
 
 export async function resolveJobIdForAssignment(

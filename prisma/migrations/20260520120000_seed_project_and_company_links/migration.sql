@@ -51,8 +51,10 @@ INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`,
 SELECT 'project', `project_id`, `id`, `priority`, `created_at`, `updated_at`
 FROM `jr_links` WHERE `project_id` IS NOT NULL;
 
--- 0f. Drop old compound unique index from jr_links (was on project_id, url)
-ALTER TABLE `jr_links` DROP INDEX `jr_projects_links_project_url_key`;
+-- 0f. Drop old compound unique index from jr_links (was on project_id, url) if it exists.
+SET @_idx_exists := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'jr_links' AND index_name = 'jr_projects_links_project_url_key');
+SET @_sql := IF(@_idx_exists > 0, 'ALTER TABLE `jr_links` DROP INDEX `jr_projects_links_project_url_key`', 'SELECT 1');
+PREPARE _stmt FROM @_sql; EXECUTE _stmt; DEALLOCATE PREPARE _stmt;
 
 -- 0g. Drop project_id FK + column from jr_links
 ALTER TABLE `jr_links`
@@ -112,8 +114,8 @@ SET @p_pete_mamos        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 
 SET @p_my_choice_energy  := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'my-choice-energy'               LIMIT 1);
 SET @p_equilibrio        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'equilibrio-nicaragua'           LIMIT 1);
 SET @p_millennium        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'millennium-marketing-denver'    LIMIT 1);
-SET @p_express_roofing   := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'express-roofing-inc'            LIMIT 1);
-SET @p_extreme_devs      := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'extreme-developers-inc'         LIMIT 1);
+SET @p_express_roofing   := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'express-roofing'               LIMIT 1);
+SET @p_extreme_devs      := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'extreme-developers'             LIMIT 1);
 SET @p_biodental         := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'biodental-veneers'              LIMIT 1);
 SET @p_washington_dental := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'washington-dental'              LIMIT 1);
 SET @p_packard_grill     := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'packard-grill'                  LIMIT 1);
@@ -133,18 +135,18 @@ SET @p_tt2016            := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 
 SET @p_huffman           := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'huffman-trailers'               LIMIT 1);
 SET @p_hitchman          := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'hitchman-inc'                   LIMIT 1);
 SET @p_factory_vantage   := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'factory-vantage'                LIMIT 1);
-SET @p_craigslist        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-craigslist-autoposter'       LIMIT 1);
-SET @p_ksl_feed          := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-ksl-feed'                    LIMIT 1);
-SET @p_overlays          := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-image-overlays'              LIMIT 1);
-SET @p_dealer_sites      := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-dealer-websites'             LIMIT 1);
-SET @p_elasticsearch     := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-elasticsearch'               LIMIT 1);
-SET @p_crm_legacy        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-crm-legacy'                  LIMIT 1);
-SET @p_crm_system        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-crm-system'                  LIMIT 1);
-SET @p_crm_email_text    := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-crm-email-text'              LIMIT 1);
+SET @p_craigslist        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'craigslist-autoposter'         LIMIT 1);
+SET @p_ksl_feed          := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'ksl-feed'                    LIMIT 1);
+SET @p_overlays          := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'image-overlays'              LIMIT 1);
+SET @p_dealer_sites      := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'dealer-websites'             LIMIT 1);
+SET @p_elasticsearch     := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'elasticsearch'               LIMIT 1);
+SET @p_crm_legacy        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'crm-legacy'                  LIMIT 1);
+SET @p_crm_system        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'crm-system'                  LIMIT 1);
+SET @p_crm_email_text    := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'crm-email-text'              LIMIT 1);
 SET @p_gmail_oauth       := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'gmail-oauth-integration'        LIMIT 1);
-SET @p_truckpaper        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-truckpaper-autoposter'       LIMIT 1);
-SET @p_lotvantage        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-lotvantage-facebook'         LIMIT 1);
-SET @p_facebook_mktpl    := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-facebook-marketplace'        LIMIT 1);
+SET @p_truckpaper        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'truckpaper-autoposter'       LIMIT 1);
+SET @p_lotvantage        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'lotvantage-facebook'         LIMIT 1);
+SET @p_facebook_mktpl    := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'facebook-marketplace'        LIMIT 1);
 SET @p_twilio            := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'twilio-call-tracking'           LIMIT 1);
 SET @p_twilio_sms        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'twilio-sms-system'              LIMIT 1);
 SET @p_email_stab        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'email-system-stabilization'     LIMIT 1);
@@ -154,347 +156,465 @@ SET @p_crm_automation    := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 
 -- 5. Project links
 --    Each unique URL gets one row in jr_links (UNIQUE on url(255)).
 --    Bridge rows in jr_link_bridges associate the link with each project.
---    priority 0 = archive / context link, priority 1 = current live URL
+--    priority 1 = archive / context link, priority 2+ = current live URL
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- ── Personal / self-owned ────────────────────────────────────────────────────
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'https://jrprogramming.net/', 0, @now, @now);
+VALUES ('Live Site', 'https://jrprogramming.net/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_jrprogramming, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://jrprogramming.net/' AND @p_jrprogramming IS NOT NULL LIMIT 1;
+SELECT 'project', @p_jrprogramming, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://jrprogramming.net/' AND @p_jrprogramming IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'https://jaidynreiman.net/', 0, @now, @now);
+VALUES ('Live Site', 'https://jaidynreiman.net/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_jaidynreiman, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://jaidynreiman.net/' AND @p_jaidynreiman IS NOT NULL LIMIT 1;
+SELECT 'project', @p_jaidynreiman, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://jaidynreiman.net/' AND @p_jaidynreiman IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'https://jrplays.net/', 0, @now, @now);
+VALUES ('Live Site', 'https://jrplays.net/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_jrplays, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://jrplays.net/' AND @p_jrplays IS NOT NULL LIMIT 1;
+SELECT 'project', @p_jrplays, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://jrplays.net/' AND @p_jrplays IS NOT NULL LIMIT 1;
 
 -- ── Freelance client ─────────────────────────────────────────────────────────
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'https://eternityready.com/', 0, @now, @now);
+VALUES ('Live Site', 'https://eternityready.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_eternity_ready, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://eternityready.com/' AND @p_eternity_ready IS NOT NULL LIMIT 1;
+SELECT 'project', @p_eternity_ready, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://eternityready.com/' AND @p_eternity_ready IS NOT NULL LIMIT 1;
 
 -- ── Data Annotation ──────────────────────────────────────────────────────────
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('DataAnnotation.tech', 'https://www.dataannotation.tech/', 0, @now, @now);
+VALUES ('DataAnnotation.tech', 'https://www.dataannotation.tech/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_data_ann_ai, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.dataannotation.tech/' AND @p_data_ann_ai IS NOT NULL LIMIT 1;
+SELECT 'project', @p_data_ann_ai, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.dataannotation.tech/' AND @p_data_ann_ai IS NOT NULL LIMIT 1;
 
 -- ── Ponticlaro ───────────────────────────────────────────────────────────────
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20160110011422/http://signnn.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20160110011422/http://signnn.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_sands_ig, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20160110011422/http://signnn.com/' AND @p_sands_ig IS NOT NULL LIMIT 1;
+SELECT 'project', @p_sands_ig, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20160110011422/http://signnn.com/' AND @p_sands_ig IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'https://www.sandsig.com/', 1, @now, @now);
+VALUES ('Live Site', 'https://www.sandsig.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_sands_ig, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://www.sandsig.com/' AND @p_sands_ig IS NOT NULL LIMIT 1;
+SELECT 'project', @p_sands_ig, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.sandsig.com/' AND @p_sands_ig IS NOT NULL LIMIT 1;
 
 -- ── oDesk / Freelance ────────────────────────────────────────────────────────
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20141011214124/http://www.realchords.com.au/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20141011214124/http://www.realchords.com.au/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_real_chords, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20141011214124/http://www.realchords.com.au/' AND @p_real_chords IS NOT NULL LIMIT 1;
+SELECT 'project', @p_real_chords, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20141011214124/http://www.realchords.com.au/' AND @p_real_chords IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20120904002316/http://www.homesolutionproperties.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20120904002316/http://www.homesolutionproperties.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_home_solution, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20120904002316/http://www.homesolutionproperties.com/' AND @p_home_solution IS NOT NULL LIMIT 1;
+SELECT 'project', @p_home_solution, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20120904002316/http://www.homesolutionproperties.com/' AND @p_home_solution IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20130110111448/http://www.petemamos.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20130110111448/http://www.petemamos.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_pete_mamos, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130110111448/http://www.petemamos.com/' AND @p_pete_mamos IS NOT NULL LIMIT 1;
+SELECT 'project', @p_pete_mamos, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130110111448/http://www.petemamos.com/' AND @p_pete_mamos IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'https://www.petemamos.com/', 1, @now, @now);
+VALUES ('Live Site', 'https://www.petemamos.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_pete_mamos, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://www.petemamos.com/' AND @p_pete_mamos IS NOT NULL LIMIT 1;
+SELECT 'project', @p_pete_mamos, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.petemamos.com/' AND @p_pete_mamos IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20130325090308/http://www.fostermychoice.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20130325090308/http://www.fostermychoice.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_my_choice_energy, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130325090308/http://www.fostermychoice.com/' AND @p_my_choice_energy IS NOT NULL LIMIT 1;
+SELECT 'project', @p_my_choice_energy, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130325090308/http://www.fostermychoice.com/' AND @p_my_choice_energy IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'http://www.fostermychoice.com/', 1, @now, @now);
+VALUES ('Live Site', 'http://www.fostermychoice.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_my_choice_energy, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'http://www.fostermychoice.com/' AND @p_my_choice_energy IS NOT NULL LIMIT 1;
+SELECT 'project', @p_my_choice_energy, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'http://www.fostermychoice.com/' AND @p_my_choice_energy IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20120120184016/http://www.equilibrionicaragua.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20120120184016/http://www.equilibrionicaragua.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_equilibrio, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20120120184016/http://www.equilibrionicaragua.com/' AND @p_equilibrio IS NOT NULL LIMIT 1;
+SELECT 'project', @p_equilibrio, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20120120184016/http://www.equilibrionicaragua.com/' AND @p_equilibrio IS NOT NULL LIMIT 1;
 
 -- ── Millennium Marketing ──────────────────────────────────────────────────────
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20131028204020/http://www.millenniummarketingdenver.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20131028204020/http://www.millenniummarketingdenver.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_millennium, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20131028204020/http://www.millenniummarketingdenver.com/' AND @p_millennium IS NOT NULL LIMIT 1;
+SELECT 'project', @p_millennium, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20131028204020/http://www.millenniummarketingdenver.com/' AND @p_millennium IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'http://www.millenniummarketingdenver.com/', 1, @now, @now);
+VALUES ('Live Site', 'http://www.millenniummarketingdenver.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_millennium, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'http://www.millenniummarketingdenver.com/' AND @p_millennium IS NOT NULL LIMIT 1;
+SELECT 'project', @p_millennium, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'http://www.millenniummarketingdenver.com/' AND @p_millennium IS NOT NULL LIMIT 1;
 
 -- ── SEO Strong ───────────────────────────────────────────────────────────────
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20130128035340/http://www.washington-dental.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20130128035340/http://www.washington-dental.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_washington_dental, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130128035340/http://www.washington-dental.com/' AND @p_washington_dental IS NOT NULL LIMIT 1;
+SELECT 'project', @p_washington_dental, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130128035340/http://www.washington-dental.com/' AND @p_washington_dental IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'http://www.washington-dental.com/', 1, @now, @now);
+VALUES ('Live Site', 'http://www.washington-dental.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_washington_dental, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'http://www.washington-dental.com/' AND @p_washington_dental IS NOT NULL LIMIT 1;
+SELECT 'project', @p_washington_dental, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'http://www.washington-dental.com/' AND @p_washington_dental IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20131228151622/http://expressroofinginc.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20131228151622/http://expressroofinginc.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_express_roofing, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20131228151622/http://expressroofinginc.com/' AND @p_express_roofing IS NOT NULL LIMIT 1;
+SELECT 'project', @p_express_roofing, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20131228151622/http://expressroofinginc.com/' AND @p_express_roofing IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'https://expressroofinginc.com/', 1, @now, @now);
+VALUES ('Live Site', 'https://expressroofinginc.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_express_roofing, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://expressroofinginc.com/' AND @p_express_roofing IS NOT NULL LIMIT 1;
+SELECT 'project', @p_express_roofing, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://expressroofinginc.com/' AND @p_express_roofing IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20140207164106/http://www.extremedevelopersinc.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20140207164106/http://www.extremedevelopersinc.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_extreme_devs, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20140207164106/http://www.extremedevelopersinc.com/' AND @p_extreme_devs IS NOT NULL LIMIT 1;
+SELECT 'project', @p_extreme_devs, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20140207164106/http://www.extremedevelopersinc.com/' AND @p_extreme_devs IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20130419021734/http://www.mybiodental.com/veneers-special/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20130419021734/http://www.mybiodental.com/veneers-special/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_biodental, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130419021734/http://www.mybiodental.com/veneers-special/' AND @p_biodental IS NOT NULL LIMIT 1;
+SELECT 'project', @p_biodental, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130419021734/http://www.mybiodental.com/veneers-special/' AND @p_biodental IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'https://www.topencinodentist.com/', 1, @now, @now);
+VALUES ('Live Site', 'https://www.topencinodentist.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_biodental, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://www.topencinodentist.com/' AND @p_biodental IS NOT NULL LIMIT 1;
+SELECT 'project', @p_biodental, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.topencinodentist.com/' AND @p_biodental IS NOT NULL LIMIT 1;
 
 -- ── Dominate.net / Lead Optimize ─────────────────────────────────────────────
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20130923221642/http://www.packardgrill.net/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20130923221642/http://www.packardgrill.net/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_packard_grill, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130923221642/http://www.packardgrill.net/' AND @p_packard_grill IS NOT NULL LIMIT 1;
+SELECT 'project', @p_packard_grill, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130923221642/http://www.packardgrill.net/' AND @p_packard_grill IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20130216072717/http://restylekitchenandbath.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20130216072717/http://restylekitchenandbath.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_restyle, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130216072717/http://restylekitchenandbath.com/' AND @p_restyle IS NOT NULL LIMIT 1;
+SELECT 'project', @p_restyle, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130216072717/http://restylekitchenandbath.com/' AND @p_restyle IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20130309222304/http://www.fortcollinsroofingconsultants.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20130309222304/http://www.fortcollinsroofingconsultants.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_fort_collins, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130309222304/http://www.fortcollinsroofingconsultants.com/' AND @p_fort_collins IS NOT NULL LIMIT 1;
+SELECT 'project', @p_fort_collins, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130309222304/http://www.fortcollinsroofingconsultants.com/' AND @p_fort_collins IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'http://www.fortcollinsroofingconsultants.com/', 1, @now, @now);
+VALUES ('Live Site', 'http://www.fortcollinsroofingconsultants.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_fort_collins, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'http://www.fortcollinsroofingconsultants.com/' AND @p_fort_collins IS NOT NULL LIMIT 1;
+SELECT 'project', @p_fort_collins, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'http://www.fortcollinsroofingconsultants.com/' AND @p_fort_collins IS NOT NULL LIMIT 1;
 
 -- ── Yazamo ───────────────────────────────────────────────────────────────────
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20131115045050/http://abundancethebook.com/ab/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20131115045050/http://abundancethebook.com/ab/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_abundance, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20131115045050/http://abundancethebook.com/ab/' AND @p_abundance IS NOT NULL LIMIT 1;
+SELECT 'project', @p_abundance, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20131115045050/http://abundancethebook.com/ab/' AND @p_abundance IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'https://www.diamandis.com/abundance', 1, @now, @now);
+VALUES ('Live Site', 'https://www.diamandis.com/abundance', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_abundance, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://www.diamandis.com/abundance' AND @p_abundance IS NOT NULL LIMIT 1;
+SELECT 'project', @p_abundance, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.diamandis.com/abundance' AND @p_abundance IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Amazon', 'https://amzn.to/2EsPj2J', 2, @now, @now);
+VALUES ('Amazon', 'https://amzn.to/2EsPj2J', 3, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_abundance, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://amzn.to/2EsPj2J' AND @p_abundance IS NOT NULL LIMIT 1;
+SELECT 'project', @p_abundance, `id`, 3, @now, @now FROM `jr_links` WHERE `url` = 'https://amzn.to/2EsPj2J' AND @p_abundance IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20130607024614/http://www.25kgroup.com/MySuccess1/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20130607024614/http://www.25kgroup.com/MySuccess1/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_25kgroup, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130607024614/http://www.25kgroup.com/MySuccess1/' AND @p_25kgroup IS NOT NULL LIMIT 1;
+SELECT 'project', @p_25kgroup, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130607024614/http://www.25kgroup.com/MySuccess1/' AND @p_25kgroup IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'https://geniusnetwork.com/', 1, @now, @now);
+VALUES ('Live Site', 'https://geniusnetwork.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_25kgroup, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://geniusnetwork.com/' AND @p_25kgroup IS NOT NULL LIMIT 1;
+SELECT 'project', @p_25kgroup, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://geniusnetwork.com/' AND @p_25kgroup IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20130923102941/http://www.joepolish.com/2012/press', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20130923102941/http://www.joepolish.com/2012/press', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_joe_polish, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130923102941/http://www.joepolish.com/2012/press' AND @p_joe_polish IS NOT NULL LIMIT 1;
+SELECT 'project', @p_joe_polish, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130923102941/http://www.joepolish.com/2012/press' AND @p_joe_polish IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'https://www.joepolish.com/', 1, @now, @now);
+VALUES ('Live Site', 'https://www.joepolish.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_joe_polish, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://www.joepolish.com/' AND @p_joe_polish IS NOT NULL LIMIT 1;
+SELECT 'project', @p_joe_polish, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.joepolish.com/' AND @p_joe_polish IS NOT NULL LIMIT 1;
 
 -- ── KloutFire ────────────────────────────────────────────────────────────────
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20130430102043/http://www.geniusnetworkmastermind.com/25k/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20130430102043/http://www.geniusnetworkmastermind.com/25k/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_genius_network, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130430102043/http://www.geniusnetworkmastermind.com/25k/' AND @p_genius_network IS NOT NULL LIMIT 1;
+SELECT 'project', @p_genius_network, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130430102043/http://www.geniusnetworkmastermind.com/25k/' AND @p_genius_network IS NOT NULL LIMIT 1;
 
 -- geniusnetwork.com already inserted for @p_25kgroup above — just add bridge
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_genius_network, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://geniusnetwork.com/' AND @p_genius_network IS NOT NULL LIMIT 1;
+SELECT 'project', @p_genius_network, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://geniusnetwork.com/' AND @p_genius_network IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20130515092227/http://www.low-vision.org/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20130515092227/http://www.low-vision.org/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_cps, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130515092227/http://www.low-vision.org/' AND @p_cps IS NOT NULL LIMIT 1;
+SELECT 'project', @p_cps, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130515092227/http://www.low-vision.org/' AND @p_cps IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20130411215649/http://www.mangatplasticsurgery.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20130411215649/http://www.mangatplasticsurgery.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_mangat, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130411215649/http://www.mangatplasticsurgery.com/' AND @p_mangat IS NOT NULL LIMIT 1;
+SELECT 'project', @p_mangat, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130411215649/http://www.mangatplasticsurgery.com/' AND @p_mangat IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'https://www.vailvalleyps.com/', 1, @now, @now);
+VALUES ('Live Site', 'https://www.vailvalleyps.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_mangat, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://www.vailvalleyps.com/' AND @p_mangat IS NOT NULL LIMIT 1;
+SELECT 'project', @p_mangat, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.vailvalleyps.com/' AND @p_mangat IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20130228190944/http://kloutfire.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20130228190944/http://kloutfire.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_kloutfire_site, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130228190944/http://kloutfire.com/' AND @p_kloutfire_site IS NOT NULL LIMIT 1;
+SELECT 'project', @p_kloutfire_site, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130228190944/http://kloutfire.com/' AND @p_kloutfire_site IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20130809190359/http://www.facesbydrt.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20130809190359/http://www.facesbydrt.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_tansavatdi, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130809190359/http://www.facesbydrt.com/' AND @p_tansavatdi IS NOT NULL LIMIT 1;
+SELECT 'project', @p_tansavatdi, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20130809190359/http://www.facesbydrt.com/' AND @p_tansavatdi IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'https://www.facesbydrt.com/', 1, @now, @now);
+VALUES ('Live Site', 'https://www.facesbydrt.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_tansavatdi, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://www.facesbydrt.com/' AND @p_tansavatdi IS NOT NULL LIMIT 1;
+SELECT 'project', @p_tansavatdi, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.facesbydrt.com/' AND @p_tansavatdi IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20121225064931/http://www.raffleconsulting.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20121225064931/http://www.raffleconsulting.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_raffle, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20121225064931/http://www.raffleconsulting.com/' AND @p_raffle IS NOT NULL LIMIT 1;
+SELECT 'project', @p_raffle, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20121225064931/http://www.raffleconsulting.com/' AND @p_raffle IS NOT NULL LIMIT 1;
 
 -- ── TrailerCentral — client-facing sites ─────────────────────────────────────
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20161013100417/http://www.trailertraders.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20161013100417/http://www.trailertraders.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_tt2016, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20161013100417/http://www.trailertraders.com/' AND @p_tt2016 IS NOT NULL LIMIT 1;
+SELECT 'project', @p_tt2016, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20161013100417/http://www.trailertraders.com/' AND @p_tt2016 IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('TrailerTrader', 'https://www.trailertrader.com/', 1, @now, @now);
+VALUES ('TrailerTrader', 'https://www.trailertrader.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_tt2016, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailertrader.com/' AND @p_tt2016 IS NOT NULL LIMIT 1;
+SELECT 'project', @p_tt2016, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailertrader.com/' AND @p_tt2016 IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20190715224624/https://www.huffmantrailers.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20190715224624/https://www.huffmantrailers.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_huffman, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20190715224624/https://www.huffmantrailers.com/' AND @p_huffman IS NOT NULL LIMIT 1;
+SELECT 'project', @p_huffman, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20190715224624/https://www.huffmantrailers.com/' AND @p_huffman IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'https://www.huffmantrailers.com/', 1, @now, @now);
+VALUES ('Live Site', 'https://www.huffmantrailers.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_huffman, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://www.huffmantrailers.com/' AND @p_huffman IS NOT NULL LIMIT 1;
+SELECT 'project', @p_huffman, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.huffmantrailers.com/' AND @p_huffman IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/20180805083556/https://www.thehitchmaninc.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/20180805083556/https://www.thehitchmaninc.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_hitchman, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20180805083556/https://www.thehitchmaninc.com/' AND @p_hitchman IS NOT NULL LIMIT 1;
+SELECT 'project', @p_hitchman, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/20180805083556/https://www.thehitchmaninc.com/' AND @p_hitchman IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Live Site', 'https://www.thehitchmaninc.com/', 1, @now, @now);
+VALUES ('Live Site', 'https://www.thehitchmaninc.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_hitchman, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://www.thehitchmaninc.com/' AND @p_hitchman IS NOT NULL LIMIT 1;
+SELECT 'project', @p_hitchman, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.thehitchmaninc.com/' AND @p_hitchman IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Archive.org', 'https://web.archive.org/web/*/https://factoryvantage.com/', 0, @now, @now);
+VALUES ('Archive.org', 'https://web.archive.org/web/*/https://factoryvantage.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_factory_vantage, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://factoryvantage.com/' AND @p_factory_vantage IS NOT NULL LIMIT 1;
+SELECT 'project', @p_factory_vantage, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://factoryvantage.com/' AND @p_factory_vantage IS NOT NULL LIMIT 1;
 
--- ── TrailerCentral — internal tools (shared TC homepage URL) ──────────────────
+-- ── TrailerCentral — internal tools (shared TC archive + homepage URL) ────────
+
+SET @p_htw_autoposter := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'horse-trailer-world'    LIMIT 1);
+SET @p_cl_scheduler   := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'craigslist-scheduler'  LIMIT 1);
+SET @p_camera_mobile  := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'camera-mobile-app'     LIMIT 1);
+SET @p_classifieds    := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'classifieds-websites'  LIMIT 1);
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('TrailerCentral', 'https://www.trailercentral.com/', 0, @now, @now);
-
-INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_craigslist, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_craigslist IS NOT NULL LIMIT 1;
-
-INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_ksl_feed, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_ksl_feed IS NOT NULL LIMIT 1;
+VALUES ('Archive.org', 'https://web.archive.org/web/*/https://www.trailercentral.com/', 1, @now, @now);
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('KSL Classifieds', 'https://www.ksl.com/classifieds/category/Trailers/', 1, @now, @now);
-INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_ksl_feed, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://www.ksl.com/classifieds/category/Trailers/' AND @p_ksl_feed IS NOT NULL LIMIT 1;
+VALUES ('TrailerCentral', 'https://www.trailercentral.com/', 2, @now, @now);
 
+-- CL Autoposter
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_overlays, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_overlays IS NOT NULL LIMIT 1;
+SELECT 'project', @p_craigslist, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_craigslist IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_craigslist, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_craigslist IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
+VALUES ('Craigslist', 'https://craigslist.org/', 3, @now, @now);
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_craigslist, `id`, 3, @now, @now FROM `jr_links` WHERE `url` = 'https://craigslist.org/' AND @p_craigslist IS NOT NULL LIMIT 1;
 
+-- KSL Feed
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_dealer_sites, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_dealer_sites IS NOT NULL LIMIT 1;
+SELECT 'project', @p_ksl_feed, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_ksl_feed IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_ksl_feed, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_ksl_feed IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
+VALUES ('KSL', 'https://www.ksl.com/', 3, @now, @now);
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_ksl_feed, `id`, 3, @now, @now FROM `jr_links` WHERE `url` = 'https://www.ksl.com/' AND @p_ksl_feed IS NOT NULL LIMIT 1;
 
+-- Image Overlays
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_elasticsearch, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_elasticsearch IS NOT NULL LIMIT 1;
+SELECT 'project', @p_overlays, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_overlays IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_overlays, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_overlays IS NOT NULL LIMIT 1;
 
+-- Dealer Sites
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_crm_legacy, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_crm_legacy IS NOT NULL LIMIT 1;
+SELECT 'project', @p_dealer_sites, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_dealer_sites IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_dealer_sites, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_dealer_sites IS NOT NULL LIMIT 1;
 
+-- Elasticsearch
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_crm_system, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_crm_system IS NOT NULL LIMIT 1;
+SELECT 'project', @p_elasticsearch, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_elasticsearch IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_elasticsearch, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_elasticsearch IS NOT NULL LIMIT 1;
 
+-- CRM Legacy
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_crm_email_text, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_crm_email_text IS NOT NULL LIMIT 1;
+SELECT 'project', @p_crm_legacy, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_crm_legacy IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_crm_legacy, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_crm_legacy IS NOT NULL LIMIT 1;
 
+-- CRM System
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_gmail_oauth, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_gmail_oauth IS NOT NULL LIMIT 1;
+SELECT 'project', @p_crm_system, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_crm_system IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_crm_system, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_crm_system IS NOT NULL LIMIT 1;
 
+-- CRM Email/Text
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_truckpaper, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_truckpaper IS NOT NULL LIMIT 1;
+SELECT 'project', @p_crm_email_text, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_crm_email_text IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_crm_email_text, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_crm_email_text IS NOT NULL LIMIT 1;
+
+-- Gmail OAuth
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_gmail_oauth, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_gmail_oauth IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_gmail_oauth, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_gmail_oauth IS NOT NULL LIMIT 1;
+
+-- TruckPaper Autoposter
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_truckpaper, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_truckpaper IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_truckpaper, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_truckpaper IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
+VALUES ('TruckPaper', 'https://www.truckpaper.com/', 3, @now, @now);
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_truckpaper, `id`, 3, @now, @now FROM `jr_links` WHERE `url` = 'https://www.truckpaper.com/' AND @p_truckpaper IS NOT NULL LIMIT 1;
+
+-- LotVantage Facebook
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_lotvantage, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_lotvantage IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_lotvantage, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_lotvantage IS NOT NULL LIMIT 1;
+
+-- Twilio Call Tracking
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_twilio, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_twilio IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_twilio, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_twilio IS NOT NULL LIMIT 1;
+
+-- Twilio SMS
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_twilio_sms, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_twilio_sms IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_twilio_sms, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_twilio_sms IS NOT NULL LIMIT 1;
+
+-- Email System Stabilization
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_email_stab, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_email_stab IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_email_stab, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_email_stab IS NOT NULL LIMIT 1;
+
+-- CRM Automation
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_crm_automation, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_crm_automation IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_crm_automation, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_crm_automation IS NOT NULL LIMIT 1;
+
+-- Facebook Marketplace
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_facebook_mktpl, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_facebook_mktpl IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_facebook_mktpl, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_facebook_mktpl IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
+VALUES ('Facebook Marketplace', 'https://www.facebook.com/marketplace/', 3, @now, @now);
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_facebook_mktpl, `id`, 3, @now, @now FROM `jr_links` WHERE `url` = 'https://www.facebook.com/marketplace/' AND @p_facebook_mktpl IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
+VALUES ('Facebook', 'https://www.facebook.com/', 4, @now, @now);
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_facebook_mktpl, `id`, 4, @now, @now FROM `jr_links` WHERE `url` = 'https://www.facebook.com/' AND @p_facebook_mktpl IS NOT NULL LIMIT 1;
+
+-- HTW Autoposter
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_htw_autoposter, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_htw_autoposter IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_htw_autoposter, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_htw_autoposter IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
+VALUES ('HTW', 'https://horsetrailerworld.com/', 3, @now, @now);
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_htw_autoposter, `id`, 3, @now, @now FROM `jr_links` WHERE `url` = 'https://horsetrailerworld.com/' AND @p_htw_autoposter IS NOT NULL LIMIT 1;
+
+-- CL Scheduler
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_cl_scheduler, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_cl_scheduler IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_cl_scheduler, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_cl_scheduler IS NOT NULL LIMIT 1;
+
+-- Camera Mobile App
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_camera_mobile, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_camera_mobile IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_camera_mobile, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_camera_mobile IS NOT NULL LIMIT 1;
+
+-- TC Classifieds Websites
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_classifieds, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://www.trailercentral.com/' AND @p_classifieds IS NOT NULL LIMIT 1;
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_classifieds, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_classifieds IS NOT NULL LIMIT 1;
+
+-- CL Scheduler shares gallery images with CL Autoposter
+INSERT IGNORE INTO `jr_gallery_bridges` (`relation_type`, `relation_id`, `gallery_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_cl_scheduler, gb.`gallery_id`, gb.`priority`, @now, @now
+FROM `jr_gallery_bridges` gb
+WHERE gb.`relation_type` = 'project'
+  AND gb.`relation_id` = @p_craigslist
+  AND @p_cl_scheduler IS NOT NULL
+  AND @p_craigslist IS NOT NULL;
+
+-- ── Personal projects (ULPC, LT Engine) ──────────────────────────────────────
+
+SET @p_ulpc := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'ulpc-spritesheet-generator' LIMIT 1);
+SET @p_lt   := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'lex-talionis-engine' LIMIT 1);
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('TruckPaper', 'https://www.truckpaper.com/', 1, @now, @now);
+VALUES ('ULPC Generator', 'https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_truckpaper, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://www.truckpaper.com/' AND @p_truckpaper IS NOT NULL LIMIT 1;
-
-INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_lotvantage, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_lotvantage IS NOT NULL LIMIT 1;
-
-INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_twilio, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_twilio IS NOT NULL LIMIT 1;
-
-INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_twilio_sms, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_twilio_sms IS NOT NULL LIMIT 1;
-
-INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_email_stab, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_email_stab IS NOT NULL LIMIT 1;
-
-INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_crm_automation, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_crm_automation IS NOT NULL LIMIT 1;
-
-INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_facebook_mktpl, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://www.trailercentral.com/' AND @p_facebook_mktpl IS NOT NULL LIMIT 1;
+SELECT 'project', @p_ulpc, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/' AND @p_ulpc IS NOT NULL LIMIT 1;
 
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Facebook Marketplace', 'https://www.facebook.com/marketplace/', 1, @now, @now);
+VALUES ('GitHub', 'https://github.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator/', 3, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_facebook_mktpl, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://www.facebook.com/marketplace/' AND @p_facebook_mktpl IS NOT NULL LIMIT 1;
+SELECT 'project', @p_ulpc, `id`, 3, @now, @now FROM `jr_links` WHERE `url` = 'https://github.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator/' AND @p_ulpc IS NOT NULL LIMIT 1;
+
+INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
+VALUES ('GitLab', 'https://gitlab.com/rainlash/lt-maker/', 2, @now, @now);
+INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
+SELECT 'project', @p_lt, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://gitlab.com/rainlash/lt-maker/' AND @p_lt IS NOT NULL LIMIT 1;
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 6. Company links
@@ -504,19 +624,19 @@ SET @c_kloutfire := (SELECT `id` FROM `jr_companies` WHERE `shortcode` = 'kloutf
 
 -- KloutFire: archived domain link
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('KloutFire (archived)', 'https://web.archive.org/web/*/https://kloutfire.com/', 0, @now, @now);
+VALUES ('KloutFire (archived)', 'https://web.archive.org/web/*/https://kloutfire.com/', 1, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'company', @c_kloutfire, `id`, 0, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://kloutfire.com/' AND @c_kloutfire IS NOT NULL LIMIT 1;
+SELECT 'company', @c_kloutfire, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://web.archive.org/web/*/https://kloutfire.com/' AND @c_kloutfire IS NOT NULL LIMIT 1;
 
 -- KloutFire rebranded to Yazamo — link the current Yazamo domain
 INSERT IGNORE INTO `jr_links` (`website`, `url`, `priority`, `created_at`, `updated_at`)
-VALUES ('Yazamo (current)', 'https://yazamo.com/', 1, @now, @now);
+VALUES ('Yazamo (current)', 'https://yazamo.com/', 2, @now, @now);
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'company', @c_kloutfire, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://yazamo.com/' AND @c_kloutfire IS NOT NULL LIMIT 1;
+SELECT 'company', @c_kloutfire, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://yazamo.com/' AND @c_kloutfire IS NOT NULL LIMIT 1;
 
 -- kloutfire-website project also links to the Yazamo domain (same URL row, new bridge)
 INSERT IGNORE INTO `jr_link_bridges` (`relation_type`, `relation_id`, `link_id`, `priority`, `created_at`, `updated_at`)
-SELECT 'project', @p_kloutfire_site, `id`, 1, @now, @now FROM `jr_links` WHERE `url` = 'https://yazamo.com/' AND @p_kloutfire_site IS NOT NULL LIMIT 1;
+SELECT 'project', @p_kloutfire_site, `id`, 2, @now, @now FROM `jr_links` WHERE `url` = 'https://yazamo.com/' AND @p_kloutfire_site IS NOT NULL LIMIT 1;
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 7. Replace oDesk job with Freelance

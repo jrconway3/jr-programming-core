@@ -11,24 +11,45 @@ type Props = {
 };
 
 export default function ExperienceJobPage({ job }: Props) {
+  const companyName = job.company?.name || 'Experience';
+  const companyShortcode = job.company?.shortcode ?? null;
+  const allProjectsLabel = 'Other';
+
   return (
     <>
       <Head>
-        <title>{`${job.company?.name || 'Experience'} | JRProgramming`}</title>
+        <title>{`${companyName} | JRProgramming`}</title>
       </Head>
 
       <main className="min-h-screen px-4 py-12">
-        <section className="mx-auto w-full max-w-5xl space-y-8">
+        <section className="mx-auto w-full space-y-8">
           <nav className="text-sm text-primary-text/65">
             <Link href="/" className="hover:text-primary-accentLight">Home</Link>
             <span className="px-2 text-primary-text/40">/</span>
             <Link href="/experience" className="hover:text-primary-accentLight">Experience</Link>
             <span className="px-2 text-primary-text/40">/</span>
-            <span className="text-primary-text/85">{job.company?.name || 'Role Breakdown'}</span>
+            <span className="text-primary-text/85">{companyName}</span>
           </nav>
 
           <div className="terminal-card px-6 pb-8 pt-12 md:px-8">
-            <p className="text-xs uppercase tracking-[0.22em] text-emerald-300/70">{`> company: ${job.company?.name || 'Experience'}`}</p>
+            {companyShortcode && (
+              <div className="-mt-12 -mx-6 md:-mx-8 mb-6 relative aspect-video overflow-hidden rounded-t-[9px] bg-slate-900">
+                <img
+                  src={`/images/experience/${companyShortcode}.png`}
+                  alt={companyName}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const container = e.currentTarget.parentElement as HTMLElement;
+                    container.style.display = 'none';
+                    const card = container.parentElement as HTMLElement;
+                    if (card) card.style.paddingTop = '3.5rem';
+                  }}
+                />
+                <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(rgba(168,85,247,0.06) 0px, rgba(168,85,247,0.06) 1px, transparent 1px, transparent 3px)' }} />
+              </div>
+            )}
+
+            <p className="text-xs uppercase tracking-[0.22em] text-emerald-300/70">{`> company: ${companyName}`}</p>
             {job.date_range && (
               <p className="mt-2 text-xs uppercase tracking-[0.22em] text-emerald-300/70">{`> years: ${job.date_range}`}</p>
             )}
@@ -46,17 +67,8 @@ export default function ExperienceJobPage({ job }: Props) {
           {job.keySystems.length > 0 && (
             <div className="space-y-4">
               <h2 className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">Key Systems</h2>
-              <div className="grid gap-8 md:grid-cols-2">
-                {job.keySystems.map((project) => <ProjectCard key={project.id} project={withProjectCardView(project, "experience")} />)}
-              </div>
-            </div>
-          )}
-
-          {job.moreProjects.length > 0 && (
-            <div className="space-y-4">
-              <h2 className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">Additional Projects</h2>
-              <div className="grid gap-8 md:grid-cols-2">
-                {job.moreProjects.map((project) => <ProjectCard key={project.id} project={withProjectCardView(project, "experience")} />)}
+              <div className="grid gap-8 md:grid-cols-2 3xl:grid-cols-3">
+                {job.keySystems.map((project) => <ProjectCard key={project.id} project={withProjectCardView(project, "project")} />)}
               </div>
             </div>
           )}
@@ -69,6 +81,30 @@ export default function ExperienceJobPage({ job }: Props) {
               </ul>
             </div>
           )}
+
+          {job.moreProjects.length > 0 && (
+            <div className="space-y-6">
+              <h2 className="text-xs uppercase tracking-[0.35em] text-primary-accentLight">
+                {job.keySystems.length > 0 ? allProjectsLabel : "Projects"}
+              </h2>
+              <div className="flex flex-wrap justify-center gap-8">
+                {[
+                  ...job.moreProjects.filter((p) => p.gallery.length > 0),
+                  ...job.moreProjects.filter((p) => p.gallery.length === 0),
+                ].map((project) => (
+                  <div key={project.id} className="w-full sm:w-[calc(50%-1rem)] xl:w-[calc(33.333%-1.5rem)]">
+                    <ProjectCard project={withProjectCardView(project, "project")} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-4 text-center">
+            <Link href="/experience" className="btn-cta-outline inline-block px-6 py-2 text-sm">
+              ← Back to Experience
+            </Link>
+          </div>
         </section>
       </main>
     </>

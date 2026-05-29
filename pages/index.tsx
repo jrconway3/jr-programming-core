@@ -7,6 +7,8 @@ import ProjectCard from "components/projects/ProjectCard";
 import { withProjectCardView } from "app/helpers/project-card";
 import { getFeaturedProjects, getAllProjectStats } from "app/repositories/projects";
 import { transformHomePageMetrics } from "app/transformers/home";
+import { prisma } from "prisma/adapter";
+import { siteSettingDefaults } from "app/services/settings";
 
 export default function Home({
   featuredProjects,
@@ -23,8 +25,8 @@ export default function Home({
       <Head>
         <title>JRProgramming</title>
       </Head>
-      <main className="min-h-screen px-4 py-10 md:px-6 md:py-16">
-        <section className="mx-auto w-full pb-8 pt-3 md:pt-4">
+      <main className="min-h-screen px-4 py-8 md:px-6">
+        <section className="mx-auto w-full pb-8">
           {homeSettings.show_status_cta && (
             <div className={`mb-8 flex items-center gap-3 rounded-lg px-4 py-3 md:mb-9 ${homeSettings.home_status_state === "busy" ? "border border-amber-400/35 bg-amber-500/10" : "border border-emerald-400/35 bg-emerald-500/10"}`}>
               <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -205,12 +207,17 @@ export default function Home({
 }
 
 export const getServerSideProps: GetServerSideProps<HomePageProps> = async () => {
-  const [featuredProjects, allProjectsRaw] = await Promise.all([
+  const [featuredProjects, allProjectsRaw, experienceYearRow] = await Promise.all([
     getFeaturedProjects(3),
     getAllProjectStats(),
+    prisma.settings.findUnique({ where: { key: 'home/stats/experience_start_year' }, select: { value: true } }),
   ]);
 
-  const metrics = transformHomePageMetrics(allProjectsRaw);
+  const experienceStartYear = parseInt(
+    experienceYearRow?.value ?? siteSettingDefaults['home/stats/experience_start_year'],
+    10,
+  );
+  const metrics = transformHomePageMetrics(allProjectsRaw, experienceStartYear);
 
   return {
     props: {

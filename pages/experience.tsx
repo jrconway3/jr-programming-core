@@ -24,10 +24,11 @@ export default function ExperiencePage({ category, projects, jobs }: Props) {
     keySystems,
     impactItems,
     href,
+    featuredCompanyShortcode,
   } = buildExperiencePageData({ projects, jobs });
 
   const renderJobCards = (entries: Job[]) => (
-    <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-8 md:grid-cols-2">
       {entries.map((entry) => {
         return (
           <Link
@@ -77,6 +78,17 @@ export default function ExperiencePage({ category, projects, jobs }: Props) {
           </div>
 
           <div className="terminal-card px-6 pb-7 pt-12 md:px-8 md:pt-13">
+            {featuredCompanyShortcode && (
+              <div className="-mt-12 -mx-6 md:-mx-8 mb-6 relative aspect-video overflow-hidden rounded-t-[9px] bg-slate-900">
+                <img
+                  src={`/images/experience/${featuredCompanyShortcode}.png`}
+                  alt={featuredOrgLabel}
+                  className="w-full h-full object-cover"
+                  onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }}
+                />
+                <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(rgba(168,85,247,0.06) 0px, rgba(168,85,247,0.06) 1px, transparent 1px, transparent 3px)' }} />
+              </div>
+            )}
             {featuredPrimary ? (
               <article className="mt-10">
                 <div className="pb-5">
@@ -115,6 +127,9 @@ export default function ExperiencePage({ category, projects, jobs }: Props) {
                               <span aria-hidden="true" className="text-emerald-300/80 transition-transform duration-150 group-hover:translate-x-1">{'->'}</span>
                             </Link>
                             <p className="text-primary-text/60">{system.description}</p>
+                            {system.date_range && (
+                              <p className="text-xs text-primary-text/40">{system.date_range}</p>
+                            )}
                           </li>
                         ))}
                       </ul>

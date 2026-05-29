@@ -21,7 +21,7 @@ export function withProjectCardView(project: Project, variant: ProjectCardVarian
     ...project,
     card: {
       href: isExperience ? project.job_href : project.href,
-      companyName: isExperience ? null : project.job?.company?.name ?? null,
+      companyName: isExperience ? null : (project.position ?? project.job?.company?.name ?? null),
       focusLabel: isExperience ? "Role" : "Built For",
       focusValue: project.position || project.role || "Client project",
       ctaLabel: isExperience ? "View project details" : "View case study",

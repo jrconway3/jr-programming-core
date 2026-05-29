@@ -26,20 +26,20 @@ SET @p_raffle                    := (SELECT `id` FROM `jr_projects` WHERE `short
 SET @p_washington_dental         := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'washington-dental' LIMIT 1);
 SET @p_pete_mamos                := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'pete-mamos' LIMIT 1);
 SET @p_home_solution             := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'home-solution-properties' LIMIT 1);
-SET @p_craigslist                := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-craigslist-autoposter' LIMIT 1);
+SET @p_craigslist                := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'craigslist-autoposter' LIMIT 1);
 SET @p_tt2016                    := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'trailertrader-2016' LIMIT 1);
-SET @p_overlays                  := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-image-overlays' LIMIT 1);
-SET @p_crm_legacy                := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-crm-legacy' LIMIT 1);
-SET @p_crm_system                := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-crm-system' LIMIT 1);
-SET @p_crm_email_text            := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-crm-email-text' LIMIT 1);
-SET @p_lotvantage                := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-lotvantage-facebook' LIMIT 1);
+SET @p_overlays                  := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'image-overlays' LIMIT 1);
+SET @p_crm_legacy                := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'crm-legacy' LIMIT 1);
+SET @p_crm_system                := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'crm-system' LIMIT 1);
+SET @p_crm_email_text            := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'crm-email-text' LIMIT 1);
+SET @p_lotvantage                := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'lotvantage-facebook' LIMIT 1);
 SET @p_twilio                    := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'twilio-call-tracking' LIMIT 1);
 SET @p_huffman                   := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'huffman-trailers' LIMIT 1);
 SET @p_hitchman                  := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'hitchman-inc' LIMIT 1);
 SET @p_factory_vantage           := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'factory-vantage' LIMIT 1);
 SET @p_twilio_sms                := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'twilio-sms-system' LIMIT 1);
 SET @p_gmail_oauth               := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'gmail-oauth-integration' LIMIT 1);
-SET @p_facebook_mktpl            := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'tc-facebook-marketplace' LIMIT 1);
+SET @p_facebook_mktpl            := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'facebook-marketplace' LIMIT 1);
 SET @p_abundance                 := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'abundance-campaign' LIMIT 1);
 SET @p_genius_network            := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'genius-network' LIMIT 1);
 SET @p_joe_polish                := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'joe-polish-press' LIMIT 1);
@@ -47,6 +47,8 @@ SET @p_equilibrio                := (SELECT `id` FROM `jr_projects` WHERE `short
 SET @p_millennium                := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'millennium-marketing-denver' LIMIT 1);
 SET @p_ulpc                      := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'ulpc-spritesheet-generator' LIMIT 1);
 SET @p_lt                        := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'lex-talionis-engine' LIMIT 1);
+SET @p_jrprogramming             := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'jrprogramming' LIMIT 1);
+SET @p_jaidynreiman              := (SELECT `id` FROM `jr_projects` WHERE `shortcode` = 'jaidynreiman-net' LIMIT 1);
 
 -- ─────────────────────────────────────────────────────
 -- Gallery entries — one INSERT block per project group.
@@ -337,4 +339,24 @@ VALUES
   (@p_lt, 'Map Anim Palette',       '/images/portfolio/personal/lt-maker/02-lt-map-anim-palette-preview.png', 1, @now, @now),
   (@p_lt, 'Weapon Rank Up',         '/images/portfolio/personal/lt-maker/03-lt-weapon-rank-up.png',           2, @now, @now),
   (@p_lt, 'Custom Platform Types',  '/images/portfolio/personal/lt-maker/04-lt-custom-platform-types.png',    3, @now, @now)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `priority` = VALUES(`priority`), `updated_at` = @now;
+
+-- Personal: JR Programming (this portfolio site)
+INSERT INTO `jr_projects_gallery` (`project_id`, `title`, `image`, `priority`, `created_at`, `updated_at`)
+VALUES
+  (@p_jrprogramming, 'Home — Hero',     '/images/portfolio/personal/jr-programming/01-home-hero.png',    0, @now, @now),
+  (@p_jrprogramming, 'Home — Stats',    '/images/portfolio/personal/jr-programming/02-home-stats.png',   1, @now, @now),
+  (@p_jrprogramming, 'Home — Projects', '/images/portfolio/personal/jr-programming/03-home-projects.png', 2, @now, @now),
+  (@p_jrprogramming, 'About',           '/images/portfolio/personal/jr-programming/04-about.png',         3, @now, @now),
+  (@p_jrprogramming, 'About — Stack',   '/images/portfolio/personal/jr-programming/05-about-stack.png',   4, @now, @now),
+  (@p_jrprogramming, 'Contact',         '/images/portfolio/personal/jr-programming/06-contact.png',       5, @now, @now)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `priority` = VALUES(`priority`), `updated_at` = @now;
+
+-- Personal: Jaidynreiman.net (Sprite Portfolio)
+INSERT INTO `jr_projects_gallery` (`project_id`, `title`, `image`, `priority`, `created_at`, `updated_at`)
+VALUES
+  (@p_jaidynreiman, 'Home',        '/images/portfolio/personal/jr-productions/01-home.png',        0, @now, @now),
+  (@p_jaidynreiman, 'LPC Hair',    '/images/portfolio/personal/jr-productions/02-lpc-hair.png',    1, @now, @now),
+  (@p_jaidynreiman, 'FE:GBA',      '/images/portfolio/personal/jr-productions/03-fegba.png',       2, @now, @now),
+  (@p_jaidynreiman, 'Commissions', '/images/portfolio/personal/jr-productions/04-commissions.png', 3, @now, @now)
 ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `priority` = VALUES(`priority`), `updated_at` = @now;

@@ -214,13 +214,14 @@ model ProjectCategory {
 }
 
 model Skill {
-  id         Int            @id @default(autoincrement())
-  name       String
-  desc       String
-  rating     Int            @default(5) @db.TinyInt
-  created_at DateTime       @default(now())
-  updated_at DateTime       @default(now())
-  projects   ProjectSkill[]
+  id            Int            @id @default(autoincrement())
+  name          String
+  desc          String
+  rating        Int            @default(5) @db.TinyInt
+  about_section String?        @db.VarChar(20)
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @default(now())
+  projects      ProjectSkill[]
 
   @@map("jr_skills")
 }
