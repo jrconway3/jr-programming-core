@@ -12,7 +12,7 @@ SET @now := NOW(3);
 -- New projects: jaidynreiman.net and jrplays.net
 -- ─────────────────────────────────────────────────────
 
-INSERT INTO `jr_projects` (`name`, `shortcode`, `short`, `role`, `position`, `extended`, `start_date`, `created_at`, `updated_at`)
+INSERT INTO `jr_projects` (`name`, `shortcode`, `short`, `role`, `position`, `extended`, `start_date`, `end_date`, `created_at`, `updated_at`)
 VALUES
   (
     'Sprite and Game Asset Portfolio',
@@ -22,6 +22,7 @@ VALUES
     'Personal Project',
     NULL,
     '2026-05-01 00:00:00.000',
+    NULL,
     @now,
     @now
   ),
@@ -33,6 +34,7 @@ VALUES
     'Personal Project',
     NULL,
     '2026-05-01 00:00:00.000',
+    NULL,
     @now,
     @now
   ),
@@ -45,6 +47,7 @@ VALUES
     'Built and maintained a Twilio-based SMS system integrated into a CRM for both automated and direct messaging workflows. Implemented webhook handling to process real-time delivery status updates, including carrier-level failures such as unreachable numbers and invalid recipients. Developed reporting and tracking features to monitor message outcomes, including sent, failed, and unsubscribed states. Integrated SMS activity into lead workflows and campaign automation systems, enabling scalable communication and improved visibility into customer engagement.',
     '2019-10-01 00:00:00.000',
     '2026-01-02 00:00:00.000',
+    @now,
     @now
   ),
   (
@@ -56,6 +59,7 @@ VALUES
     'Designed and implemented a CRM-based email automation system supporting trigger-driven messaging workflows. Built a visual template editor (Mosaico) and a campaign engine with scheduling and state-based logic, enabling emails to be sent based on timing, lead status, and user actions. Developed delivery tracking and reporting features to monitor sent, bounced, and skipped messages. Integrated campaign activity into lead interaction timelines, improving communication visibility and enabling scalable follow-up workflows.',
     '2020-03-01 00:00:00.000',
     '2026-01-02 00:00:00.000',
+    @now,
     @now
   ),
   (
@@ -66,6 +70,7 @@ VALUES
     'Freelancer',
     NULL,
     '2026-05-01 00:00:00.000',
+    NULL,
     @now,
     @now
   ),
@@ -77,6 +82,7 @@ VALUES
     'TrailerCentral',
     'Migrated a legacy CRM into a scalable Laravel + Vue/Nuxt system supporting lead management, workflow automation, and campaign execution. Built backend services for CRM pipelines, dealer workflows, and API-driven integrations. Implemented Twilio-based communication workflows with opt-in compliance, delivery tracking, and messaging rules. Focused on improving system reliability, performance, and extensibility across production CRM operations.',
     '2018-01-01 00:00:00.000',
+    NULL,
     @now,
     @now
   ),
@@ -88,6 +94,7 @@ VALUES
     'Freelancer',
     NULL,
     '2026-05-14 00:00:00.000',
+    NULL,
     @now,
     @now
   )

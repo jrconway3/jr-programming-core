@@ -1,8 +1,11 @@
 -- Seed portfolio gallery images for all projects that have screenshots.
 -- Unique index on (project_id, image) to prevent duplicate gallery entries.
 
-ALTER TABLE `jr_projects_gallery`
-  ADD UNIQUE INDEX `jr_projects_gallery_project_image_key`(`project_id`, `image`(191));
+SET @_tbl := (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='jr_projects_gallery');
+SET @_sql := IF(@_tbl > 0,
+  'ALTER TABLE `jr_projects_gallery` ADD UNIQUE INDEX IF NOT EXISTS `jr_projects_gallery_project_image_key`(`project_id`, `image`(191))',
+  'SELECT 1');
+PREPARE _s FROM @_sql; EXECUTE _s; DEALLOCATE PREPARE _s;
 
 SET @now := NOW(3);
 
