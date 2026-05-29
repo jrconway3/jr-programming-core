@@ -402,18 +402,18 @@ export async function getAboutSkills(): Promise<{
   secondary: Array<{ id: number; name: string }>;
   learning: Array<{ id: number; name: string }>;
 }> {
-  const rows = await prisma.$queryRaw<Array<{ id: number; name: string; about_section: string }>>`
-    SELECT id, name, about_section FROM jr_skills
-    WHERE about_section IS NOT NULL
-    ORDER BY rating DESC, name ASC
-  `;
+  const rows = await prisma.skill.findMany({
+    where: { about_section: { not: null } },
+    select: { id: true, name: true, about_section: true },
+    orderBy: [{ rating: 'desc' }, { name: 'asc' }],
+  });
   const result: Record<string, Array<{ id: number; name: string }>> = {
     primary: [],
     secondary: [],
     learning: [],
   };
   for (const row of rows) {
-    if (result[row.about_section]) {
+    if (row.about_section && result[row.about_section]) {
       result[row.about_section].push({ id: row.id, name: row.name });
     }
   }
@@ -422,6 +422,15 @@ export async function getAboutSkills(): Promise<{
     secondary: Array<{ id: number; name: string }>;
     learning: Array<{ id: number; name: string }>;
   };
+}
+
+export async function getExperienceStartYear(defaultYear: number): Promise<number> {
+  const row = await prisma.settings.findUnique({
+    where: { key: 'home/stats/experience_start_year' },
+    select: { value: true },
+  });
+  const parsed = parseInt(row?.value ?? '', 10);
+  return isNaN(parsed) ? defaultYear : parsed;
 }
 
 export async function resolveJobIdForAssignment(

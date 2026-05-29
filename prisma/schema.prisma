@@ -223,6 +223,7 @@ model Skill {
   updated_at    DateTime       @default(now())
   projects      ProjectSkill[]
 
+  @@unique([name(length: 100)])
   @@map("jr_skills")
 }
 

@@ -5,9 +5,8 @@ import type { HomePageProps } from "app/models/home";
 import { useSettings } from "components/SettingsContext";
 import ProjectCard from "components/projects/ProjectCard";
 import { withProjectCardView } from "app/helpers/project-card";
-import { getFeaturedProjects, getAllProjectStats } from "app/repositories/projects";
+import { getFeaturedProjects, getAllProjectStats, getExperienceStartYear } from "app/repositories/projects";
 import { transformHomePageMetrics } from "app/transformers/home";
-import { prisma } from "prisma/adapter";
 import { siteSettingDefaults } from "app/services/settings";
 
 export default function Home({
@@ -207,16 +206,12 @@ export default function Home({
 }
 
 export const getServerSideProps: GetServerSideProps<HomePageProps> = async () => {
-  const [featuredProjects, allProjectsRaw, experienceYearRow] = await Promise.all([
+  const defaultYear = parseInt(siteSettingDefaults['home/stats/experience_start_year'], 10);
+  const [featuredProjects, allProjectsRaw, experienceStartYear] = await Promise.all([
     getFeaturedProjects(3),
     getAllProjectStats(),
-    prisma.settings.findUnique({ where: { key: 'home/stats/experience_start_year' }, select: { value: true } }),
+    getExperienceStartYear(defaultYear),
   ]);
-
-  const experienceStartYear = parseInt(
-    experienceYearRow?.value ?? siteSettingDefaults['home/stats/experience_start_year'],
-    10,
-  );
   const metrics = transformHomePageMetrics(allProjectsRaw, experienceStartYear);
 
   return {
