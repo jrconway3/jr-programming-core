@@ -54,7 +54,11 @@ export default function About({ skills }: Props) {
   return (
     <>
       <Head>
-        <title>About | JRProgramming</title>
+        <title>About — David Conway Jr., Backend Developer | David Conway Jr.</title>
+        <meta name="description" content="Self-taught backend developer with 20+ years of experience. Specializing in Laravel, PHP, Node.js, and API integrations. Actively seeking backend and fullstack roles." />
+        <meta property="og:title" content="About — David Conway Jr., Backend Developer" />
+        <meta property="og:description" content="Self-taught backend developer with 20+ years of experience. Specializing in Laravel, PHP, Node.js, and API integrations. Actively seeking backend and fullstack roles." />
+        <meta property="og:url" content="https://jrconway.net/about" />
       </Head>
       <main className="px-4 py-12 md:px-6">
         <section className="w-full mx-auto space-y-6">

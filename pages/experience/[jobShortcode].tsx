@@ -1,11 +1,13 @@
 import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
-import { toSecureAssetUrl } from 'app/helpers/common';
+import { toSecureAssetUrl, toAbsoluteUrl, SITE_BASE_URL } from 'app/helpers/common';
 import { withProjectCardView } from 'app/helpers/project-card';
 import type { Job } from 'app/models/jobs';
 import { getJobByShortcode } from 'app/repositories/projects';
 import ProjectCard from 'components/projects/ProjectCard';
+
+const BASE_URL = SITE_BASE_URL;
 
 type Props = {
   job: Job;
@@ -15,10 +17,35 @@ export default function ExperienceJobPage({ job }: Props) {
   const companyName = job.company?.name || 'Experience';
   const allProjectsLabel = 'Other';
 
+  const jobUrl = `${BASE_URL}/experience/${job.shortcode}`;
+  const descriptionMeta = job.summary
+    ? `${job.primary_role} at ${companyName}. ${job.summary.slice(0, 120)}`
+    : `${job.primary_role} at ${companyName}.`;
+  const ogImage = job.gallery[0]?.image ? toAbsoluteUrl(job.gallery[0].image) : `${BASE_URL}/api/og`;
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Experience', item: `${BASE_URL}/experience` },
+      { '@type': 'ListItem', position: 3, name: companyName, item: jobUrl },
+    ],
+  };
+
   return (
     <>
       <Head>
-        <title>{`${companyName} | JRProgramming`}</title>
+        <title>{`${companyName} — ${job.primary_role} | David Conway Jr.`}</title>
+        <meta name="description" content={descriptionMeta} />
+        <meta property="og:title" content={`${companyName} — ${job.primary_role}`} />
+        <meta property="og:description" content={descriptionMeta} />
+        <meta property="og:url" content={jobUrl} />
+        <meta property="og:image" content={ogImage} key="og:image" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, '\\u003c') }}
+        />
       </Head>
 
       <main className="min-h-screen px-4 py-12">

@@ -101,7 +101,11 @@ export default function Contact() {
   return (
     <>
       <Head>
-        <title>Contact | JRProgramming</title>
+        <title>Contact — Hire David Conway Jr. | David Conway Jr.</title>
+        <meta name="description" content="Get in touch to discuss backend development, API integration, or workflow automation projects. Available for contract or full-time roles." />
+        <meta property="og:title" content="Contact — Hire David Conway Jr." />
+        <meta property="og:description" content="Get in touch to discuss backend development, API integration, or workflow automation projects. Available for contract or full-time roles." />
+        <meta property="og:url" content="https://jrconway.net/contact" />
       </Head>
 
       <main className="min-h-screen px-4 py-12 md:px-6">

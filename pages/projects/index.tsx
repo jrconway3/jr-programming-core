@@ -1,4 +1,5 @@
 import type { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import type { Category } from 'app/models/categories';
 import type { Project } from 'app/models/projects';
 import { getAllProjects, getCategoryByShortcode, getFilterCategories } from 'app/repositories/projects';
@@ -13,18 +14,26 @@ type Props = {
 
 export default function ProjectsPage({ category, projects, filterCategories, initialSkillFilter }: Props) {
   return (
-    <ProjectCategoryPage
-      initialCategory={category}
-      initialProjects={projects}
-      filterCategories={filterCategories}
-      initialSkillFilter={initialSkillFilter}
-      titleOverride="Portfolio"
-      sectionLabel="Case Studies"
-      cardVariant="project"
-      emptyStateLabel="No portfolio case studies are available yet."
-      searchPlaceholder="Search case studies"
-      descriptionOverride="Selected systems, tools, and implementations that show the kinds of business problems I solve and the work I can deliver."
-    />
+    <>
+      <Head>
+        <link rel="canonical" href="https://jrconway.net/projects" key="canonical" />
+        <meta property="og:url" content="https://jrconway.net/projects" key="og:url" />
+      </Head>
+      <ProjectCategoryPage
+        initialCategory={category}
+        initialProjects={projects}
+        filterCategories={filterCategories}
+        initialSkillFilter={initialSkillFilter}
+        titleOverride="Portfolio"
+        sectionLabel="Case Studies"
+        cardVariant="project"
+        emptyStateLabel="No portfolio case studies are available yet."
+        searchPlaceholder="Search case studies"
+        descriptionOverride="Selected systems, tools, and implementations that show the kinds of business problems I solve and the work I can deliver."
+        seoTitle={`Portfolio — ${projects.length} Projects in Laravel, PHP, APIs & Automation | David Conway Jr.`}
+        seoDescription={`Browse ${projects.length} production projects including CRM systems, Chrome extensions, API integrations, and automation tools built across a decade of professional work.`}
+      />
+    </>
   );
 }
 
