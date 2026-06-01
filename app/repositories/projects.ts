@@ -435,8 +435,8 @@ export async function getSitemapData(): Promise<{
   jobs: Array<{ shortcode: string | null; updated_at: Date }>;
 }> {
   const [projects, jobs] = await Promise.all([
-    prisma.project.findMany({ select: { shortcode: true, updated_at: true } }),
-    prisma.job.findMany({ select: { shortcode: true, updated_at: true } }),
+    prisma.project.findMany({ where: { shortcode: { not: null } }, select: { shortcode: true, updated_at: true } }),
+    prisma.job.findMany({ where: { shortcode: { not: null } }, select: { shortcode: true, updated_at: true } }),
   ]);
   return { projects, jobs };
 }

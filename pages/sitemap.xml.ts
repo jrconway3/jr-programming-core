@@ -69,6 +69,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
 
   const sitemap = buildSitemap([...staticPages, ...projectPages, ...jobPages]);
 
+  res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
   res.setHeader('Content-Type', 'text/xml; charset=utf-8');
   res.write(sitemap);
   res.end();

@@ -31,6 +31,13 @@ export function buildDateRange(startDate?: string | null, endDate?: string | nul
   return formatDate(endDate);
 }
 
+export const SITE_BASE_URL = 'https://jrconway.net';
+
+export function toAbsoluteUrl(path: string): string {
+  const secure = toSecureAssetUrl(path);
+  return secure.startsWith('/') ? `${SITE_BASE_URL}${secure}` : secure;
+}
+
 export function toSecureAssetUrl(value: string): string {
   const trimmed = value.trim();
 

@@ -74,7 +74,7 @@ export default function ProjectCategoryPage({
   return (
     <>
       <Head>
-        <title>{seoTitle ?? `${pageTitle} | JRProgramming`}</title>
+        <title>{seoTitle ?? `${pageTitle} | David Conway Jr.`}</title>
         {seoDescription && <meta name="description" content={seoDescription} />}
         {seoTitle && <meta property="og:title" content={seoTitle} key="og:title" />}
         {seoDescription && <meta property="og:description" content={seoDescription} key="og:description" />}

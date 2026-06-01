@@ -17,7 +17,7 @@ export default function Document() {
       <Head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(PERSON_JSON_LD) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(PERSON_JSON_LD).replace(/</g, '\\u003c') }}
         />
       </Head>
       <body>

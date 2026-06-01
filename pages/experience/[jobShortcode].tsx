@@ -1,18 +1,13 @@
 import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
-import { toSecureAssetUrl } from 'app/helpers/common';
+import { toSecureAssetUrl, toAbsoluteUrl, SITE_BASE_URL } from 'app/helpers/common';
 import { withProjectCardView } from 'app/helpers/project-card';
 import type { Job } from 'app/models/jobs';
 import { getJobByShortcode } from 'app/repositories/projects';
 import ProjectCard from 'components/projects/ProjectCard';
 
-const BASE_URL = 'https://jrconway.net';
-
-function toAbsoluteUrl(path: string): string {
-  const secure = toSecureAssetUrl(path);
-  return secure.startsWith('/') ? `${BASE_URL}${secure}` : secure;
-}
+const BASE_URL = SITE_BASE_URL;
 
 type Props = {
   job: Job;

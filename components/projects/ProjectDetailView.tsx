@@ -1,14 +1,9 @@
 import Head from "next/head";
 import Link from "next/link";
-import { buildDateRange, toSecureAssetUrl } from "app/helpers/common";
+import { buildDateRange, toSecureAssetUrl, toAbsoluteUrl, SITE_BASE_URL } from "app/helpers/common";
 import { ProjectDetail } from "app/models/projects";
 
-const BASE_URL = 'https://jrconway.net';
-
-function toAbsoluteUrl(path: string): string {
-  const secure = toSecureAssetUrl(path);
-  return secure.startsWith('/') ? `${BASE_URL}${secure}` : secure;
-}
+const BASE_URL = SITE_BASE_URL;
 
 interface Props {
   project: ProjectDetail;
