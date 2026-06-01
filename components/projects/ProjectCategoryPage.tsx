@@ -9,6 +9,8 @@ import { withProjectCardView } from "app/helpers/project-card";
 interface Props {
   titleOverride?: string;
   descriptionOverride?: string;
+  seoTitle?: string;
+  seoDescription?: string;
   cardVariant?: "project" | "experience";
   emptyStateLabel?: string;
   sectionLabel?: string;
@@ -22,6 +24,8 @@ interface Props {
 export default function ProjectCategoryPage({
   titleOverride,
   descriptionOverride,
+  seoTitle,
+  seoDescription,
   cardVariant = "project",
   emptyStateLabel = "No entries found.",
   sectionLabel,
@@ -70,7 +74,10 @@ export default function ProjectCategoryPage({
   return (
     <>
       <Head>
-        <title>{`${pageTitle} | JRProgramming`}</title>
+        <title>{seoTitle ?? `${pageTitle} | JRProgramming`}</title>
+        {seoDescription && <meta name="description" content={seoDescription} />}
+        {seoTitle && <meta property="og:title" content={seoTitle} key="og:title" />}
+        {seoDescription && <meta property="og:description" content={seoDescription} key="og:description" />}
       </Head>
       <main className="min-h-screen px-4 py-12">
         <section className="w-full mx-auto">

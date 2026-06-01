@@ -60,7 +60,11 @@ export default function ExperiencePage({ category, projects, jobs }: Props) {
   return (
     <>
       <Head>
-        <title>{`Experience | JRProgramming`}</title>
+        <title>Work Experience — Backend Developer | David Conway Jr.</title>
+        <meta name="description" content="Professional history as a backend and fullstack developer: TrailerCentral, SEO Strong, Yazamo, Kloutfire, and Ponticlaro. Laravel, PHP, CRM, API work." />
+        <meta property="og:title" content="Work Experience — Backend Developer" />
+        <meta property="og:description" content="Professional history as a backend and fullstack developer: TrailerCentral, SEO Strong, Yazamo, Kloutfire, and Ponticlaro. Laravel, PHP, CRM, API work." />
+        <meta property="og:url" content="https://jrconway.net/experience" />
       </Head>
 
       <main className="min-h-screen px-4 py-12">

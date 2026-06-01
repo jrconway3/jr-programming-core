@@ -3,6 +3,13 @@ import Link from "next/link";
 import { buildDateRange, toSecureAssetUrl } from "app/helpers/common";
 import { ProjectDetail } from "app/models/projects";
 
+const BASE_URL = 'https://jrconway.net';
+
+function toAbsoluteUrl(path: string): string {
+  const secure = toSecureAssetUrl(path);
+  return secure.startsWith('/') ? `${BASE_URL}${secure}` : secure;
+}
+
 interface Props {
   project: ProjectDetail;
 }
@@ -20,11 +27,36 @@ export function ProjectDetailView({ project }: Props) {
   const primaryImage = gallery[0]?.image ? toSecureAssetUrl(gallery[0].image) : null;
   const hasMultiple = gallery.length > 1;
 
+  const projectSlug = project.shortcode ?? String(project.id);
+  const projectUrl = `${BASE_URL}/projects/${projectSlug}`;
+  const descriptionMeta = project.short
+    ? project.short.slice(0, 155)
+    : `${project.name}: a project delivered by David Conway Jr.${project.role ? ` as ${project.role}` : ''}.`;
+  const ogImage = gallery[0]?.image ? toAbsoluteUrl(gallery[0].image) : `${BASE_URL}/api/og`;
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Portfolio', item: `${BASE_URL}/projects` },
+      { '@type': 'ListItem', position: 3, name: project.name, item: projectUrl },
+    ],
+  };
+
   return (
     <>
       <Head>
-        <title>{`${project.name} | JRProgramming`}</title>
-        <meta name="description" content={project.short} />
+        <title>{`${project.name} | David Conway Jr.`}</title>
+        <meta name="description" content={descriptionMeta} />
+        <meta property="og:title" content={project.name} />
+        <meta property="og:description" content={descriptionMeta} />
+        <meta property="og:url" content={projectUrl} />
+        <meta property="og:image" content={ogImage} key="og:image" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        />
       </Head>
       <main className="min-h-screen px-4 py-12">
         <section className="w-full mx-auto">

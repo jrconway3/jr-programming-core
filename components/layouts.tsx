@@ -21,6 +21,13 @@ export default function Layout({ children }: Props) {
     <>
       <Head>
         <link rel="icon" href="/favicon2.ico" />
+        <meta name="robots" content="index, follow" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="David Conway Jr. — Portfolio" />
+        <meta property="og:image" content="https://jrconway.net/api/og" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
       <div className="flex flex-col min-h-screen bg-background text-text">
         <header className="w-full py-4 px-6 glass border-b border-accent/30 neon-glow">
