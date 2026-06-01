@@ -10,11 +10,15 @@ type SitemapEntry = {
   priority: string;
 };
 
+function escapeXml(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function buildSitemap(entries: SitemapEntry[]): string {
   const urls = entries
     .map(
       (e) => `  <url>
-    <loc>${e.url}</loc>
+    <loc>${escapeXml(e.url)}</loc>
     <lastmod>${e.lastmod}</lastmod>
     <changefreq>${e.changefreq}</changefreq>
     <priority>${e.priority}</priority>

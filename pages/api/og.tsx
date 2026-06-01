@@ -15,7 +15,11 @@ async function loadFonts(origin: string) {
 }
 
 export default async function OgImage(req: Request) {
-  const { origin } = new URL(req.url);
+  const url = new URL(req.url);
+  const origin =
+    url.hostname === 'localhost' || url.hostname === '127.0.0.1'
+      ? url.origin
+      : 'https://jrconway.net';
   const { fontAngled, fontRegular } = await loadFonts(origin);
 
   return new ImageResponse(

@@ -30,8 +30,8 @@ export default function ProjectsPage({ category, projects, filterCategories, ini
         emptyStateLabel="No portfolio case studies are available yet."
         searchPlaceholder="Search case studies"
         descriptionOverride="Selected systems, tools, and implementations that show the kinds of business problems I solve and the work I can deliver."
-        seoTitle="Portfolio — 53 Projects in Laravel, PHP, APIs & Automation | David Conway Jr."
-        seoDescription="Browse 53 production projects including CRM systems, Chrome extensions, API integrations, and automation tools built across a decade of professional work."
+        seoTitle={`Portfolio — ${projects.length} Projects in Laravel, PHP, APIs & Automation | David Conway Jr.`}
+        seoDescription={`Browse ${projects.length} production projects including CRM systems, Chrome extensions, API integrations, and automation tools built across a decade of professional work.`}
       />
     </>
   );
