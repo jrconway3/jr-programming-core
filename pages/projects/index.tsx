@@ -17,9 +17,7 @@ export default function ProjectsPage({ category, projects, filterCategories, ini
     <>
       <Head>
         <link rel="canonical" href="https://jrconway.net/projects" key="canonical" />
-        <meta property="og:title" content="Portfolio — 53 Projects in Laravel, PHP, APIs & Automation" key="og:title" />
-        <meta property="og:description" content="Browse 53 production projects including CRM systems, Chrome extensions, API integrations, and automation tools built across a decade of professional work." key="og:description" />
-        <meta property="og:url" content="https://jrconway.net/projects" />
+        <meta property="og:url" content="https://jrconway.net/projects" key="og:url" />
       </Head>
       <ProjectCategoryPage
         initialCategory={category}

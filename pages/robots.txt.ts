@@ -2,7 +2,8 @@ import type { GetServerSideProps } from 'next';
 
 const ROBOTS_CONTENT = `User-agent: *
 Allow: /
-Sitemap: https://jrconway.net/sitemap.xml`;
+Sitemap: https://jrconway.net/sitemap.xml
+`;
 
 export default function RobotsTxt() {
   return null;

@@ -2,6 +2,10 @@ import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { toSecureAssetUrl } from 'app/helpers/common';
+import { withProjectCardView } from 'app/helpers/project-card';
+import type { Job } from 'app/models/jobs';
+import { getJobByShortcode } from 'app/repositories/projects';
+import ProjectCard from 'components/projects/ProjectCard';
 
 const BASE_URL = 'https://jrconway.net';
 
@@ -9,10 +13,6 @@ function toAbsoluteUrl(path: string): string {
   const secure = toSecureAssetUrl(path);
   return secure.startsWith('/') ? `${BASE_URL}${secure}` : secure;
 }
-import { withProjectCardView } from 'app/helpers/project-card';
-import type { Job } from 'app/models/jobs';
-import { getJobByShortcode } from 'app/repositories/projects';
-import ProjectCard from 'components/projects/ProjectCard';
 
 type Props = {
   job: Job;
@@ -22,7 +22,7 @@ export default function ExperienceJobPage({ job }: Props) {
   const companyName = job.company?.name || 'Experience';
   const allProjectsLabel = 'Other';
 
-  const jobUrl = `${BASE_URL}/experience/${job.shortcode ?? ''}`;
+  const jobUrl = `${BASE_URL}/experience/${job.shortcode}`;
   const descriptionMeta = job.summary
     ? `${job.primary_role} at ${companyName}. ${job.summary.slice(0, 120)}`
     : `${job.primary_role} at ${companyName}.`;

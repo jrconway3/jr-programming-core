@@ -1,5 +1,5 @@
 import type { GetServerSideProps } from 'next';
-import { prisma } from 'prisma/adapter';
+import { getSitemapData } from 'app/repositories/projects';
 
 const BASE_URL = 'https://jrconway.net';
 
@@ -8,11 +8,6 @@ type SitemapEntry = {
   lastmod: string;
   changefreq: string;
   priority: string;
-};
-
-type JobSitemapRow = { shortcode: string | null; updated_at: Date };
-type PrismaJobFacade = {
-  job: { findMany(args: unknown): Promise<JobSitemapRow[]> };
 };
 
 function buildSitemap(entries: SitemapEntry[]): string {
@@ -48,12 +43,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
     { url: `${BASE_URL}/contact`, lastmod: now, changefreq: 'monthly', priority: '0.6' },
   ];
 
-  const [projects, jobs] = await Promise.all([
-    prisma.project.findMany({ select: { shortcode: true, updated_at: true } }),
-    (prisma as unknown as PrismaJobFacade).job.findMany({
-      select: { shortcode: true, updated_at: true },
-    }),
-  ]);
+  const { projects, jobs } = await getSitemapData();
 
   const projectPages: SitemapEntry[] = projects
     .filter((p) => p.shortcode)

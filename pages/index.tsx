@@ -21,7 +21,7 @@ export default function Home({
   return (
     <>
       <Head>
-        <title>David Conway Jr. — Backend Developer &amp; API Integration Specialist</title>
+        <title>David Conway Jr. — Backend Developer & API Integration Specialist</title>
         <meta name="description" content="Backend developer specializing in Laravel, PHP, REST APIs, and workflow automation. 15+ years of production experience. Available for hire." />
         <meta property="og:title" content="David Conway Jr. — Backend Developer & API Integration Specialist" />
         <meta property="og:description" content="Backend developer specializing in Laravel, PHP, REST APIs, and workflow automation. 15+ years of production experience. Available for hire." />

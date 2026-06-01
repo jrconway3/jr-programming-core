@@ -430,6 +430,22 @@ export async function getAboutSkills(): Promise<{
   };
 }
 
+export async function getSitemapData(): Promise<{
+  projects: Array<{ shortcode: string | null; updated_at: Date }>;
+  jobs: Array<{ shortcode: string | null; updated_at: Date }>;
+}> {
+  type SitemapJobFacade = {
+    job: { findMany(args: unknown): Promise<Array<{ shortcode: string | null; updated_at: Date }>> };
+  };
+  const [projects, jobs] = await Promise.all([
+    prisma.project.findMany({ select: { shortcode: true, updated_at: true } }),
+    (prisma as unknown as SitemapJobFacade).job.findMany({
+      select: { shortcode: true, updated_at: true },
+    }),
+  ]);
+  return { projects, jobs };
+}
+
 export async function getExperienceStartYear(defaultYear: number): Promise<number> {
   const row = await prisma.settings.findUnique({
     where: { key: 'home/stats/experience_start_year' },

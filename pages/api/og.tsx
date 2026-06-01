@@ -2,13 +2,21 @@ import { ImageResponse } from 'next/og';
 
 export const config = { runtime: 'edge' };
 
-export default async function OgImage(req: Request) {
-  const { origin } = new URL(req.url);
+let fontCache: { origin: string; fontAngled: ArrayBuffer; fontRegular: ArrayBuffer } | null = null;
 
+async function loadFonts(origin: string) {
+  if (fontCache?.origin === origin) return fontCache;
   const [fontAngled, fontRegular] = await Promise.all([
     fetch(`${origin}/fonts/commodore-64-angled-1.2.ttf`).then((r) => r.arrayBuffer()),
     fetch(`${origin}/fonts/commodore-64-6.3.ttf`).then((r) => r.arrayBuffer()),
   ]);
+  fontCache = { origin, fontAngled, fontRegular };
+  return fontCache;
+}
+
+export default async function OgImage(req: Request) {
+  const { origin } = new URL(req.url);
+  const { fontAngled, fontRegular } = await loadFonts(origin);
 
   return new ImageResponse(
     (
@@ -189,7 +197,7 @@ export default async function OgImage(req: Request) {
               marginBottom: 0,
             }}
           >
-            jrconway.net -&gt;
+            jrconway.net -{'>'}
           </p>
         </div>
       </div>
