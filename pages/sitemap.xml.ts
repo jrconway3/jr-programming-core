@@ -1,7 +1,8 @@
 import type { GetServerSideProps } from 'next';
+import { SITE_BASE_URL } from 'app/helpers/common';
 import { getSitemapData } from 'app/repositories/projects';
 
-const BASE_URL = 'https://jrconway.net';
+const BASE_URL = SITE_BASE_URL;
 
 type SitemapEntry = {
   url: string;
